@@ -4,7 +4,7 @@ const domain = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || "buyhoreca.myshop
 const token = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_TOKEN || "";
 const version = process.env.NEXT_PUBLIC_SHOPIFY_API_VERSION || "2026-07";
 const apiUrl = `https://${domain}/api/${version}/graphql.json`;
-const site = "https://buyhoreca.com";
+const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://buyhoreca.com").replace(/\/$/, "");
 
 async function shopify<T>(query: string, variables: Record<string, unknown> = {}): Promise<T> {
   if (!token) throw new Error("Missing Shopify storefront configuration");
@@ -12,7 +12,7 @@ async function shopify<T>(query: string, variables: Record<string, unknown> = {}
     method: "POST",
     headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token },
     body: JSON.stringify({ query, variables }),
-    cache: "no-store",
+    next: { revalidate: 900 },
   });
   const data = await res.json();
   if (!res.ok || data.errors?.length) throw new Error("Shopify sitemap query failed");
@@ -20,9 +20,12 @@ async function shopify<T>(query: string, variables: Record<string, unknown> = {}
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const core: MetadataRoute.Sitemap = [
-    "", "shop", "categories", "business", "brands", "collections", "about", "contact", "blogs", "faq", "quote", "track-order", "policies/terms", "policies/privacy", "policies/order", "policies/returns"
-  ].map(path => ({ url: `${site}/${path}`, changeFrequency: "daily", priority: path === "" ? 1 : 0.6 }));
+  const corePaths = ["", "shop", "categories", "business", "brands", "collections", "about", "contact", "blogs", "faq", "shipping", "information", "policies/terms", "policies/privacy", "policies/order", "policies/returns"];
+  const core: MetadataRoute.Sitemap = corePaths.map(path => ({
+    url: `${site}/${path}`,
+    changeFrequency: path === "" ? "daily" : "weekly",
+    priority: path === "" ? 1 : 0.6,
+  }));
 
   const products: MetadataRoute.Sitemap = [];
   const collections: MetadataRoute.Sitemap = [];
@@ -31,7 +34,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const productQuery = `query Products($first:Int!,$after:String){products(first:$first,after:$after){pageInfo{hasNextPage endCursor}nodes{handle updatedAt}}}`;
   do {
     const result: any = await shopify<any>(productQuery, { first: 250, after });
-    for (const p of result.products.nodes ?? []) products.push({ url: `${site}/products/${p.handle}`, lastModified: p.updatedAt, changeFrequency: "daily", priority: 0.8 });
+    for (const p of result.products.nodes ?? []) {
+      products.push({ url: `${site}/products/${p.handle}`, lastModified: p.updatedAt, changeFrequency: "daily", priority: 0.8 });
+    }
     after = result.products.pageInfo.hasNextPage ? result.products.pageInfo.endCursor : null;
     guard++;
   } while (after && guard < 100);
@@ -40,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const collectionQuery = `query Collections($first:Int!,$after:String){collections(first:$first,after:$after){pageInfo{hasNextPage endCursor}nodes{handle updatedAt}}}`;
   do {
     const result: any = await shopify<any>(collectionQuery, { first: 250, after });
-    for (const c of result.collections.nodes ?? []) collections.push({ url: `${site}/categories/${c.handle}`, lastModified: c.updatedAt, changeFrequency: "daily", priority: 0.7 });
+    for (const c of result.collections.nodes ?? []) collections.push({ url: `${site}/categories/${c.handle}`, lastModified: c.updatedAt, changeFrequency: "weekly", priority: 0.7 });
     after = result.collections.pageInfo.hasNextPage ? result.collections.pageInfo.endCursor : null;
     guard++;
   } while (after && guard < 100);

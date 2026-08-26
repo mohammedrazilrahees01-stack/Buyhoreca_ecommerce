@@ -488,19 +488,41 @@ function JsonLd({data}:{data:Record<string,unknown>}){
 
 function applySEO(pathname:string, product?:Product|null, collection?:Collection|null) {
   if (typeof document === "undefined") return;
-  const base="BuyHoreca — Professional HoReCa Equipment & Supplies";
-  let title=base; let description="Shop professional HoReCa equipment and supplies for hospitality, kitchens, coffee, bakery, hotel, service and foodservice operations in the UAE.";
-  if(product){ title=`${product.name} | BuyHoreca`; description=(product.seo?.description||product.description||description).slice(0,160); }
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, "");
+  const defaults = {
+    title: "BuyHoreca | Professional HoReCa Equipment & Supplies",
+    description: "Professional HoReCa equipment and supplies for hospitality, kitchens, coffee, bakery, hotel, service and foodservice operations in the UAE.",
+  };
+  let title=defaults.title;
+  let description=defaults.description;
+  if(product){ title=`${product.seo?.title||product.name} | BuyHoreca`; description=(product.seo?.description||product.description||defaults.description).slice(0,160); }
   else if(collection){ title=`${collection.title} | BuyHoreca`; description=(collection.description||`Shop ${collection.title} at BuyHoreca.`).slice(0,160); }
-  else if(pathname==="/shop"){title=`Shop All HoReCa Products | BuyHoreca`;}
-  else if(pathname==="/blogs"){title=`HoReCa Buying Guides & Blogs | BuyHoreca`;}
-  else if(pathname==="/about"){title=`About BuyHoreca | Professional HoReCa Supply`;}
-  else if(pathname==="/contact"){title=`Contact BuyHoreca | Dubai, UAE`;}
+  else if(pathname==="/shop"){title="Shop HoReCa Equipment & Supplies | BuyHoreca";}
+  else if(pathname==="/categories"){title="HoReCa Equipment Categories | BuyHoreca";}
+  else if(pathname.startsWith("/categories/")){title=`${titleFromSlug(pathname.split("/")[2]||"")} | BuyHoreca`}
+  else if(pathname==="/business"){title="Shop by Business | HoReCa Equipment | BuyHoreca";}
+  else if(pathname.startsWith("/business/")){title=`${titleFromSlug(pathname.split("/")[2]||"")} Equipment & Supplies | BuyHoreca`}
+  else if(pathname==="/brands"){title="Brands | Professional HoReCa Equipment | BuyHoreca";}
+  else if(pathname.startsWith("/brands/")){title=`${titleFromSlug(pathname.split("/")[2]||"")} | BuyHoreca`}
+  else if(pathname==="/collections"){title="Collections | BuyHoreca";}
+  else if(pathname==="/blogs"){title="HoReCa Buying Guides & Blogs | BuyHoreca";}
+  else if(pathname==="/about"){title="About BuyHoreca | Professional HoReCa Supply";}
+  else if(pathname==="/contact"){title="Contact BuyHoreca | Dubai, UAE";}
+  else if(pathname==="/faq"){title="FAQ | BuyHoreca";}
+  else if(pathname==="/shipping"){title="Shipping & Delivery | BuyHoreca";}
+  else if(pathname.startsWith("/policies/")){title=`${titleFromSlug(pathname.split("/")[2]||"")} | BuyHoreca`}
+
   document.title=title;
   const setMeta=(name:string,content:string)=>{let el=document.head.querySelector(`meta[name="${name}"]`) as HTMLMetaElement|null;if(!el){el=document.createElement("meta");el.name=name;document.head.appendChild(el)}el.content=content};
+  const setProperty=(property:string,content:string)=>{let el=document.head.querySelector(`meta[property="${property}"]`) as HTMLMetaElement|null;if(!el){el=document.createElement("meta");el.setAttribute("property",property);document.head.appendChild(el)}el.content=content};
+  const utilityNoIndex=["/search","/cart","/wishlist","/compare","/quote","/track-order"].includes(pathname) || window.location.search.length>0;
   setMeta("description",description);
-  setMeta("robots","index,follow,max-image-preview:large");
-  let link=document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement|null;if(!link){link=document.createElement("link");link.rel="canonical";document.head.appendChild(link)}link.href=window.location.href.split("?")[0];
+  setMeta("robots",utilityNoIndex?"noindex,follow,max-image-preview:large":"index,follow,max-image-preview:large");
+  setMeta("googlebot",utilityNoIndex?"noindex,follow,max-image-preview:large":"index,follow,max-image-preview:large");
+  const canonical=new URL(pathname,site); canonical.search=""; canonical.hash="";
+  let link=document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement|null;if(!link){link=document.createElement("link");link.rel="canonical";document.head.appendChild(link)} link.href=canonical.toString();
+  setProperty("og:title",title); setProperty("og:description",description); setProperty("og:type",product?"product":"website"); setProperty("og:url",canonical.toString()); setProperty("og:site_name","BuyHoreca"); setProperty("og:image",product?.images?.[0]?.url||`${site}/images/hero/hero-main.jpg`);
+  setMeta("twitter:card","summary_large_image"); setMeta("twitter:title",title); setMeta("twitter:description",description); setMeta("twitter:image",product?.images?.[0]?.url||`${site}/images/hero/hero-main.jpg`);
 }
 
 export default function BuyHorecaShopifyApp() {
@@ -525,7 +547,6 @@ export default function BuyHorecaShopifyApp() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
-  const [showStartup, setShowStartup] = useState(false);
   const [language, setLanguage] = useState<"en"|"ar">("en");
   const [autoOpenCart, setAutoOpenCart] = useState(true);
 
@@ -753,14 +774,6 @@ export default function BuyHorecaShopifyApp() {
     return()=>observer.disconnect();
   },[language]);
 
-  useEffect(()=>{
-    if(pathname !== "/") return;
-    const splashKey="buyhoreca_startup_splash_played";
-    if(sessionStorage.getItem(splashKey)==="1") return;
-    sessionStorage.setItem(splashKey,"1");
-    setShowStartup(true);
-  },[]);
-
   const toast = (text: string) => {
     const id = Date.now() + Math.random();
     setToasts((v) => [...v, { id, text }]);
@@ -972,6 +985,11 @@ export default function BuyHorecaShopifyApp() {
         url:"https://buyhoreca.com",
         potentialAction:{"@type":"SearchAction",target:"https://buyhoreca.com/search?q={search_term_string}","query-input":"required name=search_term_string"}
       }} />
+      <JsonLd data={{
+        "@context":"https://schema.org",
+        "@type":"BreadcrumbList",
+        itemListElement:[{ "@type":"ListItem", position:1, name:"Home", item:"https://buyhoreca.com/" }, ...pathname.split("/").filter(Boolean).map((part:string,index:number)=>({"@type":"ListItem",position:index+2,name:titleFromSlug(part),item:`https://buyhoreca.com/${pathname.split("/").filter(Boolean).slice(0,index+1).join("/")}`}))]
+      }} />
       <style jsx global>{`
         :root{
           --bh-bg:#f5f7f8;--bh-surface:#ffffff;--bh-surface-soft:#f9fafb;--bh-ink:#15212b;--bh-green:#00a879;
@@ -993,7 +1011,6 @@ export default function BuyHorecaShopifyApp() {
         html[dir="rtl"] body{font-family:'Noto Sans Arabic','Tahoma','Arial',sans-serif}
         html[dir="rtl"] .bh-app{direction:rtl}
         html[dir="rtl"] input,html[dir="rtl"] textarea,html[dir="rtl"] select{text-align:right}
-        html[dir="rtl"] .bh-startup-video{direction:ltr}
         html[dir="rtl"] .bh-lang-toggle{direction:ltr}
         .bh-btn{border:1px solid transparent;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,color .18s ease,filter .18s ease}
         .bh-btn:hover{transform:translateY(-1px)}.bh-btn:active{transform:translateY(1px)}
@@ -1023,11 +1040,6 @@ export default function BuyHorecaShopifyApp() {
           animation:bhCodepenFlicker 20s infinite linear}
         @keyframes bhCodepenFlicker{to{-webkit-mask-position:50% 50%,0 50%;mask-position:50% 50%,0 50%}}
         @media(prefers-reduced-motion:reduce){.bh-codepen-bg{animation:none}}
-        .bh-startup{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#fff;overflow:hidden;opacity:1;transition:opacity .65s cubic-bezier(.22,1,.36,1);backdrop-filter:blur(12px)}
-        .bh-startup.is-leaving{opacity:0;pointer-events:none}
-        .bh-startup-video{width:100vw;height:100vh;object-fit:cover;background:#fff}
-        .bh-startup-fallback{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.92);opacity:0;pointer-events:none}
-        .bh-startup-fallback img{width:min(340px,48vw);height:auto}
 .bh-section{padding-block:clamp(54px,5.8vw,100px)}
         @keyframes bhRevealUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
         [data-reveal]{animation:bhRevealUp .72s cubic-bezier(.22,1,.36,1) both}
@@ -1077,7 +1089,6 @@ export default function BuyHorecaShopifyApp() {
 
       <Footer articles={articles} />
 
-      {showStartup && <StartupSplash onComplete={()=>setShowStartup(false)} />}
 
       {quickView && (
         <QuickView
@@ -1117,26 +1128,6 @@ export default function BuyHorecaShopifyApp() {
 }
 
 
-const STARTUP_SPLASH_VIDEO="/videos/buyhoreca_loading.mp4";
-
-function StartupSplash({onComplete}:{onComplete:()=>void}){
-  const [leaving,setLeaving]=useState(false);
-  const finish=()=>{
-    if(leaving) return;
-    setLeaving(true);
-    window.setTimeout(onComplete,650);
-  };
-  useEffect(()=>{
-    const t=window.setTimeout(finish,9000);
-    return()=>window.clearTimeout(t);
-  },[]);
-  return <div className={`bh-startup ${leaving?"is-leaving":""}`} aria-hidden="true">
-    <video className="bh-startup-video" autoPlay muted playsInline preload="auto" onEnded={finish} onError={finish}>
-      <source src={STARTUP_SPLASH_VIDEO} type="video/mp4"/>
-    </video>
-    <div className="bh-startup-fallback"><img src="/images/buyhoreca_logo.png" alt="BuyHoreca"/></div>
-  </div>;
-}
 
 /* ----------------------------- header ----------------------------- */
 
@@ -1482,8 +1473,63 @@ function CollectionsPage({collections}:{collections:Collection[]}){return <Categ
 function BusinessPage(){return <Shell><p className="bh-kicker">Shop by Business</p><h1 className="bh-title mt-2">Solutions for your operation</h1><p className="bh-body mt-4 max-w-3xl">Business routes are kept stable while product data is sourced live from collections.</p><div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">{VERIFIED_BUSINESSES.map(n=><Link key={n} href={`/business/${slugify(n)}`} className="bh-raised bh-interactive rounded-[26px] p-7"><div className="bh-inset grid size-12 place-items-center rounded-2xl"><BusinessIcon name={n}/></div><h2 className="mt-5 text-xl font-extrabold">{n}</h2><p className="mt-3 text-sm text-[var(--bh-muted)]">Explore products for {n.toLowerCase()} operations.</p></Link>)}</div></Shell>}
 function BusinessDetail({slug,products,addToCart,openQuickView}:{slug:string;products:Product[];addToCart:(p:Product)=>any;openQuickView:(p:Product)=>void}){return <Shell><p className="bh-kicker">Business</p><h1 className="bh-title mt-2">{titleFromSlug(slug)}</h1><p className="bh-body mt-4">Browse products selected for this business category.</p><div className="mt-10 bh-grid-4">{products.slice(0,16).map(p=><ProductCard key={p.id} product={p} addToCart={addToCart} openQuickView={openQuickView}/>)}</div></Shell>}
 
-function BrandPage({products}:{products:Product[]}){const brands=Array.from(new Set(products.map(p=>p.brand))).filter(Boolean).sort();return <Shell><p className="bh-kicker">Shop by Brands</p><h1 className="bh-title mt-2">Brands</h1><div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">{brands.map(b=><Link key={b} href={`/brands/${slugify(b)}`} className="bh-raised bh-interactive rounded-[24px] p-6"><h2 className="font-extrabold">{b}</h2><p className="mt-3 text-xs text-[var(--bh-faint)]">Live products →</p></Link>)}</div></Shell>}
-function BrandDetail({slug,products,addToCart,openQuickView}:{slug:string;products:Product[];addToCart:(p:Product)=>any;openQuickView:(p:Product)=>void}){const name=titleFromSlug(slug);const list=products.filter(p=>slugify(p.brand)===slug);return <Shell><p className="bh-kicker">Brand</p><h1 className="bh-title mt-2">{name}</h1><div className="mt-10 bh-grid-4">{(list.length?list:products).map(p=><ProductCard key={p.id} product={p} addToCart={addToCart} openQuickView={openQuickView}/>)}</div></Shell>}
+const BRAND_LOGOS: Record<string, string> = {
+  "buyhoreca": "/images/buyhoreca_logo.png",
+  "brewing-edge": "/images/brands/brewing-edge.png",
+  "bisetti": "/images/brands/bisetti.png",
+  "cambro": "/images/brands/cambro.png",
+  "cooper-atkins": "/images/brands/cooper-atkins.png",
+  "cutlerypro": "/images/brands/cutlerypro.png",
+  "eco-botanics": "/images/brands/eco-botanics.png",
+  "eros": "/images/brands/eros.png",
+  "gi-metal": "/images/brands/gi-metal.png",
+  "isi": "/images/brands/isi.png",
+  "kalando": "/images/brands/kalando.png",
+  "knicer": "/images/brands/knicer.png",
+  "mercer-culinary": "/images/brands/mercer-culinary.png",
+  "sonoco": "/images/brands/sonoco.png",
+  "winco": "/images/brands/winco.png",
+  "vollrath": "/images/brands/vollrath.png",
+};
+
+function brandLogoPath(name: string) {
+  return BRAND_LOGOS[slugify(name)] || "";
+}
+
+function BrandPage({products}:{products:Product[]}){
+  const brands=Array.from(new Set(products.map(p=>p.brand))).filter(Boolean).sort();
+  return <Shell>
+    <p className="bh-kicker">Shop by Brands</p>
+    <h1 className="bh-title mt-2">Brands</h1>
+    <p className="bh-body mt-4 max-w-3xl">Explore the brands currently represented in the live BuyHoreca catalogue.</p>
+    <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {brands.map(b=>{
+        const src=brandLogoPath(b);
+        return <Link key={b} href={`/brands/${slugify(b)}`} className="bh-raised bh-interactive rounded-[24px] p-5 sm:p-6">
+          <div className={`bh-brand-logo-box ${src ? "" : "bh-brand-logo-missing"}`}>
+            {src ? <img src={src} alt={`${b} logo`} className="bh-brand-logo" /> : <span className="bh-brand-logo-placeholder">Add logo</span>}
+          </div>
+          <h2 className="mt-5 font-extrabold">{b}</h2>
+          <p className="mt-2 text-xs text-[var(--bh-faint)]">Live products →</p>
+        </Link>
+      })}
+    </div>
+  </Shell>
+}
+function BrandDetail({slug,products,addToCart,openQuickView}:{slug:string;products:Product[];addToCart:(p:Product)=>any;openQuickView:(p:Product)=>void}){
+  const name=titleFromSlug(slug); const list=products.filter(p=>slugify(p.brand)===slug); const src=brandLogoPath(name);
+  return <Shell>
+    <div className="bh-raised rounded-[30px] p-6 md:p-8">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+        <div className={`bh-brand-logo-box w-full shrink-0 sm:w-56 ${src ? "" : "bh-brand-logo-missing"}`}>
+          {src ? <img src={src} alt={`${name} logo`} className="bh-brand-logo" /> : <span className="bh-brand-logo-placeholder">Add logo</span>}
+        </div>
+        <div><p className="bh-kicker">Brand</p><h1 className="bh-title mt-2">{name}</h1><p className="bh-body mt-3">Products currently available from {name} in the live BuyHoreca catalogue.</p></div>
+      </div>
+    </div>
+    <div className="mt-10 bh-grid-4">{(list.length?list:products).map(p=><ProductCard key={p.id} product={p} addToCart={addToCart} openQuickView={openQuickView}/>)}</div>
+  </Shell>
+}
 
 /* ------------------------------- product -------------------------- */
 
@@ -1500,7 +1546,8 @@ function ProductPage({product,products,addToCart,openQuote,wishlist,toggleWishli
     sku:selected?.sku||undefined,
     brand:{"@type":"Brand",name:product.brand},
     image:product.images.map(i=>i.url),
-    offers:{"@type":"Offer",price:selected?.price?.amount||product.price.amount,priceCurrency:selected?.price?.currencyCode||product.price.currencyCode,availability:canBuy?"https://schema.org/InStock":"https://schema.org/OutOfStock",url:`https://buyhoreca.com${product.href}`}
+    offers:{"@type":"Offer",price:selected?.price?.amount||product.price.amount,priceCurrency:selected?.price?.currencyCode||product.price.currencyCode,availability:canBuy?"https://schema.org/InStock":"https://schema.org/OutOfStock",url:`https://buyhoreca.com${product.href}`},
+    ...(product.rating && product.reviewCount ? {aggregateRating:{"@type":"AggregateRating",ratingValue:product.rating,reviewCount:product.reviewCount}} : {})
   }} />
    <div className="text-xs font-bold text-[var(--bh-muted)]"><Link href="/">Home</Link> / <Link href="/brands">Brands</Link> / {product.brand} / {product.name}</div>
    <div className="mt-7 grid gap-8 lg:grid-cols-[1.06fr_.94fr]">
@@ -1593,7 +1640,30 @@ function QuotePage(){
  </Shell>;
 }
 function TrackPage(){return <Shell><p className="bh-kicker">Order Tracking</p><h1 className="bh-title mt-2">Track your order</h1><div className="bh-raised mt-10 max-w-2xl rounded-[30px] p-7 md:p-10"><label className="text-sm font-extrabold">Order number<input className="bh-inset mt-2 w-full rounded-2xl bg-transparent p-4 outline-none" placeholder="Enter order number"/></label><label className="mt-5 block text-sm font-extrabold">Email<input className="bh-inset mt-2 w-full rounded-2xl bg-transparent p-4 outline-none" placeholder="Email used for the order"/></label><button className="bh-raised-sm mt-5 rounded-full bg-[var(--bh-green)] px-7 py-3 text-sm font-extrabold text-white">Track order</button></div></Shell>}
-function AboutPage(){return <Shell><div className="bh-raised rounded-[34px] p-7 md:p-12 lg:p-16"><p className="bh-kicker">About BuyHoreca</p><h1 className="bh-title mt-3 max-w-5xl">Professional HoReCa shopping for hospitality and foodservice.</h1><div className="mt-8 grid gap-8 lg:grid-cols-2"><div><p className="bh-body">BuyHoreca describes itself as a HoReCa platform serving businesses and consumers across hospitality, including hotels, restaurants, catering, kitchens, bakery, coffee and related operations.</p><p className="bh-body mt-5">Its published company information highlights broad product selection, competitive pricing, delivery and online support for commercial kitchen and hospitality requirements.</p></div><div className="bh-inset rounded-[26px] p-7"><p className="bh-kicker">What BuyHoreca focuses on</p><ul className="mt-4 grid gap-4 text-sm font-bold text-[var(--bh-muted)]"><li>Professional HoReCa equipment and supplies</li><li>Online discovery and ordering</li><li>Commercial and bulk requirements</li><li>Delivery and customer support</li></ul></div></div></div></Shell>}
+function AboutPage(){return <Shell>
+  <section className="bh-raised overflow-hidden rounded-[34px] p-7 md:p-12 lg:p-16">
+    <p className="bh-kicker">About BuyHoreca</p>
+    <h1 className="bh-title mt-3 max-w-5xl">Professional HoReCa shopping, built around the needs of hospitality.</h1>
+    <div className="mt-10 grid gap-8 lg:grid-cols-[1.15fr_.85fr] lg:items-start">
+      <div>
+        <p className="bh-body">BuyHoreca is a UAE-focused HoReCa marketplace for professional equipment, supplies and operational essentials across restaurants, hotels, cafés, bakeries, catering and foodservice.</p>
+        <p className="bh-body mt-5">The storefront connects customers directly to a live Shopify catalogue, so product availability, variants, pricing and purchasing stay connected to the underlying commerce system.</p>
+        <div className="mt-7 flex flex-wrap gap-3"><Link href="/shop" className="bh-btn bh-btn-green inline-flex rounded-full px-6 py-3 text-sm font-extrabold">Explore products <ArrowRight size={16}/></Link><Link href="/quote" className="bh-btn bh-btn-light inline-flex rounded-full px-6 py-3 text-sm font-extrabold">Request a quote <FileText size={16}/></Link></div>
+      </div>
+      <div className="bh-inset rounded-[28px] p-7">
+        <p className="bh-kicker">What we serve</p>
+        <ul className="mt-5 grid gap-4 text-sm font-bold text-[var(--bh-muted)]"><li className="flex gap-3"><Hotel size={18}/> Hotels & hospitality</li><li className="flex gap-3"><Utensils size={18}/> Restaurants & catering</li><li className="flex gap-3"><Coffee size={18}/> Coffee & beverage operations</li><li className="flex gap-3"><ChefHat size={18}/> Professional kitchens & bakery</li></ul>
+      </div>
+    </div>
+  </section>
+  <section className="mt-5 grid gap-5 lg:grid-cols-3">
+    {[['Company story','PLACEHOLDER — Add approved BuyHoreca company story / history image here.','Replace this block with your final company-history copy and approved image.'],['Brands & partnerships','PLACEHOLDER — Add approved partner / brand logos here.','Use official supplied logos only. Replace the placeholder cards without changing the surrounding layout.'],['Facilities / showroom','PLACEHOLDER — Add approved Dubai office, warehouse or showroom photography here.','Add the final location/facility photographs and supporting details when approved.']].map(([title,label,copy])=><div key={title} className="bh-raised-sm overflow-hidden rounded-[28px]">
+      <div className="grid min-h-64 place-items-center bg-[linear-gradient(135deg,#eef2f3,#fafbfb)] p-8 text-center"><div><div className="mx-auto grid size-16 place-items-center rounded-2xl border border-dashed border-[var(--bh-faint)] text-xs font-extrabold text-[var(--bh-faint)]">LOGO / IMAGE</div><div className="mt-4 text-xs font-extrabold uppercase tracking-[.12em] text-[var(--bh-faint)]">{label}</div></div></div>
+      <div className="p-6"><h2 className="text-xl font-extrabold">{title}</h2><p className="mt-3 text-sm leading-6 text-[var(--bh-muted)]">{copy}</p></div>
+    </div>)}
+  </section>
+  <section className="bh-raised mt-5 rounded-[30px] p-7 md:p-10"><p className="bh-kicker">The BuyHoreca promise</p><div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{[['Live catalogue','Products, variants and availability stay connected to Shopify.'],['Professional range','Equipment and supplies selected for hospitality and foodservice.'],['Commercial support','Bulk requirements and quotation requests are supported.'],['UAE-based service','Local contact, delivery and customer support from Dubai.']].map(([t,c])=><div key={t} className="bh-inset rounded-[22px] p-5"><h3 className="font-extrabold">{t}</h3><p className="mt-2 text-sm leading-6 text-[var(--bh-muted)]">{c}</p></div>)}</div></section>
+</Shell>}
 
 function InformationPage(){const links=[["About Us","/about"],["Terms & Conditions","/policies/terms"],["Privacy Policy","/policies/privacy"],["Order Policy","/policies/order"],["Warranty & Returns","/policies/returns"],["FAQ","/faq"],["Shipping & Delivery","/shipping"],["Contact Us","/contact"]];return <Shell><p className="bh-kicker">Information</p><h1 className="bh-title mt-2">Customer information</h1><p className="bh-body mt-4 max-w-3xl">Policies, support information and useful links for BuyHoreca customers.</p><div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{links.map(([label,href])=><Link key={href} href={href} className="bh-raised-sm bh-interactive rounded-[24px] p-6"><div className="text-lg font-extrabold">{label}</div><div className="mt-3 text-xs font-bold text-[var(--bh-faint)]">Open page <ArrowRight size={13} className="ml-1 inline"/></div></Link>)}</div></Shell>}
 

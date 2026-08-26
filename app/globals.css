@@ -1,2 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
+
+
+/* Production responsive hardening */
+html,body{max-width:100%;overflow-x:hidden}body{-webkit-text-size-adjust:100%;text-size-adjust:100%;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}button,a,input,select,textarea{touch-action:manipulation}img{height:auto}iframe{max-width:100%}
+.bh-brand-logo-box{height:112px;width:100%;display:grid;place-items:center;border:1px solid var(--bh-line);border-radius:18px;background:linear-gradient(180deg,#fff,#f7f9fa);overflow:hidden}
+.bh-brand-logo{max-width:82%;max-height:72px;width:auto;height:auto;object-fit:contain}
+.bh-brand-logo-placeholder{display:inline-flex;min-width:96px;min-height:42px;align-items:center;justify-content:center;border:1px dashed var(--bh-faint);border-radius:12px;padding:0 12px;color:var(--bh-faint);font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.bh-brand-logo-missing{background:linear-gradient(135deg,#f5f7f8,#fff)}
+@media(max-width:640px){header .bh-container{width:calc(100% - 20px)}header .bh-container.py-3{padding-top:max(10px,env(safe-area-inset-top));padding-bottom:10px}header img[alt="BuyHoreca"]{width:145px!important}header .bh-lang-toggle{width:44px;padding-left:0;padding-right:0;justify-content:center}header .bh-lang-toggle span{display:none}.bh-brand-logo-box{height:96px}.bh-card-media{min-height:235px}.bh-container{max-width:100%}}
+@media(max-width:390px){header img[alt="BuyHoreca"]{width:132px!important}header .bh-container.flex.items-center.gap-3{gap:6px}header .ml-auto.flex.items-center.gap-2{gap:5px}header .bh-raised-sm.grid.size-11{width:40px;height:40px}header .bh-lang-toggle{width:40px;height:40px}.bh-section{padding-block:42px}}
+@media(min-width:1920px){.bh-container{max-width:1830px}}
+@media(min-width:2800px){.bh-container{max-width:2200px}}
+@media(min-width:3600px){.bh-container{max-width:2500px}}
+@media(orientation:landscape) and (max-height:520px){header .bh-container.py-3{padding-top:8px;padding-bottom:8px}header .bh-container.flex.items-center.gap-3{min-height:50px}header form.md\:hidden{display:none}.bh-section{padding-block:34px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.bh-brand-logo,.bh-interactive{transition:none!important}}

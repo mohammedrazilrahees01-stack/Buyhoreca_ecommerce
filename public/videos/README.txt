@@ -1,1 +1,2 @@
-Place your existing loading video at public/videos/buyhoreca_loading.mp4. The splash uses this exact file.
+The homepage entry video was intentionally removed from the production storefront.
+Do not add the old loading video back unless a responsive SVG/CSS entrance is not used.
