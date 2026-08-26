@@ -585,7 +585,6 @@ export default function BuyHorecaShopifyApp() {
       "Latest Buying Guides":"أحدث أدلة الشراء",
       "Read article":"اقرأ المقال",
       "View all":"عرض الكل",
-      "Current catalogue":"الكتالوج الحالي",
       "Filter & sort":"تصفية وترتيب",
       "Filters & sort":"التصفية والترتيب",
       "Refine catalogue":"تخصيص الكتالوج",
@@ -643,30 +642,20 @@ export default function BuyHorecaShopifyApp() {
       "Shipping & Delivery":"الشحن والتوصيل",
       "Contact Us":"اتصل بنا",
       "Contact BuyHoreca":"اتصل بـ BuyHoreca",
-      "Contact BuyHoreca":"اتصل بـ BuyHoreca",
       "Reach us here":"تواصل معنا",
-      "Contact BuyHoreca":"تواصل مع BuyHoreca",
       "Help":"المساعدة",
       "Resources":"المصادر",
       "About BuyHoreca":"عن BuyHoreca",
       "Professional HoReCa shopping for hospitality and foodservice.":"تجربة شراء احترافية لقطاع الضيافة وخدمات الأغذية.",
-      "Shipping & Delivery":"الشحن والتوصيل",
       "Dubai":"دبي",
-      "Secure shopping":"تسوق آمن",
-      "Delivery":"التوصيل",
-      "Cart":"السلة",
-      "Secure checkout":"الدفع الآمن",
-      "Order Tracking":"تتبع الطلب",
       "Page not found":"الصفحة غير موجودة",
       "Back home":"العودة للرئيسية",
       "Temporarily unavailable":"غير متاح مؤقتاً",
       "We’re refreshing the store.":"نقوم بتحديث المتجر.",
       "Try again":"حاول مرة أخرى",
       "Reviews will appear when review data is available.":"ستظهر التقييمات عند توفر بيانات المراجعات.",
-      "Reviews will appear when review data is available.":"ستظهر التقييمات عند توفر بيانات المراجعات.",
       "Rating filters activate when verified review data is available.":"ستتفعّل فلاتر التقييم عند توفر بيانات مراجعات موثوقة.",
       "Don’t open cart automatically after adding":"لا تفتح السلة تلقائياً بعد الإضافة",
-      "Information":"المعلومات",
       "Open page":"فتح الصفحة",
       "Our focus":"تركيزنا",
       "What BuyHoreca focuses on":"ما تركز عليه BuyHoreca",
@@ -702,8 +691,6 @@ export default function BuyHorecaShopifyApp() {
       "Order updates":"تحديثات الطلب",
       "Delivery details":"تفاصيل التوصيل",
       "Blogs":"المدونة",
-      "About":"من نحن",
-      "FAQ":"الأسئلة الشائعة"
     };
 
     const translateNode=(node:Node, arabic:boolean)=>{
@@ -725,7 +712,7 @@ export default function BuyHorecaShopifyApp() {
       }
     };
 
-    const translateAttributes=(root:ParentNode,arabic:boolean)=>{
+    const translateAttributes=(root:Node,arabic:boolean)=>{
       const nodes=(root instanceof Element||root instanceof Document?root.querySelectorAll("[placeholder],[title],[aria-label]"):[]) as NodeListOf<HTMLElement>;
       nodes.forEach(el=>{
         ["placeholder","title","aria-label"].forEach(attr=>{
@@ -1217,6 +1204,41 @@ function Header({
   );
 }
 
+
+function ShippingPage(){
+  const rows=[
+    ["UAE delivery","Most orders: 1–2 working days"],
+    ["Next-day delivery","Available for selected products and locations"],
+    ["International shipping","Available; timing depends on destination"],
+    ["Order updates","WhatsApp, email and direct support communication"],
+    ["Delivery details","Provide complete and accurate delivery information and make sure someone is available to receive the order"]
+  ];
+  return <Shell>
+    <div className="bh-raised rounded-[34px] p-7 md:p-12">
+      <p className="bh-kicker">Delivery</p>
+      <h1 className="bh-title mt-2">Shipping & Delivery</h1>
+      <p className="bh-body mt-5 max-w-3xl">BuyHoreca’s published FAQ and Order Policy describe UAE-wide delivery, selected next-day options and international shipping.</p>
+      <div className="mt-10 grid gap-3">{rows.map(([h,b])=><div key={h} className="bh-raised-sm grid gap-2 rounded-[22px] p-5 md:grid-cols-[220px_1fr]"><div className="font-extrabold">{h}</div><div className="text-sm leading-6 text-[var(--bh-muted)]">{b}</div></div>)}</div>
+      <Link href="/contact" className="bh-btn bh-btn-green mt-8 inline-flex rounded-full px-6 py-3 text-sm font-extrabold">Contact BuyHoreca <ArrowRight size={16}/></Link>
+    </div>
+  </Shell>
+}
+
+function BlogsPage({articles}:{articles:Article[]}){
+  return <Shell>
+    <p className="bh-kicker">Resources</p>
+    <h1 className="bh-title mt-2">Blogs</h1>
+    <p className="bh-body mt-4 max-w-3xl">Latest articles and buying guides from BuyHoreca.</p>
+    {!articles.length ? <div className="bh-inset mt-10 rounded-[24px] p-7"><p className="bh-body">No articles are available right now.</p></div> :
+      <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {articles.map(a=><a key={a.id} href={`https://${SHOP_DOMAIN}/blogs/${a.blogHandle}/${a.handle}`} target="_blank" rel="noreferrer" className="bh-raised-sm overflow-hidden rounded-[28px]">
+          <div className="aspect-[16/10] bg-[#f4f6f7]">{a.image?<img src={a.image.url} alt={a.image.altText||a.title} className="h-full w-full object-cover"/>:<div className="grid h-full place-items-center text-xs font-extrabold text-[var(--bh-faint)]">Blog image</div>}</div>
+          <div className="p-6"><div className="text-[10px] font-extrabold uppercase tracking-[.12em] text-[var(--bh-faint)]">{new Date(a.publishedAt).toLocaleDateString()}</div><h2 className="mt-3 text-xl font-extrabold leading-7">{a.title}</h2>{a.excerpt&&<p className="bh-body mt-3 line-clamp-3 text-sm">{a.excerpt}</p>}<div className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold">Read article <ExternalLink size={15}/></div></div>
+        </a>)}
+      </div>}
+  </Shell>
+}
+
 /* ----------------------------- routing ---------------------------- */
 
 function RenderPage(props: any) {
@@ -1330,12 +1352,12 @@ function CollectionCard({collection}:{collection:any}) {
     </div>
   </Link>;
 }
-function LiveProductSection({kicker,title,products,addToCart,openQuickView}:{kicker:string;title:string;products:Product[];addToCart:(p:Product)=>void;openQuickView:(p:Product)=>void}) {
+function LiveProductSection({kicker,title,products,addToCart,openQuickView}:{kicker:string;title:string;products:Product[];addToCart:(p:Product)=>any;openQuickView:(p:Product)=>void}) {
  if(!products.length) return null;
  return <section className="bh-section pt-0"><div className="bh-container"><SectionHeading kicker={kicker} title={title} href="/shop"/><div className="bh-grid-4">{products.map(p=><ProductCard key={p.id} product={p} addToCart={addToCart} openQuickView={openQuickView}/>)}</div></div></section>;
 }
 
-function ProductCard({product,addToCart,openQuickView}:{product:Product;addToCart:(p:Product,v?:Variant,q?:number)=>Promise<Cart|null>;openQuickView:(p:Product)=>void}) {
+function ProductCard({product,addToCart,openQuickView}:{product:Product;addToCart:(p:Product,v?:Variant,q?:number)=>any;openQuickView:(p:Product)=>void}) {
   const [saved,setSaved]=useState(false);
   const [quantity,setQuantity]=useState(1);
   const [added,setAdded]=useState(false);
@@ -1398,7 +1420,7 @@ function SectionHeading({kicker,title,href}:{kicker:string;title:string;href?:st
 
 /* ------------------------------- shop ----------------------------- */
 
-function ShopPage({addToCart,openQuickView,wishlist,compare,toggleWishlist,toggleCompare}:{addToCart:(p:Product)=>void;openQuickView:(p:Product)=>void;wishlist:string[];compare:string[];toggleWishlist:(p:Product)=>void;toggleCompare:(p:Product)=>void}) {
+function ShopPage({addToCart,openQuickView,wishlist,compare,toggleWishlist,toggleCompare}:{addToCart:(p:Product)=>any;openQuickView:(p:Product)=>void;wishlist:string[];compare:string[];toggleWishlist:(p:Product)=>void;toggleCompare:(p:Product)=>void}) {
  const [brand,setBrand]=useState("All brands"); const [productType,setProductType]=useState("All types"); const [availability,setAvailability]=useState("ALL"); const [minPrice,setMinPrice]=useState(""); const [maxPrice,setMaxPrice]=useState(""); const [sort,setSort]=useState("BEST_SELLING"); const [query,setQuery]=useState(""); const [ratingMin,setRatingMin]=useState("ALL"); const [items,setItems]=useState<Product[]>([]); const [cursor,setCursor]=useState<string|null>(null); const [hasMore,setHasMore]=useState(false); const [loading,setLoading]=useState(true); const [loadError,setLoadError]=useState(false); const [filterOpen,setFilterOpen]=useState(false);
  const brands=Array.from(new Set(items.map(p=>p.brand).filter(Boolean))).sort(); const ratedItems=items.filter(p=>typeof p.rating==="number"); const visibleItems=ratingMin==="ALL"?items:items.filter(p=>typeof p.rating==="number" && p.rating>=Number(ratingMin)); const types=Array.from(new Set(items.map(p=>p.productType).filter(Boolean) as string[])).sort();
  const buildQuery=()=>{const parts:string[]=[]; const q=query.trim(); if(q) parts.push(q); if(brand!=="All brands") parts.push(`vendor:${JSON.stringify(brand)}`); if(productType!=="All types") parts.push(`product_type:${JSON.stringify(productType)}`); if(availability==="IN_STOCK") parts.push("available_for_sale:true"); if(availability==="OUT_OF_STOCK") parts.push("available_for_sale:false"); if(minPrice.trim()) parts.push(`variants.price:>=${Number(minPrice).toFixed(2)}`); if(maxPrice.trim()) parts.push(`variants.price:<=${Number(maxPrice).toFixed(2)}`); return parts.join(" AND ");};
@@ -1429,7 +1451,7 @@ function CategoriesPage({collections}:{collections:Collection[]}) {
    {collections.length ? <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{collections.map(c=><CollectionCard key={c.id} collection={c}/>)}</div> : <div className="bh-inset mt-10 rounded-[24px] p-7"><p className="bh-body">We are refreshing our collections. Please check back shortly.</p></div>}
  </Shell>;
 }
-function CategoryPage({slug,collections,addToCart,openQuickView}:{slug:string;collections:Collection[];addToCart:(p:Product)=>void;openQuickView:(p:Product)=>void}) {
+function CategoryPage({slug,collections,addToCart,openQuickView}:{slug:string;collections:Collection[];addToCart:(p:Product)=>any;openQuickView:(p:Product)=>void}) {
  const seed=collections.find(c=>c.handle===slug)||collections.find(c=>slugify(c.title)===slug)||null;
  const [collection,setCollection]=useState<Collection|null>(seed);
  const [loading,setLoading]=useState(true);
@@ -1458,14 +1480,14 @@ function CategoryPage({slug,collections,addToCart,openQuickView}:{slug:string;co
 function CollectionsPage({collections}:{collections:Collection[]}){return <CategoriesPage collections={collections}/>}
 
 function BusinessPage(){return <Shell><p className="bh-kicker">Shop by Business</p><h1 className="bh-title mt-2">Solutions for your operation</h1><p className="bh-body mt-4 max-w-3xl">Business routes are kept stable while product data is sourced live from collections.</p><div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">{VERIFIED_BUSINESSES.map(n=><Link key={n} href={`/business/${slugify(n)}`} className="bh-raised bh-interactive rounded-[26px] p-7"><div className="bh-inset grid size-12 place-items-center rounded-2xl"><BusinessIcon name={n}/></div><h2 className="mt-5 text-xl font-extrabold">{n}</h2><p className="mt-3 text-sm text-[var(--bh-muted)]">Explore products for {n.toLowerCase()} operations.</p></Link>)}</div></Shell>}
-function BusinessDetail({slug,products,addToCart,openQuickView}:{slug:string;products:Product[];addToCart:(p:Product)=>void;openQuickView:(p:Product)=>void}){return <Shell><p className="bh-kicker">Business</p><h1 className="bh-title mt-2">{titleFromSlug(slug)}</h1><p className="bh-body mt-4">Browse products selected for this business category.</p><div className="mt-10 bh-grid-4">{products.slice(0,16).map(p=><ProductCard key={p.id} product={p} addToCart={addToCart} openQuickView={openQuickView}/>)}</div></Shell>}
+function BusinessDetail({slug,products,addToCart,openQuickView}:{slug:string;products:Product[];addToCart:(p:Product)=>any;openQuickView:(p:Product)=>void}){return <Shell><p className="bh-kicker">Business</p><h1 className="bh-title mt-2">{titleFromSlug(slug)}</h1><p className="bh-body mt-4">Browse products selected for this business category.</p><div className="mt-10 bh-grid-4">{products.slice(0,16).map(p=><ProductCard key={p.id} product={p} addToCart={addToCart} openQuickView={openQuickView}/>)}</div></Shell>}
 
 function BrandPage({products}:{products:Product[]}){const brands=Array.from(new Set(products.map(p=>p.brand))).filter(Boolean).sort();return <Shell><p className="bh-kicker">Shop by Brands</p><h1 className="bh-title mt-2">Brands</h1><div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">{brands.map(b=><Link key={b} href={`/brands/${slugify(b)}`} className="bh-raised bh-interactive rounded-[24px] p-6"><h2 className="font-extrabold">{b}</h2><p className="mt-3 text-xs text-[var(--bh-faint)]">Live products →</p></Link>)}</div></Shell>}
-function BrandDetail({slug,products,addToCart,openQuickView}:{slug:string;products:Product[];addToCart:(p:Product)=>void;openQuickView:(p:Product)=>void}){const name=titleFromSlug(slug);const list=products.filter(p=>slugify(p.brand)===slug);return <Shell><p className="bh-kicker">Brand</p><h1 className="bh-title mt-2">{name}</h1><div className="mt-10 bh-grid-4">{(list.length?list:products).map(p=><ProductCard key={p.id} product={p} addToCart={addToCart} openQuickView={openQuickView}/>)}</div></Shell>}
+function BrandDetail({slug,products,addToCart,openQuickView}:{slug:string;products:Product[];addToCart:(p:Product)=>any;openQuickView:(p:Product)=>void}){const name=titleFromSlug(slug);const list=products.filter(p=>slugify(p.brand)===slug);return <Shell><p className="bh-kicker">Brand</p><h1 className="bh-title mt-2">{name}</h1><div className="mt-10 bh-grid-4">{(list.length?list:products).map(p=><ProductCard key={p.id} product={p} addToCart={addToCart} openQuickView={openQuickView}/>)}</div></Shell>}
 
 /* ------------------------------- product -------------------------- */
 
-function ProductPage({product,products,addToCart,openQuote,wishlist,toggleWishlist,openQuickView}:{product:Product;products:Product[];addToCart:(p:Product,v?:Variant,q?:number)=>void;openQuote:()=>void;wishlist:string[];toggleWishlist:(p:Product)=>void;openQuickView:(p:Product)=>void}) {
+function ProductPage({product,products,addToCart,openQuote,wishlist,toggleWishlist,openQuickView}:{product:Product;products:Product[];addToCart:(p:Product,v?:Variant,q?:number)=>any;openQuote:()=>void;wishlist:string[];toggleWishlist:(p:Product)=>void;openQuickView:(p:Product)=>void}) {
  const [selected,setSelected]=useState(product.variants.find(v=>v.availableForSale)||product.variants[0]); const [tab,setTab]=useState<"desc"|"info">("desc"); const [qty,setQty]=useState(1);
  const canBuy=Boolean(product.availableForSale && selected?.availableForSale);
  const buyNow=async()=>{if(!canBuy||!selected)return;const next=await addToCart(product,selected,qty);if(next?.checkoutUrl)window.location.href=next.checkoutUrl;};
@@ -1510,7 +1532,7 @@ function ProductGallery({product}:{product:Product}) {
 
 /* ------------------------------- search ---------------------------- */
 
-function SearchPage({query,addToCart,openQuickView}:{query:string;addToCart:(p:Product)=>void;openQuickView:(p:Product)=>void}) {
+function SearchPage({query,addToCart,openQuickView}:{query:string;addToCart:(p:Product)=>any;openQuickView:(p:Product)=>void}) {
  const [results,setResults]=useState<Product[]>([]); const [loading,setLoading]=useState(false); const [loadingMore,setLoadingMore]=useState(false); const [cursor,setCursor]=useState<string|null>(null); const [hasMore,setHasMore]=useState(false); const [total,setTotal]=useState(0);
  const load=async(reset=true)=>{if(!query)return; if(reset)setLoading(true);else setLoadingMore(true); try{const r=await fetchSearch(query,reset?null:cursor);setResults(prev=>reset?r.products:[...prev,...r.products]);setCursor(r.pageInfo?.endCursor||null);setHasMore(Boolean(r.pageInfo?.hasNextPage));setTotal(r.totalCount||0)}catch{if(reset){setResults([]);setTotal(0)}}finally{setLoading(false);setLoadingMore(false)}};
  useEffect(()=>{void load(true)},[query]);
@@ -1523,7 +1545,7 @@ function CartPage({cart,cartOpen}:{cart:Cart|null;cartOpen:()=>void}) {return <S
 
 /* ---------------------------- wishlist/compare -------------------- */
 
-function WishlistPage({ids,products,addToCart,openQuickView}:{ids:string[];products:Product[];addToCart:(p:Product)=>void;openQuickView:(p:Product)=>void}){const list=products.filter(p=>ids.includes(p.id));return <Shell><p className="bh-kicker">Saved products</p><h1 className="bh-title mt-2">Wishlist</h1>{list.length?<div className="mt-10 bh-grid-4">{list.map(p=><ProductCard key={p.id} product={p} addToCart={addToCart} openQuickView={openQuickView}/>)}</div>:<div className="bh-inset mt-10 rounded-[28px] p-8"><p className="bh-body">Save products with the heart control.</p></div>}</Shell>}
+function WishlistPage({ids,products,addToCart,openQuickView}:{ids:string[];products:Product[];addToCart:(p:Product)=>any;openQuickView:(p:Product)=>void}){const list=products.filter(p=>ids.includes(p.id));return <Shell><p className="bh-kicker">Saved products</p><h1 className="bh-title mt-2">Wishlist</h1>{list.length?<div className="mt-10 bh-grid-4">{list.map(p=><ProductCard key={p.id} product={p} addToCart={addToCart} openQuickView={openQuickView}/>)}</div>:<div className="bh-inset mt-10 rounded-[28px] p-8"><p className="bh-body">Save products with the heart control.</p></div>}</Shell>}
 function ComparePage({ids,products}:{ids:string[];products:Product[]}){const list=products.filter(p=>ids.includes(p.id));return <Shell><p className="bh-kicker">Product tools</p><h1 className="bh-title mt-2">Compare</h1>{list.length?<div className="mt-10 overflow-x-auto"><table className="min-w-[760px] w-full text-left text-sm"><thead><tr className="bh-raised-sm"><th className="p-5">Field</th>{list.map(p=><th key={p.id} className="p-5">{p.name}</th>)}</tr></thead><tbody>{[["Brand",(p:Product)=>p.brand],["Price",(p:Product)=>moneyText(p.price)],["Product type",(p:Product)=>p.productType||"—"],["Variants",(p:Product)=>String(p.variants.length)]].map(([l,g])=><tr key={l as string}><td className="bh-inset p-5 font-extrabold">{l as string}</td>{list.map(p=><td key={p.id} className="bh-inset p-5">{(g as any)(p)}</td>)}</tr>)}</tbody></table></div>:<div className="bh-inset mt-10 rounded-[28px] p-8"><p className="bh-body">Use Compare under a product to build a comparison set.</p></div>}</Shell>}
 
 /* ------------------------------- content -------------------------- */
@@ -1571,114 +1593,7 @@ function QuotePage(){
  </Shell>;
 }
 function TrackPage(){return <Shell><p className="bh-kicker">Order Tracking</p><h1 className="bh-title mt-2">Track your order</h1><div className="bh-raised mt-10 max-w-2xl rounded-[30px] p-7 md:p-10"><label className="text-sm font-extrabold">Order number<input className="bh-inset mt-2 w-full rounded-2xl bg-transparent p-4 outline-none" placeholder="Enter order number"/></label><label className="mt-5 block text-sm font-extrabold">Email<input className="bh-inset mt-2 w-full rounded-2xl bg-transparent p-4 outline-none" placeholder="Email used for the order"/></label><button className="bh-raised-sm mt-5 rounded-full bg-[var(--bh-green)] px-7 py-3 text-sm font-extrabold text-white">Track order</button></div></Shell>}
-function AboutPage(){
-  const provide=[
-    ["Fastest Delivery Times","Our priority is delivering your products quickly and securely. BuyHoreca describes investment in distribution to provide fast, reliable delivery while keeping orders in excellent condition.","/images/about/about-delivery.jpg"],
-    ["Best Prices","BuyHoreca’s published About page describes a broad inventory of 10,000+ products, with new additions daily and a focus on competitive pricing.","/images/about/about-prices.jpg"],
-    ["Online Support 24/7","The published About page says the team supports commercial kitchen needs through chat or email, with people available to help customers find quick solutions.","/images/about/about-support.jpg"]
-  ];
-  return <Shell>
-    <div className="bh-raised overflow-hidden rounded-[34px]">
-      <div className="grid lg:grid-cols-[1.05fr_.95fr]">
-        <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-14">
-          <p className="bh-kicker">About BuyHoreca</p>
-          <h1 className="bh-title mt-3 max-w-4xl">No. 1 HoReCa shopping site in the Middle East and Africa.</h1>
-          <p className="bh-body mt-6 max-w-2xl">BuyHoreca.com describes itself as a pioneering platform serving the wider HoReCa industry, connecting businesses, professionals and consumers through an online shopping experience.</p>
-          <p className="bh-body mt-5 max-w-2xl">Its published About page positions the business around product knowledge, service, convenience and reliable support for hotels, restaurants, catering, bakery, coffee, kitchens and related hospitality operations.</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/shop" className="bh-btn bh-btn-green inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-extrabold">Shop products <ArrowRight size={17}/></Link>
-            <Link href="/contact" className="bh-btn bh-btn-light inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-sm font-extrabold">Contact us <ArrowRight size={17}/></Link>
-          </div>
-        </div>
-        <div className="bh-media-core min-h-[360px] lg:min-h-[520px]">
-          <div className="flex h-full min-h-[360px] items-end justify-start bg-[linear-gradient(135deg,#eef4f1,#d9e7e0)] p-8 lg:min-h-[520px]">
-            <div className="bh-inset max-w-sm rounded-[24px] p-5">
-              <p className="bh-kicker">Image placeholder</p>
-              <p className="mt-2 text-sm font-bold text-[var(--bh-muted)]">Suggested image: BuyHoreca warehouse, showroom or professional HoReCa team.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t border-[var(--bh-line)] p-7 sm:p-10 lg:p-14">
-        <div className="max-w-3xl">
-          <p className="bh-kicker">Welcome to BuyHoreca</p>
-          <h2 className="bh-title mt-3">A single destination for professional culinary and hospitality needs.</h2>
-          <p className="bh-body mt-6">Whether you are a business owner, chef or home cook, the published BuyHoreca About page presents the store as a one-stop destination for culinary and hospitality products, supported by product knowledge and customer service.</p>
-        </div>
-      </div>
-    </div>
-
-    <section className="bh-section">
-      <SectionHeading kicker="What we provide" title="Built around speed, value and support"/>
-      <div className="grid gap-4 lg:grid-cols-3">
-        {provide.map(([title,body,img])=><article key={title} className="bh-raised-sm overflow-hidden rounded-[28px]">
-          <div className="relative aspect-[16/10] bg-[#edf2ef]">
-            <img src={img} alt="" className="h-full w-full object-cover" onError={(e:any)=>{e.currentTarget.style.display="none"}}/>
-            <div className="absolute inset-0 grid place-items-center p-7">
-              <div className="bh-inset rounded-[22px] p-5 text-center">
-                <p className="bh-kicker">Image placeholder</p>
-                <p className="mt-2 text-xs font-bold leading-5 text-[var(--bh-muted)]">Add the {title.toLowerCase()} image here.</p>
-              </div>
-            </div>
-          </div>
-          <div className="p-7">
-            <h3 className="text-2xl font-extrabold">{title}</h3>
-            <p className="bh-body mt-4">{body}</p>
-          </div>
-        </article>)}
-      </div>
-    </section>
-
-    <section className="bh-section pt-0">
-      <div className="grid gap-5 lg:grid-cols-[.85fr_1.15fr]">
-        <div className="bh-raised overflow-hidden rounded-[30px] min-h-[420px]">
-          <div className="flex h-full min-h-[420px] items-end bg-[linear-gradient(145deg,#eef5f1,#d4e5dd)] p-7">
-            <div className="bh-inset rounded-[22px] p-5">
-              <p className="bh-kicker">Image placeholder</p>
-              <p className="mt-2 text-sm font-bold text-[var(--bh-muted)]">Suggested image: commercial kitchen equipment / customer operations.</p>
-            </div>
-          </div>
-        </div>
-        <div className="bh-raised rounded-[30px] p-7 md:p-10">
-          <p className="bh-kicker">Why choose us</p>
-          <h2 className="bh-title mt-3">A practical buying experience for commercial kitchens and hospitality.</h2>
-          <p className="bh-body mt-5">BuyHoreca’s published About page emphasizes a large product selection, competitive prices and customer support backed by a team ready to assist with kitchen requirements.</p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {[
-              ["10,000+ products","The public About page describes an inventory of 10,000+ products with new additions daily."],
-              ["Professional support","Support is positioned around commercial kitchen and hospitality requirements."],
-              ["Online convenience","Products can be discovered and ordered from computers and smartphones."],
-              ["Leading brands","The published page says the business focuses on leading brands and professional products."]
-            ].map(([title,body])=><div key={title} className="bh-inset rounded-[22px] p-5"><h3 className="text-base font-extrabold">{title}</h3><p className="mt-2 text-xs leading-5 text-[var(--bh-muted)]">{body}</p></div>)}
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section className="bh-section pt-0">
-      <div className="grid gap-4 lg:grid-cols-3">
-        {[
-          ["Our vision","Offer shoppers a fast and convenient way to find products across Hotel, Restaurant, Catering and related categories, from discovery through delivery."],
-          ["Our mission","Be a premier online destination for HoReCa products in the Middle East and Africa, combining selection, competitive pricing and customer service."],
-          ["What we do","Offer leading brands and professional products for the hotel, restaurant and catering industry through online ordering, with a focus on customer convenience."]
-        ].map(([title,body])=><article key={title} className="bh-raised rounded-[28px] p-7 md:p-9"><p className="bh-kicker">{title}</p><p className="bh-body mt-4">{body}</p></article>)}
-      </div>
-    </section>
-
-    <section className="bh-section pt-0">
-      <div className="bh-raised rounded-[30px] p-7 md:p-10 lg:p-12">
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div><p className="bh-kicker">Need help?</p><h2 className="bh-title mt-2">Talk to the BuyHoreca team.</h2><p className="bh-body mt-4 max-w-2xl">For commercial requirements, bulk orders, kitchen projects or product questions, use the support channels published by BuyHoreca.</p></div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/contact" className="bh-btn bh-btn-dark inline-flex rounded-full px-6 py-3 text-sm font-extrabold">Contact us</Link>
-            <Link href="/quote" className="bh-btn bh-btn-green inline-flex rounded-full px-6 py-3 text-sm font-extrabold">Get a quote</Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  </Shell>
-}
+function AboutPage(){return <Shell><div className="bh-raised rounded-[34px] p-7 md:p-12 lg:p-16"><p className="bh-kicker">About BuyHoreca</p><h1 className="bh-title mt-3 max-w-5xl">Professional HoReCa shopping for hospitality and foodservice.</h1><div className="mt-8 grid gap-8 lg:grid-cols-2"><div><p className="bh-body">BuyHoreca describes itself as a HoReCa platform serving businesses and consumers across hospitality, including hotels, restaurants, catering, kitchens, bakery, coffee and related operations.</p><p className="bh-body mt-5">Its published company information highlights broad product selection, competitive pricing, delivery and online support for commercial kitchen and hospitality requirements.</p></div><div className="bh-inset rounded-[26px] p-7"><p className="bh-kicker">What BuyHoreca focuses on</p><ul className="mt-4 grid gap-4 text-sm font-bold text-[var(--bh-muted)]"><li>Professional HoReCa equipment and supplies</li><li>Online discovery and ordering</li><li>Commercial and bulk requirements</li><li>Delivery and customer support</li></ul></div></div></div></Shell>}
 
 function InformationPage(){const links=[["About Us","/about"],["Terms & Conditions","/policies/terms"],["Privacy Policy","/policies/privacy"],["Order Policy","/policies/order"],["Warranty & Returns","/policies/returns"],["FAQ","/faq"],["Shipping & Delivery","/shipping"],["Contact Us","/contact"]];return <Shell><p className="bh-kicker">Information</p><h1 className="bh-title mt-2">Customer information</h1><p className="bh-body mt-4 max-w-3xl">Policies, support information and useful links for BuyHoreca customers.</p><div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{links.map(([label,href])=><Link key={href} href={href} className="bh-raised-sm bh-interactive rounded-[24px] p-6"><div className="text-lg font-extrabold">{label}</div><div className="mt-3 text-xs font-bold text-[var(--bh-faint)]">Open page <ArrowRight size={13} className="ml-1 inline"/></div></Link>)}</div></Shell>}
 
@@ -1704,7 +1619,7 @@ function BlogMarquee({articles}:{articles:Article[]}) {
 
 /* ----------------------------- overlays --------------------------- */
 
-function QuickView({product,close,addToCart,saved,toggleWishlist}:{product:Product;close:()=>void;addToCart:(p:Product,v?:Variant,q?:number)=>void;saved:boolean;toggleWishlist:(p:Product)=>void}) {
+function QuickView({product,close,addToCart,saved,toggleWishlist}:{product:Product;close:()=>void;addToCart:(p:Product,v?:Variant,q?:number)=>any;saved:boolean;toggleWishlist:(p:Product)=>void}) {
   const [quantity,setQuantity]=useState(1);
   const [selected,setSelected]=useState(product.variants.find(v=>v.availableForSale)||product.variants[0]);
   const canBuy=Boolean(product.availableForSale && selected?.availableForSale);

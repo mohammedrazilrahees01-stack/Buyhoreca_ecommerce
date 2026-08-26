@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let guard = 0;
   const productQuery = `query Products($first:Int!,$after:String){products(first:$first,after:$after){pageInfo{hasNextPage endCursor}nodes{handle updatedAt}}}`;
   do {
-    const result = await shopify<any>(productQuery, { first: 250, after });
+    const result: any = await shopify<any>(productQuery, { first: 250, after });
     for (const p of result.products.nodes ?? []) products.push({ url: `${site}/products/${p.handle}`, lastModified: p.updatedAt, changeFrequency: "daily", priority: 0.8 });
     after = result.products.pageInfo.hasNextPage ? result.products.pageInfo.endCursor : null;
     guard++;
@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   after = null; guard = 0;
   const collectionQuery = `query Collections($first:Int!,$after:String){collections(first:$first,after:$after){pageInfo{hasNextPage endCursor}nodes{handle updatedAt}}}`;
   do {
-    const result = await shopify<any>(collectionQuery, { first: 250, after });
+    const result: any = await shopify<any>(collectionQuery, { first: 250, after });
     for (const c of result.collections.nodes ?? []) collections.push({ url: `${site}/categories/${c.handle}`, lastModified: c.updatedAt, changeFrequency: "daily", priority: 0.7 });
     after = result.collections.pageInfo.hasNextPage ? result.collections.pageInfo.endCursor : null;
     guard++;
