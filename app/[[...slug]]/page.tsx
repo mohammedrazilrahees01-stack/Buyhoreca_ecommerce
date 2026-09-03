@@ -547,14 +547,15 @@ export default function BuyHorecaShopifyApp() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
-  const [language, setLanguage] = useState<"en"|"ar">("en");
+  const [language, setLanguage] = useState<"en"|"ar">(() => {
+    if (typeof window === "undefined") return "en";
+    const stored = window.localStorage.getItem("buyhoreca_language");
+    return stored === "ar" ? "ar" : "en";
+  });
   const [autoOpenCart, setAutoOpenCart] = useState(true);
 
-  useEffect(()=>{ applySEO(pathname,currentProduct,null); },[pathname,currentProduct]);
   useEffect(()=>{
-    const l=window.localStorage.getItem("buyhoreca_language");
     const c=window.localStorage.getItem("buyhoreca_auto_open_cart");
-    if(l==="en"||l==="ar")setLanguage(l);
     if(c==="false")setAutoOpenCart(false);
   },[]);
   useEffect(()=>{
@@ -568,11 +569,13 @@ export default function BuyHorecaShopifyApp() {
     const dictionary:Record<string,string>={
       "Professional HoReCa Supply":"توريد مستلزمات الضيافة والتموين الاحترافي",
       "100% Secure delivery":"توصيل آمن 100%",
+      "English":"English",
       "Order Tracking":"تتبع الطلب",
       "I'm looking for...":"أبحث عن...",
       "Search":"بحث",
       "Get a Quote":"طلب عرض سعر",
       "Shop":"المتجر",
+      "Shop products":"تسوق المنتجات",
       "Categories":"الفئات",
       "Business":"الأعمال",
       "Brands":"العلامات التجارية",
@@ -591,6 +594,24 @@ export default function BuyHorecaShopifyApp() {
       "Source commercial equipment and supplies across kitchen, coffee, bakery, hotel, service, pizzeria and foodservice.":"نوفر المعدات والمستلزمات التجارية للمطابخ والقهوة والمخابز والفنادق والخدمة والبيتزا وقطاع الأغذية.",
       "Coffee accessories":"مستلزمات القهوة",
       "Kitchen tools, cutlery & preparation":"أدوات المطبخ وأدوات المائدة والتحضير",
+      "Kitchen":"المطبخ",
+      "Coffee":"القهوة",
+      "Kitchen Tools":"أدوات المطبخ",
+      "Preparation Supplies":"مستلزمات التحضير",
+      "Measuring Equipments":"معدات القياس",
+      "Kitchen Cutlery":"أدوات مائدة المطبخ",
+      "Baking":"الخبز والحلويات",
+      "Salt & Pepper Shakers":"مرشات الملح والفلفل",
+      "Pizza Peels":"مجاريف البيتزا",
+      "Tabletop Disposables":"مستلزمات المائدة ذات الاستخدام الواحد",
+      "Coffee Accessories":"مستلزمات القهوة",
+      "Service Supplies":"مستلزمات الخدمة",
+      "Decorating Supplies":"مستلزمات التزيين",
+      "Condiment Holders":"حاملات التوابل والصلصات",
+      "Servingware":"أدوات التقديم",
+      "Thermometer":"مقياس الحرارة",
+      "Hotel":"الفنادق",
+      "Plug-in Equipments":"معدات كهربائية",
       "Explore":"استكشف",
       "Shop by category":"التسوق حسب الفئة",
       "Featured Categories":"الفئات المميزة",
@@ -600,12 +621,29 @@ export default function BuyHorecaShopifyApp() {
       "Trending Products":"المنتجات الرائجة",
       "Fresh in the catalogue":"أحدث المنتجات في الكتالوج",
       "Top Selling":"الأكثر مبيعاً",
+      "Recently Added":"أضيفت مؤخراً",
+      "New Products":"منتجات جديدة",
+      "Popular now":"الأكثر رواجاً الآن",
+      "Built around your operation":"مصمم لاحتياجات نشاطك",
       "Shop by Business":"التسوق حسب النشاط",
+      "Shop By Business":"التسوق حسب النشاط",
+      "Bakery":"المخبز",
+      "Bar supplies":"مستلزمات البار",
+      "Banquet supplies":"مستلزمات الولائم",
+      "Ice cream shop":"محل الآيس كريم",
+      "Seafood":"المأكولات البحرية",
+      "Kitchen supplies":"مستلزمات المطبخ",
+      "Pizzeria":"مطعم البيتزا",
+      "Store & Transport":"التخزين والنقل",
+      "Disposable":"مستلزمات الاستخدام الواحد",
       "Shop by Collection":"التسوق حسب المجموعة",
       "Latest articles":"أحدث المقالات",
       "Latest Buying Guides":"أحدث أدلة الشراء",
       "Read article":"اقرأ المقال",
       "View all":"عرض الكل",
+      "Product image":"صورة المنتج",
+      "Collection image":"صورة المجموعة",
+      "Collection":"المجموعة",
       "Filter & sort":"تصفية وترتيب",
       "Filters & sort":"التصفية والترتيب",
       "Refine catalogue":"تخصيص الكتالوج",
@@ -633,13 +671,13 @@ export default function BuyHorecaShopifyApp() {
       "Compare":"مقارنة",
       "Saved":"محفوظ",
       "Compared":"تمت المقارنة",
+      "Added":"تمت الإضافة",
       "Quick view":"عرض سريع",
       "Quantity":"الكمية",
       "Choose variant":"اختر النوع",
       "Add to Cart":"أضف إلى السلة",
       "Add to cart":"أضف إلى السلة",
       "Adding":"جارٍ الإضافة",
-      "Added":"تمت الإضافة",
       "Buy Now":"اشترِ الآن",
       "Cart":"السلة",
       "Your cart is empty.":"سلتك فارغة.",
@@ -667,6 +705,22 @@ export default function BuyHorecaShopifyApp() {
       "Help":"المساعدة",
       "Resources":"المصادر",
       "About BuyHoreca":"عن BuyHoreca",
+      "All Products":"كل المنتجات",
+      "Browse the current BuyHoreca catalogue with live product information.":"تصفح كتالوج BuyHoreca الحالي مع معلومات المنتجات المباشرة.",
+      "Brand":"العلامة التجارية",
+      "Product type":"نوع المنتج",
+      "Filter":"تصفية",
+      "Loading products…":"جارٍ تحميل المنتجات…",
+      "reviews":"مراجعات",
+      "bought":"تم شراؤه",
+      "Professional HoReCa product from the live BuyHoreca catalogue.":"منتج HoReCa احترافي من كتالوج BuyHoreca الحالي.",
+      "SKU not provided":"رمز المنتج غير متوفر",
+      "Available":"متوفر",
+      "Quote available":"متاح لطلب عرض سعر",
+      "Full product page":"صفحة المنتج الكاملة",
+      "Description":"الوصف",
+      "Additional information":"معلومات إضافية",
+      "Product details are being prepared.":"يتم إعداد تفاصيل المنتج.",
       "Professional HoReCa shopping for hospitality and foodservice.":"تجربة شراء احترافية لقطاع الضيافة وخدمات الأغذية.",
       "Dubai":"دبي",
       "Page not found":"الصفحة غير موجودة",
@@ -712,6 +766,23 @@ export default function BuyHorecaShopifyApp() {
       "Order updates":"تحديثات الطلب",
       "Delivery details":"تفاصيل التوصيل",
       "Blogs":"المدونة",
+      "View blogs":"عرض المدونة",
+      "BuyHoreca updates":"تحديثات BuyHoreca",
+      "New articles and buying guides appear here as they are published.":"ستظهر المقالات الجديدة وأدلة الشراء هنا عند نشرها.",
+      "Loading…":"جارٍ التحميل…",
+      "Searching products…":"جارٍ البحث عن المنتجات…",
+      "Your cart is empty":"سلتك فارغة",
+      "Continue shopping":"متابعة التسوق",
+      "Open Cart Drawer":"فتح سلة التسوق",
+      "Order number":"رقم الطلب",
+      "Email":"البريد الإلكتروني",
+      "Send to BuyHoreca on WhatsApp":"إرسال إلى BuyHoreca عبر واتساب",
+      "Message preview":"معاينة الرسالة",
+      "Quantity / delivery notes supported":"يدعم ملاحظات الكمية والتوصيل",
+      "Product details included":"تفاصيل المنتج مضمّنة",
+      "Brand and price included":"العلامة التجارية والسعر مضمّنان",
+      "Availability included":"التوفر مضمّن",
+      "Product image included":"صورة المنتج مضمّنة",
     };
 
     const translateNode=(node:Node, arabic:boolean)=>{
@@ -770,7 +841,7 @@ export default function BuyHorecaShopifyApp() {
         record.addedNodes.forEach(node=>walk(node));
       });
     });
-    observer.observe(document.body,{subtree:true,childList:true});
+    observer.observe(document.body,{subtree:true,childList:true,characterData:true});
     return()=>observer.disconnect();
   },[language]);
 
@@ -1447,7 +1518,6 @@ function CategoryPage({slug,collections,addToCart,openQuickView}:{slug:string;co
  const [collection,setCollection]=useState<Collection|null>(seed);
  const [loading,setLoading]=useState(true);
  const [loadingMore,setLoadingMore]=useState(false);
- useEffect(()=>{applySEO(`/categories/${slug}`,null,collection)},[slug,collection]);
  const load=async(reset=true)=>{
    try{
      if(reset)setLoading(true); else setLoadingMore(true);
@@ -1475,21 +1545,30 @@ function BusinessDetail({slug,products,addToCart,openQuickView}:{slug:string;pro
 
 const BRAND_LOGOS: Record<string, string> = {
   "buyhoreca": "/images/buyhoreca_logo.png",
-  "brewing-edge": "/images/brands/brewing-edge.png",
-  "bisetti": "/images/brands/bisetti.png",
-  "cambro": "/images/brands/cambro.png",
-  "cooper-atkins": "/images/brands/cooper-atkins.png",
-  "cutlerypro": "/images/brands/cutlerypro.png",
-  "eco-botanics": "/images/brands/eco-botanics.png",
-  "eros": "/images/brands/eros.png",
-  "gi-metal": "/images/brands/gi-metal.png",
-  "isi": "/images/brands/isi.png",
-  "kalando": "/images/brands/kalando.png",
-  "knicer": "/images/brands/knicer.png",
-  "mercer-culinary": "/images/brands/mercer-culinary.png",
-  "sonoco": "/images/brands/sonoco.png",
-  "winco": "/images/brands/winco.png",
-  "vollrath": "/images/brands/vollrath.png",
+  "bisetti": "/images/brands/Logo_Bisetti.jpg",
+  "borgonova": "/images/brands/Logo_Borgonova.jpg",
+  "brewing-edge": "/images/brands/Logo_Brewing_Edge.jpg",
+  "bunn": "/images/brands/Bunn_Logo.avif",
+  "cambro": "/images/brands/Logo_Cambro.avif",
+  "carlisle": "/images/brands/Logo_Carlisle.jpg",
+  "cooper-atkins": "/images/brands/Logo_Cooper_Atkins.jpg",
+  "cutlery-pro": "/images/brands/Logo_Cutlery_Pro.jpg",
+  "cutlerypro": "/images/brands/Logo_Cutlery_Pro.jpg",
+  "eco-botanics": "/images/brands/eco-botanics.svg",
+  "edhard": "/images/brands/Logo_Edhard.jpg",
+  "eros": "/images/brands/eros.svg",
+  "gi-metal": "/images/brands/Logo_Gimetal.avif",
+  "isi": "/images/brands/isi.svg",
+  "kalando": "/images/brands/Logo_Kalando.avif",
+  "knicer": "/images/brands/Logo_Knicer.jpg",
+  "mercer-culinary": "/images/brands/Logo_Mercer_Culinary.jpg",
+  "san-jamer": "/images/brands/Logo_San_Jamer.jpg",
+  "sonoco": "/images/brands/Logo_Sonoco.jpg",
+  "thermo-hauser": "/images/brands/Logo_Thermo_Hauser.avif",
+  "tight-vac": "/images/brands/Logo_Tight_Vac.jpg",
+  "winco": "/images/brands/Logo_Winco.jpg",
+  "vollrath": "/images/brands/vollrath.svg",
+  "ziora": "/images/brands/Logo_Ziora.avif",
 };
 
 function brandLogoPath(name: string) {
@@ -1657,9 +1736,9 @@ function AboutPage(){return <Shell>
     </div>
   </section>
   <section className="mt-5 grid gap-5 lg:grid-cols-3">
-    {[['Company story','PLACEHOLDER — Add approved BuyHoreca company story / history image here.','Replace this block with your final company-history copy and approved image.'],['Brands & partnerships','PLACEHOLDER — Add approved partner / brand logos here.','Use official supplied logos only. Replace the placeholder cards without changing the surrounding layout.'],['Facilities / showroom','PLACEHOLDER — Add approved Dubai office, warehouse or showroom photography here.','Add the final location/facility photographs and supporting details when approved.']].map(([title,label,copy])=><div key={title} className="bh-raised-sm overflow-hidden rounded-[28px]">
-      <div className="grid min-h-64 place-items-center bg-[linear-gradient(135deg,#eef2f3,#fafbfb)] p-8 text-center"><div><div className="mx-auto grid size-16 place-items-center rounded-2xl border border-dashed border-[var(--bh-faint)] text-xs font-extrabold text-[var(--bh-faint)]">LOGO / IMAGE</div><div className="mt-4 text-xs font-extrabold uppercase tracking-[.12em] text-[var(--bh-faint)]">{label}</div></div></div>
-      <div className="p-6"><h2 className="text-xl font-extrabold">{title}</h2><p className="mt-3 text-sm leading-6 text-[var(--bh-muted)]">{copy}</p></div>
+    {[['Company story','/images/collections/1.png'],['Brands & partnerships','/images/collections/2.png'],['Facilities / showroom','/images/collections/3.png']].map(([title,image])=><div key={title} className="bh-raised-sm overflow-hidden rounded-[28px]">
+      <div className="relative aspect-[4/3] overflow-hidden bg-[#eef2f3]"><img src={image} alt={`${title} image`} className="absolute inset-0 !h-full !w-full object-cover" /></div>
+      <div className="p-6"><h2 className="text-xl font-extrabold">{title}</h2></div>
     </div>)}
   </section>
   <section className="bh-raised mt-5 rounded-[30px] p-7 md:p-10"><p className="bh-kicker">The BuyHoreca promise</p><div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{[['Live catalogue','Products, variants and availability stay connected to Shopify.'],['Professional range','Equipment and supplies selected for hospitality and foodservice.'],['Commercial support','Bulk requirements and quotation requests are supported.'],['UAE-based service','Local contact, delivery and customer support from Dubai.']].map(([t,c])=><div key={t} className="bh-inset rounded-[22px] p-5"><h3 className="font-extrabold">{t}</h3><p className="mt-2 text-sm leading-6 text-[var(--bh-muted)]">{c}</p></div>)}</div></section>
