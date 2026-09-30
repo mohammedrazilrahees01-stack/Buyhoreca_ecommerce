@@ -14,7 +14,5 @@ export async function POST(request: Request) {
     const json = await response.json();
     if (!response.ok || json?.errors?.length) return NextResponse.json({ errors: [{ message: "Store data is temporarily unavailable." }] }, { status: response.ok ? 502 : response.status });
     return NextResponse.json({ data: json.data });
-  } catch {
-    return NextResponse.json({ errors: [{ message: "Store data is temporarily unavailable." }] }, { status: 502 });
-  }
+  } catch { return NextResponse.json({ errors: [{ message: "Store data is temporarily unavailable." }] }, { status: 502 }); }
 }

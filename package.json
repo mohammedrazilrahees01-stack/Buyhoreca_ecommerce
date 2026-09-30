@@ -1,26 +1,29 @@
 {
-  "name": "buyhoreca-next",
+  "name": "buyhoreca-ecommerce",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "tsc --noEmit"
+    "lint": "eslint .",
+    "audit": "node scripts/audit-storefront.mjs"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.14",
+    "lenis": "^1.3.17",
     "lucide-react": "^0.468.0",
     "next": "16.3.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "lenis": "^1.3.14"
+    "tailwindcss": "^4.1.14"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.0",
-    "tailwindcss": "^4.1.0",
-    "typescript": "^5.8.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0"
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.8.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.3.2"
   }
 }
