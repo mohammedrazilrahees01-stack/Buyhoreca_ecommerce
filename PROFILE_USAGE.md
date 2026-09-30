@@ -6,7 +6,7 @@ They are **not rendered as PDF pages or page screenshots in the storefront**.
 
 The storefront uses selected factual details from the profiles as normal web content. It uses the existing BuyHoreca site imagery and brand assets for presentation instead of placing profile-page screenshots into the UI.
 
-The header/footer use the actual BuyHoreca logo asset at `public/images/buyhoreca_logo.png`.
+The header/footer use the actual BuyHoreca logo asset at `public/images/buyhoreca-logo-header.png`.
 
 Homepage blog rail:
 - 2 cards visible on mobile

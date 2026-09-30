@@ -1,54 +1,45 @@
 # BuyHoreca Final Production QA
 
-## Scope
-Full storefront UI/UX and ecommerce logic pass based on the live Shopify Storefront API architecture, current ecommerce UX research, the BuyHoreca company profile and the Blue Mountain company profile.
+This is the final storefront audit record for the current package.
 
-## Brand
-- Header/footer use the supplied BuyHoreca Culinary Cart logo at `public/images/buyhoreca-logo-header.png`.
-- PDF cover/page images are not rendered as website sections. The company PDFs remain reference material under `docs/company-profiles/`.
+## User requirements applied
+- Current desktop header structure retained; no replacement header design.
+- Correct BuyHoreca culinary-cart wordmark asset is the header/footer source.
+- Search "All Categories" is backed by all Shopify collections with cursor pagination, a fixed-height scroll area, and category search.
+- Mobile has the same complete category access.
+- Green primary navigation contains 10 items total: Restaurant Equipment, Food & Beverage, Tabletop & Service, Storage & Transport, Bakery, Bar & Beverage, Business Type, Cleaning & Hygiene, Disposables & Packaging, Quote.
+- Navigation uses medium/regular weight rather than unnecessary heavy bold.
+- Collection image presentation was left unchanged.
+- Homepage category rail uses the Shopify collection image as before.
+- Product cards keep small visible gaps and dense B2B information.
+- Wishlist persists IDs and product snapshots, is guarded against hydration overwrite, and synchronizes across browser tabs/components.
+- Cart is Shopify-backed with recovery for stale cart IDs, add/update/remove operations, drawer behavior, toast feedback and cart pulse animation.
+- Blog is Shopify-backed; homepage rail shows 2/3/4 cards at mobile/tablet/desktop breakpoints, auto-advances horizontally, pauses on hover/focus and supports manual controls.
+- Actual logo image assets are used for the brand files available in this package; the live-vendor list still supports text fallback for vendors for which no local logo asset is present.
+- `public/images/company/shop_of_buyhoreca.png` is the preferred company image path. The package includes a fallback storefront image so the section remains functional when that exact user-supplied asset is not present in the source package.
+- Company profiles are retained under `docs/company-profiles/` as source/reference documents only; PDF pages are not rendered as site sections.
+- Company-profile information is used as website copy and content context, not as page screenshots.
+- Typography uses a consistent Inter/system UI stack with restrained weight and responsive sizing; unnecessary heavy text was reduced in product metadata and actions.
+- Accessibility includes skip link, focus-visible states, keyboard Escape handling, semantic labels and reduced-motion support.
+- SEO includes route metadata, canonical URLs, Open Graph, Product/Article/WebSite structured data, sitemap and robots rules.
+- Analytics hooks emit structured events to `window.dataLayer` for search, product views, add-to-cart and wishlist changes.
+- Security headers include Referrer-Policy, X-Content-Type-Options, X-Frame-Options and Permissions-Policy.
+- 404 and runtime error pages are present.
+- No raw GitHub image fallbacks or external placeholder-image services are referenced by the storefront source.
 
-## UI/UX
-- Dense B2B product cards with 10–14px grid spacing, consistent heights, wishlist/compare/quick view, SKU, rating, price, availability, quantity and add-to-cart.
-- Header search with autocomplete, category suggestions and responsive mobile search.
-- Hover mega menu.
-- Responsive catalogue grid and list mode.
-- Mobile filter drawer.
-- Animated add-to-cart state, cart pulse and toast.
-- Animated cart drawer with backdrop and ESC handling.
-- Product image gallery + zoom.
-- Product and blog JSON-LD.
-- Blog homepage rail: 2 mobile / 3 tablet / 4 desktop, auto-slides right, pauses on hover/focus, manual arrows.
-- Compare page.
-- Mobile quick navigation.
-- Reduced-motion and focus-visible support.
+## Static verification
+`node scripts/final-production-audit.mjs` passed:
+- 43 storefront requirement checks
+- 10 TypeScript/TSX parser checks
 
-## Shopify
-- Shopify remains the source of truth for product, collection, variant, pricing, search, cart, blog and article data.
-- Storefront API default version is 2026-07.
-- Expired/invalid cart recovery attempts a fresh cart before failing.
-- User errors are surfaced as UI toasts instead of browser alerts.
+`node scripts/test-wishlist.mjs` passed:
+- hydration-race regression
+- persistence
+- add/remove toggle
+- snapshot cleanup
+- malformed-storage handling
 
-## SEO
-- Root metadata, page metadata and dynamic product/collection/article metadata.
-- Product, WebSite and article-ready structured data.
-- Canonical URLs for dynamic pages.
-- Dynamic sitemap query for products/collections/blog articles (bounded to current Shopify query limits in one sitemap file).
-- Robots sitemap reference.
+A separate TypeScript semantic check was run with temporary module stubs and passed with no application-level type errors.
 
-## Static QA performed
-- No references to `raw.githubusercontent.com`, `placehold.co`, `unsplash.com`, or missing local hero paths remain in application source.
-- PDF file names only occur under `docs/company-profiles/` and are not used by JSX as web images.
-- Header is rendered once and footer is rendered once from `App`.
-- Clean exact logo asset exists and is referenced via `LOGO_SRC`.
-- ZIP integrity must be verified after packaging.
-
-## Environment validation
-A networked `npm ci` / production build could not be completed in this sandbox because registry access is unavailable. Source-level TypeScript/JSX transpilation and static reference checks are still performed before packaging.
-
-## Wishlist QA — 2026-09-30
-- Fixed the initial-load localStorage race that could overwrite an existing wishlist with an empty React state before hydration completed.
-- Wishlist IDs and product snapshots are persisted together.
-- Product-card wishlist buttons explicitly prevent default/propagation.
-- Wishlist state synchronizes through the custom BuyHoreca event and browser `storage` event.
-- Wishlist page can remove products through the same heart action and provides Clear Wishlist.
-- Node storage regression test passed: persistence, add/remove toggle, snapshot cleanup, and malformed-storage handling.
+## Build-environment limitation
+A complete `npm install` / `next build` could not be executed in this sandbox because external npm package installation timed out. This package therefore contains source-level validation and static/semantic checks, but not a sandboxed production Next.js runtime build.

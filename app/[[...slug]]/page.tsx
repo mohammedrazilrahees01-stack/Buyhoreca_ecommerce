@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Storefront from "./Storefront";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://buyhoreca.com";
@@ -76,6 +77,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
     }
   }
 
+  if (slug[0] === "brands" && slug[1]) {
+    const name = decodeURIComponent(slug[1]);
+    const title = `${name} HoReCa Products`;
+    const description = `Browse ${name} products available through the live BuyHoreca catalogue.`;
+    return { title, description, alternates: { canonical: `${baseUrl}/brands/${encodeURIComponent(name)}` }, openGraph: { title, description, type: "website" } };
+  }
+
+  if (slug[0] === "business" && slug[1]) {
+    const name = slug[1].split("-").filter(Boolean).map(x => x[0]?.toUpperCase()+x.slice(1)).join(" ");
+    const title = `${name} Hospitality Supplies`;
+    const description = `Shop products selected for ${name.toLowerCase()} operations from the BuyHoreca catalogue.`;
+    return { title, description, alternates: { canonical: `${baseUrl}/business/${slug[1]}` }, openGraph: { title, description, type: "website" } };
+  }
+
   if (slug[0] === "blog" && slug[1] && slug[2]) {
     const data = await shopifyMeta<any>(ARTICLE_META, { blog: decodeURIComponent(slug[1]), handle: decodeURIComponent(slug[2]) });
     const a = data?.blog?.articleByHandle;
@@ -92,5 +107,5 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
 }
 
 export default function Page() {
-  return <Storefront />;
+  return <Suspense fallback={<div className="min-h-screen bg-white" aria-label="Loading BuyHoreca" />}><Storefront /></Suspense>;
 }

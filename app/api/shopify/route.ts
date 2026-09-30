@@ -10,7 +10,10 @@ export async function POST(request: Request) {
   let body: unknown;
   try { body = await request.json(); } catch { return NextResponse.json({ errors: [{ message: "Invalid store request." }] }, { status: 400 }); }
   try {
-    const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token }, body: JSON.stringify(body), cache: "no-store" });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token }, body: JSON.stringify(body), cache: "no-store", signal: controller.signal });
+    clearTimeout(timeout);
     const json = await response.json();
     if (!response.ok || json?.errors?.length) return NextResponse.json({ errors: [{ message: "Store data is temporarily unavailable." }] }, { status: response.ok ? 502 : response.status });
     return NextResponse.json({ data: json.data });

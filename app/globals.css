@@ -27,7 +27,7 @@ iframe{max-width:100%}
 .bh-footer-logo img{display:block;width:235px;height:auto;max-height:75px;object-fit:contain}
 
 /* global containers / buttons */
-.bh-primary-button,.bh-secondary-button,.bh-hero-button,.bh-hero-outline-button{display:inline-flex;align-items:center;gap:.45rem;border-radius:6px;padding:0 16px;font-size:13px;font-weight:800;transition:transform .18s ease,background-color .18s ease,border-color .18s ease,box-shadow .18s ease;color:inherit;text-decoration:none}
+.bh-primary-button,.bh-secondary-button,.bh-hero-button,.bh-hero-outline-button{display:inline-flex;align-items:center;gap:.45rem;border-radius:6px;padding:0 16px;font-size:13px;font-weight:700;transition:transform .18s ease,background-color .18s ease,border-color .18s ease,box-shadow .18s ease;color:inherit;text-decoration:none}
 .bh-primary-button{min-height:44px;background:var(--bh-green);color:#fff;box-shadow:0 8px 20px rgba(0,143,104,.16)}
 .bh-primary-button:hover{background:var(--bh-green-dark);transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,143,104,.22)}
 .bh-secondary-button{min-height:44px;border:1px solid #cbd5d2;background:#fff;color:var(--bh-ink)}
@@ -93,7 +93,7 @@ iframe{max-width:100%}
 .bh-cart-line:hover{border-color:#c2d2cc;box-shadow:0 6px 20px rgba(16,37,45,.06)}
 
 /* Toast / mobile quick nav */
-.bh-toast{position:fixed;left:50%;bottom:24px;z-index:130;display:flex;align-items:center;gap:9px;max-width:min(92vw,460px);padding:11px 15px;border-radius:999px;background:#10252d;color:#fff;font-size:12px;font-weight:800;box-shadow:var(--bh-shadow-lg);pointer-events:none;opacity:0;transform:translate(-50%,12px) scale(.98);transition:opacity .22s ease,transform .22s ease}
+.bh-toast{position:fixed;left:50%;bottom:24px;z-index:130;display:flex;align-items:center;gap:9px;max-width:min(92vw,460px);padding:11px 15px;border-radius:999px;background:#10252d;color:#fff;font-size:12px;font-weight:700;box-shadow:var(--bh-shadow-lg);pointer-events:none;opacity:0;transform:translate(-50%,12px) scale(.98);transition:opacity .22s ease,transform .22s ease}
 .bh-toast-show{opacity:1;transform:translate(-50%,0) scale(1)}
 .bh-toast svg{color:#83e1c5;flex:none}
 .bh-skip-link{position:fixed;left:12px;top:10px;z-index:300;transform:translateY(-150%);border-radius:6px;background:#10252d;color:#fff;padding:10px 14px;font-size:12px;font-weight:800;text-decoration:none;box-shadow:0 10px 24px rgba(0,0,0,.18)}
@@ -176,3 +176,28 @@ html,body{min-width:0}
 @media(min-width:1200px){.bh-catalog-grid{gap:15px}}
 @media(min-width:1800px){.bh-catalog-grid{gap:16px}}
 @media(prefers-reduced-motion:reduce){.bh-cart-pulse,.bh-blog-card:hover,.bh-product-card:has(.bh-add-button:hover) .bh-product-media img{animation:none;transform:none}}
+
+/* Final typography + navigation restraint */
+.bh-primary-nav-item{white-space:nowrap}
+@media(max-width:1100px) and (min-width:1024px){.bh-primary-nav-item{font-size:11px!important;padding-inline:5px!important}}
+
+
+/* Final responsive navigation track */
+.bh-primary-nav-track{overflow-x:auto;scrollbar-width:none}
+.bh-primary-nav-track::-webkit-scrollbar{display:none}
+@media (max-width:1199px) and (min-width:1024px){.bh-primary-nav-track{min-width:1120px}.bh-primary-nav-track>*{flex:0 0 auto;min-width:112px}}
+@media (min-width:1200px){.bh-primary-nav-track{overflow-x:visible}}
+
+/* Restraint: avoid unnecessary heavy text while preserving hierarchy */
+.font-bold{font-weight:600}
+.font-extrabold{font-weight:700}
+.bh-primary-button,.bh-secondary-button,.bh-hero-button,.bh-hero-outline-button{font-weight:600}
+.bh-toast{font-weight:600}
+.bh-skip-link{font-weight:600}
+.bh-mobile-bar a,.bh-mobile-bar button{font-weight:600}
+.bh-trust-mini{font-weight:600}
+.prose h2,.prose h3,.prose h4{font-weight:700}
+
+/* Render large catalogue sections efficiently without changing layout */
+.bh-catalog-grid,.bh-blog-carousel{contain:layout paint}
+html{scrollbar-gutter:stable}

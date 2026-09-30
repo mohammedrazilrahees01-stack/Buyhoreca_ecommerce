@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "audit": "node scripts/audit-storefront.mjs"
+    "audit": "node scripts/audit-storefront.mjs",
+    "audit:final": "node scripts/final-production-audit.mjs",
+    "test:wishlist": "node scripts/test-wishlist.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.14",
@@ -25,5 +27,8 @@
     "typescript": "^5.8.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "16.3.2"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   }
 }

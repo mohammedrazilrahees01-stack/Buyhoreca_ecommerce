@@ -1,61 +1,34 @@
-# BuyHoreca Production Storefront Build
+# BuyHoreca Production Storefront Notes
 
-This ZIP is a full storefront improvement pass for the BuyHoreca Shopify headless storefront.
+## Design direction
+Keep the existing BuyHoreca header proportions, white header body and green category navigation. Premium is achieved through hierarchy, spacing, consistent typography, precise borders, restrained shadows and useful micro-interactions rather than oversized or heavy typography.
 
-## Included
+## Navigation
+Desktop primary navigation is intentionally limited to 10 items total, including Quote. The search field's All Categories selector is separate and contains the complete Shopify collection catalogue with cursor pagination and scrolling.
 
-- Real BuyHoreca logo asset extracted from the supplied 2026 BuyHoreca company profile.
-- Denser B2B product catalogue with intentional 10–12px card gaps.
-- Product-card wishlist + compare controls using localStorage.
-- Quick view, quantity controls, rating/review display, bought count, sale badge and quote fallback.
-- Desktop mega menu + mobile navigation.
-- Search autocomplete for products and collections.
-- Collection/catalogue filters, price range, availability, sorting and grid/list view.
-- Horizontal product rails.
-- Rich homepage with categories, product rails, brand portfolio, company proof, customer proof and blog rail.
-- Shopify-connected Blog index and article pages using Storefront API blog/article queries.
-- About, Contact, FAQ, Shipping, Track Order and Account information routes.
-- Product page, cart, quote, wishlist, business and brand routes retained.
-- SEO metadata, Open Graph metadata, robots and expanded sitemap routes.
-- Responsive desktop/tablet/mobile layout.
-- Supplied BuyHoreca and Blue Mountain company profiles copied into `docs/company-profiles/` for reference.
-- Company-profile PDFs are retained in `docs/company-profiles/` for reference; no PDF page is rendered as a website section.
+## Search
+Predictive search exposes products, collections and articles while typing. The All Categories selector has its own category-search input. Mobile provides the same full category access.
 
-## Shopify
+## Categories
+The homepage category rail continues to display each collection's Shopify-provided featured image. The presentation of that rail was deliberately left unchanged after user approval.
 
-The storefront keeps Shopify as the source of truth for products, variants, collections, pricing, availability, cart and checkout. Blog content is read from Shopify's Storefront API and requires the storefront's content access scope/configuration to be available.
+## Brand assets
+The package uses local logo assets where they are available. It does not fabricate manufacturer marks for vendors without an actual supplied local logo file. Missing local brand assets therefore fall back to clean vendor text instead of an invented logo.
 
-The storefront uses the configured Storefront API version from `NEXT_PUBLIC_SHOPIFY_API_VERSION`, defaulting to `2026-07`.
+## Company imagery
+The preferred company image is `/images/company/shop_of_buyhoreca.png`. When this exact user-supplied file is not present in the packaged source, the section falls back to `/images/company/modern-buyhoreca-storefront.png` so the storefront remains complete and visually stable.
 
-## Company profile source usage
+## Company profile PDFs
+The BuyHoreca and Blue Mountain profile PDFs are source/reference documents only. Their pages are never placed into the storefront as screenshots. Website sections use text and suitable imagery derived from the source material.
 
-The supplied BuyHoreca profile was used as the content source for the company/brand sections, including the stated 12+ years of experience, 30+ staff, 25,000 sq. ft. warehouse, 5,000 sq. ft. showroom, 50,000+ products, and 50+ hotels / 500+ restaurants. The supplied Blue Mountain profile was used to represent the Saudi Arabia expansion as a separate company context built on 12 years of UAE experience.
+## Interactions
+Wishlist and compare use browser persistence and cross-component event synchronization. Cart operations use Shopify Storefront API mutations. Add-to-cart feedback includes button state, toast and cart pulse. Product-card actions stop link propagation where necessary.
 
-## Install
+## Blog rail
+The homepage blog rail is responsive at 2 cards on mobile, 3 on tablet and 4 on desktop. It scrolls horizontally, advances automatically, pauses on hover/focus and resumes after the interaction ends. Manual arrow controls remain available.
 
-```bash
-npm install
-npm run dev
-```
+## SEO and performance
+Metadata, canonical URLs, Open Graph, JSON-LD, sitemap, robots rules, responsive images, lazy loading, reduced-motion behavior and restrained animation are included. Client storage is limited to non-sensitive wishlist/compare/cart identifiers and snapshots needed for the UI.
 
-For production:
-
-```bash
-npm run build
-npm run start
-```
-
-Use the environment variables documented in `.env.local.example`.
-
-## Validation note
-
-The source was syntax-reviewed with TypeScript tooling available in the environment. A complete Next.js production build was not executed because this environment does not have the project's npm dependencies installed and external package installation is not guaranteed.
-
-
-## Final audit pass
-- Exact transparent BuyHoreca culinary/cart wordmark is the only header logo source.
-- Predictive Shopify search powers type-ahead suggestions for products, collections and articles.
-- Shopify faceted filters are exposed on search and collection pages; applied filters are shown as removable chips.
-- Blog rail displays 2/3/4 cards by breakpoint, auto-advances, and pauses on hover/focus with an optional Play/Pause control.
-- State-like pages use noindex metadata to avoid indexing cart/search/account URLs.
-- Sitemap is paginated across products, collections, blogs and articles.
+## Runtime validation
+The final package includes static requirement audits and a wishlist regression test. A full Next.js build requires installation of the declared project dependencies in a network-capable environment.

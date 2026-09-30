@@ -8,6 +8,7 @@ This package is a production-oriented Shopify headless storefront build. The com
 - Corrected header logo intrinsic dimensions and responsive sizing to avoid the undersized/cropped appearance seen in the prior screenshot.
 - Standardized the mobile cart pulse to the same `bh-cart-pulse` animation class.
 - Preserved the 2 / 3 / 4-card blog rail behavior with automatic horizontal movement and hover/focus pause.
+- Retained the full Shopify collection selector, premium typography restraint, responsive navigation, actual local brand logos where available, recently viewed products, same-manufacturer related products and product specification/Q&A support.
 
 ## Storefront scope
 - Shopify Storefront API for products, variants, collections, predictive search, search filters, cart, checkout and Shopify blog/articles.
