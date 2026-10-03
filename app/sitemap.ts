@@ -16,14 +16,14 @@ const ARTICLES_QUERY=`query Articles($blog:String!,$first:Int!,$after:String){bl
 async function collectPaged<T extends {pageInfo:{hasNextPage:boolean;endCursor:string|null};nodes:any[]}>(query:string,baseVars:Record<string,unknown>,first=250){let after:string|null=null;const nodes:any[]=[];do{const data:any=await gql<any>(query,{...baseVars,first,after});if(!data)break;const connection=Object.values(data)[0] as T|undefined;if(!connection)break;nodes.push(...(connection.nodes||[]));after=connection.pageInfo?.hasNextPage?connection.pageInfo.endCursor:null;}while(after);return nodes;}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
- const staticPaths=["/","/shop","/categories","/brands","/business","/collections","/blog","/about","/contact","/faq","/shipping","/quote"];
+ const staticPaths=["/","/shop","/categories","/brands","/business","/blog","/about","/contact","/faq","/shipping","/quote"];
  const [products,collections,blogs]=await Promise.all([collectPaged(PRODUCTS_QUERY,{}),collectPaged(COLLECTIONS_QUERY,{}),collectPaged(BLOGS_QUERY,{},50)]);
- const productEntries=products.map((x:any)=>({url:`${base}/products/${x.handle}`,lastModified:x.updatedAt?new Date(x.updatedAt):undefined}));
- const collectionEntries=collections.map((x:any)=>({url:`${base}/categories/${x.handle}`,lastModified:x.updatedAt?new Date(x.updatedAt):undefined}));
+ const productEntries=products.map((x:any)=>({url:`${base}/products/${x.handle}`,lastModified:x.updatedAt?new Date(x.updatedAt):undefined,changeFrequency:"weekly" as const,priority:0.8}));
+ const collectionEntries=collections.map((x:any)=>({url:`${base}/categories/${x.handle}`,lastModified:x.updatedAt?new Date(x.updatedAt):undefined,changeFrequency:"weekly" as const,priority:0.8}));
  const brandNames=Array.from(new Set(products.map((x:any)=>String(x.vendor||"").trim()).filter((x:string)=>x&&x!=="BuyHoreca")));
- const brandEntries=brandNames.map((name:string)=>({url:`${base}/brands/${encodeURIComponent(name)}`}));
+ const brandEntries=brandNames.map((name:string)=>({url:`${base}/brands/${encodeURIComponent(name)}`,changeFrequency:"weekly" as const,priority:0.7}));
  const articleEntries:any[]=[];
- for(const b of blogs){const articles=await collectPaged(ARTICLES_QUERY,{blog:b.handle},250);for(const a of articles){const bh=a.blog?.handle||b.handle;articleEntries.push({url:`${base}/blog/${bh}/${a.handle}`,lastModified:a.publishedAt?new Date(a.publishedAt):undefined});}}
+ for(const b of blogs){const articles=await collectPaged(ARTICLES_QUERY,{blog:b.handle},250);for(const a of articles){const bh=a.blog?.handle||b.handle;articleEntries.push({url:`${base}/blog/${bh}/${a.handle}`,lastModified:a.publishedAt?new Date(a.publishedAt):undefined,changeFrequency:"monthly" as const,priority:0.6});}}
  const seen=new Set<string>();
- return [...staticPaths.map(url=>({url:`${base}${url}`})),...productEntries,...collectionEntries,...brandEntries,...articleEntries].filter((x:any)=>{if(seen.has(x.url))return false;seen.add(x.url);return true;});
+ return [...staticPaths.map(url=>({url:`${base}${url}`,changeFrequency:url==="/"?"daily" as const:"weekly" as const,priority:url==="/"?1:0.6})),...productEntries,...collectionEntries,...brandEntries,...articleEntries].filter((x:any)=>{if(seen.has(x.url))return false;seen.add(x.url);return true;});
 }

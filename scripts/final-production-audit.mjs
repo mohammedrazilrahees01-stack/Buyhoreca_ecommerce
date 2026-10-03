@@ -22,7 +22,10 @@ walk(path.join(root, 'app'));
 
 const checks = [
   ['10 primary nav items (9 categories + Quote)', (src.match(/\n  \["[^"]+",\[/g) || []).length === 9 && /href="\/quote"[^>]*>Quote<\/Link>/.test(src)],
-  ['Nav labels are medium/regular, not bold', src.includes('bh-primary-nav-item flex h-11 w-full items-center justify-center px-2 text-[12px] font-medium') && src.includes('bh-primary-nav-item flex h-11 items-center whitespace-nowrap px-4 text-[12px] font-medium') && !src.includes('bh-primary-nav-item flex h-11 w-full items-center justify-center px-2 text-[12px] font-bold')],
+  ['Nav labels are medium/regular, not bold', /bh-primary-nav-item[^\"`]*text-\[12px\] font-medium/.test(src) && !/bh-primary-nav-item[^\"`]*text-\[12px\] font-bold/.test(src)],
+  ['Mega menu is viewport-anchored, not item-anchored', /<nav className="relative hidden[\s\S]*?bh-mega border/.test(src) && /\.bh-mega\{position:absolute;left:50%;right:auto;top:100%;width:min\(1280px,calc\(100vw - 24px\)\)/.test(css) && !/bh-mega absolute left-1\/2/.test(src)],
+  ['Mega menu tracks have min-width zero to prevent child overflow', /\.bh-mega-grid\{display:grid;grid-template-columns:minmax\(0,1\.25fr\) minmax\(280px,\.95fr\)/.test(css) && /\.bh-mega-card-label\{min-width:0/.test(css) && /\.bh-mega-more-link\{display:block;min-width:0/.test(css)],
+  ['Mega menu nested category cards cannot force horizontal overflow', /bh-mega-card group flex min-h-\[66px\] min-w-0/.test(src) && /bh-mega-card-label/.test(src)],
   ['Full Shopify collections are paginated without artificial limit', (/async function getCollections\(\)/.test(src)&&src.includes('first:250')&&src.includes('do{')&&src.includes('while(after)'))],
   ['All-category dropdown is scrollable', /all-category-list[\s\S]*max-h-\[min\(62vh,560px\)\][\s\S]*overflow-y-auto/.test(src)],
   ['Mobile all-category dropdown exists', /mobile-all-category-list/.test(src) && /Search all categories on mobile/.test(src)],

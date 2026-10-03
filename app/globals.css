@@ -40,7 +40,16 @@ iframe{max-width:100%}
 /* Search / menus */
 .bh-search-panel{animation:bhDrop .13s ease-out}
 @keyframes bhDrop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.bh-mega{animation:bhDrop .12s ease-out;max-height:min(560px,calc(100vh - 145px));overflow:auto}
+nav[aria-label="Primary navigation"]{position:relative;overflow:visible}
+.bh-mega{position:absolute;left:50%;right:auto;top:100%;width:min(1280px,calc(100vw - 24px));transform:translateX(-50%);animation:bhDrop .12s ease-out;max-height:min(620px,calc(100vh - 140px));overflow:auto;overscroll-behavior:contain}
+.bh-mega-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.95fr);min-width:0}
+.bh-mega-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;min-width:0}
+.bh-mega-card{min-width:0;overflow:hidden}
+.bh-mega-card-label{min-width:0;overflow-wrap:anywhere}
+.bh-mega-more{min-width:0;overflow:hidden}
+.bh-mega-more-link{display:block;min-width:0;overflow-wrap:anywhere}
+@media (min-width:1100px){.bh-mega-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:1099px) and (min-width:1024px){.bh-mega{width:min(1040px,calc(100vw - 20px))}.bh-mega-grid{grid-template-columns:minmax(0,1.05fr) minmax(250px,.95fr)}}
 .bh-nav-link{position:relative;white-space:nowrap}
 .bh-nav-link:after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:3px;border-radius:99px;background:#fff;transform:scaleX(0);transition:transform .18s ease}
 .bh-nav-link:hover:after,.bh-nav-link[data-active="true"]:after{transform:scaleX(1)}
@@ -185,7 +194,8 @@ html,body{min-width:0}
 /* Final responsive navigation track */
 .bh-primary-nav-track{overflow-x:auto;scrollbar-width:none}
 .bh-primary-nav-track::-webkit-scrollbar{display:none}
-@media (max-width:1199px) and (min-width:1024px){.bh-primary-nav-track{min-width:1120px}.bh-primary-nav-track>*{flex:0 0 auto;min-width:112px}}
+@media (max-width:1199px) and (min-width:1024px){.bh-primary-nav-track{width:100%;min-width:0}.bh-primary-nav-track>*{flex:1 1 0;min-width:0}.bh-primary-nav-track>a{flex:0 0 auto;min-width:72px}}
+@media (max-width:1199px) and (min-width:1024px){.bh-primary-nav-item{white-space:normal!important;line-height:1.05!important;font-size:10px!important;padding-inline:3px!important;text-align:center}.bh-primary-nav-item svg{flex:none}}
 @media (min-width:1200px){.bh-primary-nav-track{overflow-x:visible}}
 
 /* Restraint: avoid unnecessary heavy text while preserving hierarchy */
@@ -201,3 +211,44 @@ html,body{min-width:0}
 /* Render large catalogue sections efficiently without changing layout */
 .bh-catalog-grid,.bh-blog-carousel{contain:layout paint}
 html{scrollbar-gutter:stable}
+
+
+/* 2026-10-02 device-width hardening: 320px phones through 4K/5K desktop displays */
+html,body,#main-content{max-width:100%;overflow-x:clip}
+body{overflow-wrap:break-word}
+button,input,select,textarea{max-width:100%}
+.bh-mega{max-width:calc(100vw - 24px)}
+.bh-search-panel{max-width:calc(100vw - 24px)}
+.bh-product-card,.bh-feature-tile,.bh-brand-tile,.bh-content-card{min-width:0}
+@media(max-width:380px){
+ .bh-logo{width:164px;height:52px}.bh-logo img{width:164px;max-height:52px}
+ .bh-catalog-grid{gap:8px}
+ .bh-product-card{font-size:12px}
+ .bh-product-card .bh-product-media img{padding:.3rem}
+ .bh-primary-button,.bh-secondary-button,.bh-hero-button,.bh-hero-outline-button{padding-inline:12px}
+}
+@media(min-width:1920px){
+ .bh-catalog-grid{grid-template-columns:repeat(7,minmax(0,1fr));gap:16px}
+ .bh-product-rail-card{width:calc((100% - 84px)/8)}
+ .bh-logo{width:270px;height:84px}.bh-logo img{width:270px;max-height:84px}
+ .bh-mega{width:min(1760px,calc(100vw - 40px))}
+}
+@media(min-width:2560px){
+ .bh-catalog-grid{grid-template-columns:repeat(8,minmax(0,1fr));gap:18px}
+ .bh-product-rail-card{width:calc((100% - 108px)/10)}
+ .bh-mega-grid{gap:28px;padding:24px}
+ .bh-mega{max-height:min(760px,calc(100vh - 150px))}
+}
+@media(min-width:3840px){
+ .bh-catalog-grid{grid-template-columns:repeat(10,minmax(0,1fr));gap:20px}
+ .bh-product-rail-card{width:calc((100% - 132px)/12)}
+ .bh-logo{width:310px;height:96px}.bh-logo img{width:310px;max-height:96px}
+}
+@media(max-width:767px){
+ .bh-mega,.bh-search-panel{max-width:calc(100vw - 16px)}
+ .bh-home-hero{min-width:0}
+ .bh-mobile-bar{padding-bottom:max(5px,env(safe-area-inset-bottom))}
+}
+@media(min-width:768px) and (max-width:1199px){
+ .bh-mega{left:50%;width:min(1040px,calc(100vw - 20px))}
+}

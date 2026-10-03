@@ -1,0 +1,15 @@
+BUYHORECA PRODUCTION RELEASE — 2026-10-02
+
+Verified in sandbox:
+- final-production-audit.mjs: PASS (46 requirement checks + 10 TS/TSX parser checks)
+- audit-storefront.mjs: PASS
+- test-wishlist.mjs: PASS
+- zip integrity: verified with unzip -t
+
+Important deployment note:
+- This is an OVERLAY release. Apply it over the existing Buyhoreca_ecommerce repository.
+- Do NOT delete the existing public/images/brands directory; the connected GitHub repository contains additional binary brand assets not available in this sandbox package.
+- The sandbox could not complete npm install / next build because the external npm registry was not reachable/cached. Vercel should perform the real dependency install and production build.
+
+Shopify promotion:
+WELCOME10 = 10% off order, no minimum requirement, Limit to one use per customer ON, no end date for an evergreen promotion.

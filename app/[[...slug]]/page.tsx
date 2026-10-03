@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
         title,
         description,
         alternates: { canonical: `${baseUrl}/products/${p.handle || slug[1]}` },
-        openGraph: { title, description, type: "website", images: p.featuredImage ? [{ url: p.featuredImage.url, width: p.featuredImage.width || 1200, height: p.featuredImage.height || 1200, alt: p.featuredImage.altText || p.title }] : undefined },
+        robots: { index: true, follow: true }, keywords: [p.title, p.vendor, "HoReCa", "hospitality supplies", "BuyHoreca"].filter(Boolean), openGraph: { title, description, type: "website", url: `${baseUrl}/products/${p.handle || slug[1]}`, images: p.featuredImage ? [{ url: p.featuredImage.url, width: p.featuredImage.width || 1200, height: p.featuredImage.height || 1200, alt: p.featuredImage.altText || p.title }] : undefined },
       };
     }
   }
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
     if (c) {
       const title = c.seo?.title || c.title;
       const description = c.seo?.description || c.description || `Browse ${c.title} products at BuyHoreca.`;
-      return { title, description, alternates: { canonical: `${baseUrl}/categories/${slug[1]}` }, openGraph: { title, description, type: "website", images: c.image ? [{ url: c.image.url, width: c.image.width || 1200, height: c.image.height || 800, alt: c.image.altText || c.title }] : undefined } };
+      return { title, description, robots: { index: true, follow: true }, keywords: [c.title, "HoReCa", "hospitality", "BuyHoreca"], alternates: { canonical: `${baseUrl}/categories/${slug[1]}` }, openGraph: { title, description, type: "website", url: `${baseUrl}/categories/${slug[1]}`, images: c.image ? [{ url: c.image.url, width: c.image.width || 1200, height: c.image.height || 800, alt: c.image.altText || c.title }] : undefined } };
     }
   }
 
@@ -81,14 +81,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
     const name = decodeURIComponent(slug[1]);
     const title = `${name} HoReCa Products`;
     const description = `Browse ${name} products available through the live BuyHoreca catalogue.`;
-    return { title, description, alternates: { canonical: `${baseUrl}/brands/${encodeURIComponent(name)}` }, openGraph: { title, description, type: "website" } };
+    return { title, description, robots: { index: true, follow: true }, keywords: [name, "HoReCa", "hospitality equipment", "BuyHoreca"], alternates: { canonical: `${baseUrl}/brands/${encodeURIComponent(name)}` }, openGraph: { title, description, type: "website", url: `${baseUrl}/brands/${encodeURIComponent(name)}` } };
   }
 
   if (slug[0] === "business" && slug[1]) {
     const name = slug[1].split("-").filter(Boolean).map(x => x[0]?.toUpperCase()+x.slice(1)).join(" ");
     const title = `${name} Hospitality Supplies`;
     const description = `Shop products selected for ${name.toLowerCase()} operations from the BuyHoreca catalogue.`;
-    return { title, description, alternates: { canonical: `${baseUrl}/business/${slug[1]}` }, openGraph: { title, description, type: "website" } };
+    return { title, description, robots: { index: true, follow: true }, keywords: [name, "hospitality supplies", "HoReCa", "BuyHoreca"], alternates: { canonical: `${baseUrl}/business/${slug[1]}` }, openGraph: { title, description, type: "website", url: `${baseUrl}/business/${slug[1]}` } };
   }
 
   if (slug[0] === "blog" && slug[1] && slug[2]) {
@@ -97,8 +97,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
     if (a) {
       const title = a.seo?.title || a.title;
       const description = a.seo?.description || a.excerpt || `Read ${a.title} from the BuyHoreca Hospitality Insights journal.`;
-      return { title, description, alternates: { canonical: `${baseUrl}/blog/${slug[1]}/${slug[2]}` }, openGraph: { title, description, type: "article", images: a.image ? [{ url: a.image.url, width: a.image.width || 1200, height: a.image.height || 800, alt: a.image.altText || a.title }] : undefined } };
+      return { title, description, robots: { index: true, follow: true }, keywords: [a.title, "hospitality", "foodservice", "BuyHoreca"], alternates: { canonical: `${baseUrl}/blog/${slug[1]}/${slug[2]}` }, openGraph: { title, description, type: "article", url: `${baseUrl}/blog/${slug[1]}/${slug[2]}`, images: a.image ? [{ url: a.image.url, width: a.image.width || 1200, height: a.image.height || 800, alt: a.image.altText || a.title }] : undefined } };
     }
+  }
+
+  if (route === "collections") {
+    return { title: "Categories", description: "Explore the live BuyHoreca collections.", robots: { index: false, follow: true }, alternates: { canonical: `${baseUrl}/categories` } };
   }
 
   const m = staticMeta[route] || { title: "BuyHoreca", description: "Professional HoReCa equipment and supplies for hospitality businesses." };
