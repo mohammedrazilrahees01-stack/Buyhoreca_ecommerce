@@ -1,0 +1,9 @@
+FILE: app/[[...slug]]/Storefront.tsx
+
+Replace the current CategoryIndex function with the following. This preserves the latest commit's category layout and object-cover image treatment while declaring the two JSON-LD objects that the JSX already uses.
+
+function CategoryIndex({collections}:{collections:Collection[]}){
+ const categorySchema={"@context":"https://schema.org","@type":"CollectionPage","name":"BuyHoreca Categories","description":"Explore the live BuyHoreca collections.","url":"https://buyhoreca.com/categories"};
+ const categoryBreadcrumb={"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://buyhoreca.com/"},{"@type":"ListItem","position":2,"name":"Categories","item":"https://buyhoreca.com/categories"}]};
+ return <main className="mx-auto max-w-[1920px] px-4 py-8"><div className="text-xs font-semibold uppercase tracking-widest text-[#008f68]">Browse</div><h1 className="mt-2 text-4xl font-bold">Categories</h1><p className="mt-3 text-slate-600">Explore the live BuyHoreca collections.</p><div className="mt-7 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">{collections.map(c=><Link key={c.id} href={"/categories/"+c.handle} className="border border-slate-200 bg-white p-3 hover:border-[#008f68]"><div className="aspect-square overflow-hidden bg-slate-50">{c.image?<img src={c.image.url} alt={c.title} className="h-full w-full object-cover"/>:<div className="grid h-full place-items-center p-4 text-center text-sm font-bold text-slate-400">{c.title}</div>}</div><div className="mt-3 font-semibold">{c.title}</div></Link>)}</div><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(categorySchema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(categoryBreadcrumb)}}/></main>
+}
