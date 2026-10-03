@@ -1,0 +1,5 @@
+diff --git a/app/[[...slug]]/Storefront.tsx b/app/[[...slug]]/Storefront.tsx
+--- a/app/[[...slug]]/Storefront.tsx
++++ b/app/[[...slug]]/Storefront.tsx
+@@
+-<script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(categorySchema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(categoryBreadcrumb)}}/>
