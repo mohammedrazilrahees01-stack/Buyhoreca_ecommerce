@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import Storefront from "./Storefront";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://buyhoreca.com";
@@ -28,6 +29,34 @@ async function shopifyMeta<T>(query: string, variables: Record<string, unknown>)
 const PRODUCT_META = `query ProductMeta($handle:String!){product(handle:$handle){title description seo{title description}featuredImage{url width height altText}vendor}}`;
 const COLLECTION_META = `query CollectionMeta($handle:String!){collection(handle:$handle){title description seo{title description}image{url width height altText}}}`;
 const ARTICLE_META = `query ArticleMeta($blog:String!,$handle:String!){blog(handle:$blog){articleByHandle(handle:$handle){title excerpt seo{title description}image{url width height altText}publishedAt}}}`;
+
+const PRODUCT_EXISTS = `query ProductExists($handle:String!){product(handle:$handle){id}}`;
+const COLLECTION_EXISTS = `query CollectionExists($handle:String!){collection(handle:$handle){id}}`;
+const ARTICLE_EXISTS = `query ArticleExists($blog:String!,$handle:String!){blog(handle:$blog){articleByHandle(handle:$handle){id}}}`;
+const BRAND_EXISTS = `query BrandExists($query:String!){products(first:1,query:$query){nodes{id}}}`;
+
+async function shopifyRouteExists(query: string, variables: Record<string, unknown>): Promise<boolean | null> {
+  if (!token) return null;
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token },
+      body: JSON.stringify({ query, variables }),
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json.errors?.length) return null;
+    return Boolean(json.data);
+  } catch {
+    return null;
+  }
+}
+
+const BUSINESS_SLUGS = new Set([
+  "hotel", "bakery", "coffee-shop", "bar-supplies", "pizzeria", "ice-cream-shop",
+  "restaurant", "catering", "banquet", "kitchen-operations", "retail-store", "food-truck",
+]);
 
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }): Promise<Metadata> {
   const { slug = [] } = await params;
@@ -110,6 +139,44 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
   return { title: m.title, description: m.description, robots: noIndex ? { index: false, follow: true } : undefined, alternates: { canonical: `${baseUrl}/${route}`.replace(/\/$/, "") || baseUrl } };
 }
 
-export default function Page() {
+const ROOT_ROUTES = new Set(["", "shop", "categories", "collections", "products", "brands", "business", "search", "cart", "wishlist", "compare", "quote", "about", "contact", "faq", "shipping", "account", "track-order", "blog"]);
+
+export default async function Page({ params }: { params: Promise<{ slug?: string[] }> }) {
+  const { slug = [] } = await params;
+  if (slug.length > 0 && !ROOT_ROUTES.has(slug[0])) notFound();
+
+  if (slug[0] === "products") {
+    if (slug.length !== 2) notFound();
+    const exists = await shopifyRouteExists(PRODUCT_EXISTS, { handle: decodeURIComponent(slug[1]) });
+    if (exists === false) notFound();
+  }
+  if (slug[0] === "categories") {
+    if (slug.length > 2) notFound();
+    if (slug[1]) {
+      const exists = await shopifyRouteExists(COLLECTION_EXISTS, { handle: decodeURIComponent(slug[1]) });
+      if (exists === false) notFound();
+    }
+  }
+  if (slug[0] === "brands") {
+    if (slug.length > 2) notFound();
+    if (slug[1]) {
+      const brand = decodeURIComponent(slug[1]).replace(/"/g, "").trim();
+      const exists = await shopifyRouteExists(BRAND_EXISTS, { query: `vendor:"${brand}"` });
+      if (exists === false) notFound();
+    }
+  }
+  if (slug[0] === "business") {
+    if (slug.length > 2 || (slug[1] && !BUSINESS_SLUGS.has(slug[1]))) notFound();
+  }
+  if (slug[0] === "blog") {
+    if (slug.length > 3) notFound();
+    if (slug.length === 2 || slug.length === 3) {
+      if (slug.length !== 3) notFound();
+      const exists = await shopifyRouteExists(ARTICLE_EXISTS, { blog: decodeURIComponent(slug[1]), handle: decodeURIComponent(slug[2]) });
+      if (exists === false) notFound();
+    }
+  }
+  if (["shop", "collections", "search", "cart", "wishlist", "compare", "quote", "about", "contact", "faq", "shipping", "account", "track-order"].includes(slug[0] || "") && slug.length !== 1) notFound();
+
   return <Suspense fallback={<div className="min-h-screen bg-white" aria-label="Loading BuyHoreca" />}><Storefront /></Suspense>;
 }
