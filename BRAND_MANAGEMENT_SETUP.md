@@ -1,39 +1,58 @@
-# Shopify-managed brand catalogue
+# BuyHoreca — Brand Management (Shopify Collections)
 
-The storefront now supports optional Shopify Metaobjects for brand merchandising. The storefront still works from Shopify product vendor data when the metaobject feature is not configured.
+## Source of truth
+Brands are managed entirely from Shopify Collections. The storefront does **not** require a local logo file, hardcoded brand map, brand metaobject, or one-off brand page component.
 
-## Shopify setup
+A brand is eligible for the storefront brand index when:
 
-Create a Metaobject definition in Shopify with type:
+1. A live product has **Vendor/Brand** set to the brand name.
+2. A Shopify Collection exists with the **same brand name** (case/punctuation differences are normalized).
+3. The Collection has the **brand logo uploaded as its Collection image**.
 
-`brand`
+## Recommended Shopify setup
 
-Recommended fields:
+For each brand:
 
-- `name` — Single line text (required)
-- `vendor` — Single line text (required; exact Shopify Product.vendor value)
-- `logo` — File reference (image)
-- `description` — Multi-line text
-- `featured` — True/false
-- `sort_order` — Integer
+- Collection title: `Winco`
+- Collection image: the Winco logo (`WINCO.PNG`, or any image format Shopify accepts)
+- Collection type: preferably **Automated**
+- Condition: **Product vendor is equal to Winco**
 
-Set the Storefront API access for the `brand` metaobjects so the public storefront can read them. The Storefront API metaobjects query requires the `unauthenticated_read_metaobjects` access scope. See Shopify's current Storefront API documentation for `metaobjects` and `MetaobjectField`. 
+Then, on every product:
 
-## Environment variable
+- Vendor/Brand: `Winco`
 
-Optional:
+When a new Winco product is added, Shopify's automated collection can place it into the Winco collection automatically.
 
-`NEXT_PUBLIC_SHOPIFY_BRAND_METAOBJECT_TYPE=brand`
+## What the storefront does automatically
 
-The default is already `brand`, so this environment variable is only needed if the definition uses another type name.
+The storefront reads all Shopify collections and uses each collection’s first product Vendor as the brand identity check. Matching brand collections become:
 
-## Behavior
+- Home → **Our Brands** cards
+- `/brands` → **Shop by Brand**
+- `/brands/<collection-handle>` → brand page
+- Product detail → brand logo beside the product title when the matching collection has an image
+- `sitemap.xml` → brand URLs
+- SEO metadata → collection title, description, image and canonical brand URL
 
-1. Managed brand records are read from Shopify Metaobjects.
-2. A managed record's `logo` is preferred over any local fallback logo.
-3. Managed records can control featured ordering with `featured` and `sort_order`.
-4. Product vendor names not yet managed remain discoverable from live Shopify product data.
-5. No fake brand records are created by the storefront.
-6. If the Storefront token does not have Metaobject access, the storefront gracefully falls back to vendor discovery and any existing local logo assets.
+Brand pages use the **actual Shopify Collection products**, including Shopify collection pagination and filters.
 
-This keeps Shopify as the source of truth while allowing brand merchandising to be maintained without editing storefront code for every new manufacturer.
+## Adding a completely new brand
+
+Example: `Hoshizaki`
+
+1. Create a product and set Vendor/Brand to `Hoshizaki`.
+2. Create a Shopify Collection named `Hoshizaki`.
+3. Make it automated using Vendor = `Hoshizaki` when appropriate.
+4. Upload the Hoshizaki logo as the Collection image.
+5. Save.
+
+No website code change is required. The `/brands/<collection-handle>` route is already dynamic.
+
+## Naming rule
+
+Use the exact brand spelling you want customers to see in Shopify. The website normalizes case, spaces, punctuation and `&`/`and` differences when matching a collection to a vendor.
+
+## Important
+
+Do **not** put brand logos into the old `public/images/brands` folder for production brand management. The current storefront uses Shopify Collection images as the single logo source. Any legacy local brand assets may remain in the repository temporarily but are not used by the active brand system.

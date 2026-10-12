@@ -1,0 +1,190 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
+import Lenis from "lenis";
+import {
+  ArrowRight, ArrowLeftRight, Check, ChevronDown, ChevronRight, Eye, FileText, Heart, Menu,
+  MessageCircle, Minus, Package, Plus, Search, ShoppingCart, SlidersHorizontal,
+  Star, Trash2, Truck, UserRound, X, ShieldCheck, Phone, Mail, MapPin, RefreshCw, Copy,
+  Grid2X2, List, Sparkles, Tag, Building2, CalendarDays, BookOpen, Share2, CheckCircle2, ChevronLeft, Home as HomeIcon, LogIn, BadgeCheck, Boxes, Clock3, ZoomIn
+} from "lucide-react";
+
+type Money={amount:string;currencyCode:string};
+type ImageData={url:string;altText?:string|null;width?:number|null;height?:number|null};
+type Variant={id:string;title:string;availableForSale:boolean;sku?:string|null;price:Money;compareAtPrice?:Money|null;selectedOptions:{name:string;value:string}[];image?:ImageData|null};
+type Product={id:string;handle:string;name:string;brand:string;description:string;descriptionHtml?:string;productType?:string;price:Money;compareAtPrice?:Money|null;availableForSale:boolean;images:ImageData[];variants:Variant[];href:string;rating?:number;reviewCount?:number;boughtCount?:number;seo?:{title?:string|null;description?:string|null}};
+type FacetValue={id:string;label:string;count?:number|null;input:any};
+type Facet={id:string;label:string;presentation?:string|null;type?:string|null;values:FacetValue[]};
+type AppliedFacet={filterId:string;label:string;input:any;token:string};
+type Collection={id:string;handle:string;title:string;description?:string|null;image?:ImageData|null;vendor?:string|null;products:Product[];pageInfo?:{hasNextPage:boolean;endCursor:string|null};filters?:Facet[]};
+type CartLine={id:string;quantity:number;merchandise:{id:string;title:string;price:Money;image?:ImageData|null;product:{title:string;handle:string;featuredImage?:ImageData|null}}};
+type CartDiscount={code:string;applicable:boolean};
+type Cart={id:string;checkoutUrl:string;totalQuantity:number;cost:{subtotalAmount:Money;totalAmount:Money};lines:CartLine[];discountCodes:CartDiscount[]};
+type QuoteItem={id:string;product:Product;variantId:string;quantity:number};
+type BlogArticle={id:string;handle:string;title:string;excerpt?:string|null;excerptHtml?:string|null;contentHtml:string;publishedAt:string;image?:ImageData|null;tags:string[];blogHandle:string;blogTitle:string;seo?:{title?:string|null;description?:string|null}};
+type Blog={id:string;handle:string;title:string;articles:BlogArticle[]};
+
+const API_VERSION=process.env.NEXT_PUBLIC_SHOPIFY_API_VERSION||"2026-07";
+const LOGO_SRC="/images/buyhoreca-logo-header.png";
+const COMPANY_SHOP_IMAGE="/images/company/shop_of_buyhoreca.png";
+const COMPANY_SHOP_FALLBACK="/images/company/modern-buyhoreca-storefront.png";
+const trackEvent=(name:string,details:Record<string,unknown>={})=>{try{(window as any).dataLayer=(window as any).dataLayer||[];(window as any).dataLayer.push({event:name,...details});window.dispatchEvent(new CustomEvent("buyhoreca:analytics",{detail:{event:name,...details}}))}catch{}};
+function brandKey(name:string):string{return name.trim().toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ")}
+const money=(m?:Money|null)=>{if(!m)return "Get Quote";const n=Number(m.amount);if(!Number.isFinite(n)||n<=0)return "Get Quote";return `${m.currencyCode==="AED"?"AED":m.currencyCode} ${n.toFixed(2)}`};
+const slugify=(s:string)=>s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const titleFromSlug=(s:string)=>s.split("-").filter((x):x is string=>Boolean(x)).map((x:string)=>x[0]?.toUpperCase()+x.slice(1)).join(" ");
+function useBodyScrollLock(active:boolean){
+ useEffect(()=>{if(!active)return;const previous=document.body.style.overflow;document.body.style.overflow="hidden";return()=>{document.body.style.overflow=previous}},[active]);
+}
+
+async function shopifyFetch<T>(query:string,variables:Record<string,unknown>={}):Promise<T>{
+  const controller=new AbortController();
+  const timeout=window.setTimeout(()=>controller.abort(),20000);
+  try{
+    const r=await fetch("/api/shopify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query,variables}),cache:"no-store",signal:controller.signal});
+    const j=await r.json().catch(()=>null);
+    if(!r.ok||j?.errors?.length)throw new Error("Shopify request failed");
+    return j.data;
+  }catch(error){
+    if(error instanceof DOMException&&error.name==="AbortError")throw new Error("Shopify request timed out");
+    throw error;
+  }finally{window.clearTimeout(timeout)}
+}
+
+const FIELDS=`id handle title vendor productType description descriptionHtml seo { title description } availableForSale featuredImage { url altText width height } images(first:20){nodes{url altText width height}} priceRange{minVariantPrice{amount currencyCode}} variants(first:100){nodes{id title availableForSale sku price{amount currencyCode} compareAtPrice{amount currencyCode} selectedOptions{name value} image{url altText width height}}} reviewRating:metafield(namespace:"reviews",key:"rating"){value} reviewRatingCount:metafield(namespace:"reviews",key:"rating_count"){value} boughtCount:metafield(namespace:"buyhoreca",key:"bought_count"){value}`;
+const PRODUCTS=`query Products($first:Int!,$after:String,$query:String,$sortKey:ProductSortKeys,$reverse:Boolean){products(first:$first,after:$after,query:$query,sortKey:$sortKey,reverse:$reverse){pageInfo{hasNextPage endCursor}nodes{${FIELDS}}}}`;
+const PRODUCT=`query Product($handle:String!){product(handle:$handle){${FIELDS}}}`;
+const SEARCH=`query Search($first:Int!,$after:String,$query:String!,$productFilters:[ProductFilter!],$sortKey:SearchSortKeys,$reverse:Boolean){search(first:$first,after:$after,query:$query,prefix:LAST,types:PRODUCT,productFilters:$productFilters,sortKey:$sortKey,reverse:$reverse){totalCount pageInfo{hasNextPage endCursor}productFilters{id label presentation type values{id label count input}}nodes{... on Product{${FIELDS}}}}}`;
+const PREDICTIVE=`query Predictive($query:String!){predictiveSearch(query:$query,types:[PRODUCT,COLLECTION,ARTICLE]){products{id handle title vendor featuredImage{url altText width height} priceRange{minVariantPrice{amount currencyCode}}} collections{id handle title image{url altText width height}} articles{id handle title publishedAt image{url altText width height} blog{handle title}}}}`;
+const COLLECTIONS=`query Collections($first:Int!,$after:String){collections(first:$first,after:$after,sortKey:TITLE){pageInfo{hasNextPage endCursor}nodes{id handle title description image{url altText width height} products(first:1){nodes{vendor}}}}}`;
+const COLLECTION=`query Collection($handle:String!,$after:String,$filters:[ProductFilter!],$sortKey:ProductCollectionSortKeys,$reverse:Boolean){collection(handle:$handle){id handle title description image{url altText width height} products(first:48,after:$after,filters:$filters,sortKey:$sortKey,reverse:$reverse){pageInfo{hasNextPage endCursor}filters{id label presentation type values{id label count input}}nodes{${FIELDS}}}}}`;
+const CART=`query Cart($id:ID!){cart(id:$id){id checkoutUrl totalQuantity discountCodes{code applicable} cost{subtotalAmount{amount currencyCode} totalAmount{amount currencyCode}} lines(first:100){nodes{id quantity merchandise{... on ProductVariant{id title price{amount currencyCode} image{url altText width height} product{title handle featuredImage{url altText width height}}}}}}}}`;
+const CREATE_CART=`mutation CartCreate($lines:[CartLineInput!]){cartCreate(input:{lines:$lines}){cart{id checkoutUrl totalQuantity discountCodes{code applicable} cost{subtotalAmount{amount currencyCode} totalAmount{amount currencyCode}} lines(first:100){nodes{id quantity merchandise{... on ProductVariant{id title price{amount currencyCode} image{url altText width height} product{title handle featuredImage{url altText width height}}}}}}}userErrors{message}}}`;
+const ADD_LINES=`mutation Add($cartId:ID!,$lines:[CartLineInput!]!){cartLinesAdd(cartId:$cartId,lines:$lines){cart{id checkoutUrl totalQuantity discountCodes{code applicable} cost{subtotalAmount{amount currencyCode} totalAmount{amount currencyCode}} lines(first:100){nodes{id quantity merchandise{... on ProductVariant{id title price{amount currencyCode} image{url altText width height} product{title handle featuredImage{url altText width height}}}}}}}userErrors{message}}}`;
+const UPDATE_LINES=`mutation Update($cartId:ID!,$lines:[CartLineUpdateInput!]!){cartLinesUpdate(cartId:$cartId,lines:$lines){cart{id checkoutUrl totalQuantity discountCodes{code applicable} cost{subtotalAmount{amount currencyCode} totalAmount{amount currencyCode}} lines(first:100){nodes{id quantity merchandise{... on ProductVariant{id title price{amount currencyCode} image{url altText width height} product{title handle featuredImage{url altText width height}}}}}}}userErrors{message}}}`;
+const REMOVE_LINES=`mutation Remove($cartId:ID!,$lineIds:[ID!]!){cartLinesRemove(cartId:$cartId,lineIds:$lineIds){cart{id checkoutUrl totalQuantity discountCodes{code applicable} cost{subtotalAmount{amount currencyCode} totalAmount{amount currencyCode}} lines(first:100){nodes{id quantity merchandise{... on ProductVariant{id title price{amount currencyCode} image{url altText width height} product{title handle featuredImage{url altText width height}}}}}}}userErrors{message}}}`;
+const UPDATE_DISCOUNTS=`mutation UpdateDiscounts($cartId:ID!,$discountCodes:[String!]!){cartDiscountCodesUpdate(cartId:$cartId,discountCodes:$discountCodes){cart{id checkoutUrl totalQuantity discountCodes{code applicable} cost{subtotalAmount{amount currencyCode} totalAmount{amount currencyCode}} lines(first:100){nodes{id quantity merchandise{... on ProductVariant{id title price{amount currencyCode} image{url altText width height} product{title handle featuredImage{url altText width height}}}}}}}userErrors{message} warnings{message}}}`;
+const ARTICLE_FIELDS=`id handle title excerpt excerptHtml contentHtml publishedAt image{url altText width height} tags seo{title description} blog{handle title}`;
+const BLOGS=`query Blogs($first:Int!){blogs(first:$first,sortKey:TITLE){nodes{id handle title articles(first:12,sortKey:PUBLISHED_AT,reverse:true){nodes{${ARTICLE_FIELDS}}}}}}`;
+const BLOG=`query Blog($handle:String!){blog(handle:$handle){id handle title articles(first:24,sortKey:PUBLISHED_AT,reverse:true){nodes{${ARTICLE_FIELDS}}}}}`;
+const ARTICLE=`query Article($blog:String!,$handle:String!){blog(handle:$blog){articleByHandle(handle:$handle){${ARTICLE_FIELDS}}}}`;
+
+function normalize(raw:any):Product{
+ const variants=(raw?.variants?.nodes||[]).map((v:any)=>({id:v.id,title:v.title,availableForSale:!!v.availableForSale,sku:v.sku,price:v.price,compareAtPrice:v.compareAtPrice,selectedOptions:v.selectedOptions||[],image:v.image}));
+ const images=raw?.images?.nodes?.length?raw.images.nodes:(raw?.featuredImage?[raw.featuredImage]:[]);
+ const rating=Number(raw?.reviewRating?.value); const reviewCount=Number(raw?.reviewRatingCount?.value); const boughtCount=Number(raw?.boughtCount?.value);
+ return {id:raw.id,handle:raw.handle,name:raw.title,brand:raw.vendor||"BuyHoreca",description:raw.description||"",descriptionHtml:raw.descriptionHtml,productType:raw.productType,price:raw.priceRange?.minVariantPrice||variants[0]?.price||{amount:"0",currencyCode:"AED"},compareAtPrice:variants[0]?.compareAtPrice,availableForSale:!!raw.availableForSale,images,variants,href:`/products/${raw.handle}`,rating:Number.isFinite(rating)?rating:undefined,reviewCount:Number.isFinite(reviewCount)?reviewCount:undefined,boughtCount:Number.isFinite(boughtCount)?boughtCount:undefined,seo:raw.seo};
+}
+const normCart=(raw:any):Cart|null=>raw?{id:raw.id,checkoutUrl:raw.checkoutUrl,totalQuantity:raw.totalQuantity,discountCodes:(raw.discountCodes||[]).map((d:any)=>({code:d.code,applicable:!!d.applicable})),cost:raw.cost,lines:(raw.lines?.nodes||[]).filter(Boolean).map((l:any)=>({id:l.id,quantity:l.quantity,merchandise:{id:l.merchandise.id,title:l.merchandise.title,price:l.merchandise.price,image:l.merchandise.image,product:l.merchandise.product}}))}:null;
+async function getProducts(first=48,after:string|null=null,query?:string,sortKey?:string,reverse=false):Promise<{products:Product[];pageInfo:{hasNextPage:boolean;endCursor:string|null}}>{const d:any=await shopifyFetch(PRODUCTS,{first,after,query:query||null,sortKey:sortKey||null,reverse});return {products:(d.products.nodes||[]).map(normalize),pageInfo:d.products.pageInfo};}
+async function getProduct(handle:string){const d:any=await shopifyFetch(PRODUCT,{handle});return d.product?normalize(d.product):null;}
+async function getSearch(q:string,after:string|null=null,productFilters:any[]=[],sortKey?:string,reverse=false){const d:any=await shopifyFetch(SEARCH,{first:48,after,query:q,productFilters:productFilters.length?productFilters:null,sortKey:sortKey||null,reverse});return {products:(d.search.nodes||[]).filter(Boolean).map(normalize),pageInfo:d.search.pageInfo,total:d.search.totalCount,filters:d.search.productFilters||[]};}
+async function getPredictiveSearch(q:string){const d:any=await shopifyFetch(PREDICTIVE,{query:q});return {products:(d.predictiveSearch?.products||[]).map((p:any)=>normalize(p)),collections:d.predictiveSearch?.collections||[],articles:d.predictiveSearch?.articles||[]};}
+async function getCollections(){let after:string|null=null;const out:any[]=[];do{const d:any=await shopifyFetch(COLLECTIONS,{first:250,after});out.push(...(d.collections?.nodes||[]).map((c:any)=>({id:c.id,handle:c.handle,title:c.title,description:c.description,image:c.image,vendor:c.products?.nodes?.[0]?.vendor||null,products:[]})));after=d.collections?.pageInfo?.hasNextPage?d.collections.pageInfo.endCursor:null;}while(after);return out as Collection[];}
+async function getCollection(handle:string,after:string|null=null,filters:any[]=[],sortKey:string="BEST_SELLING",reverse=false){const d:any=await shopifyFetch(COLLECTION,{handle,after,filters:filters.length?filters:null,sortKey:sortKey||null,reverse});return d.collection?{id:d.collection.id,handle:d.collection.handle,title:d.collection.title,description:d.collection.description,image:d.collection.image,products:(d.collection.products.nodes||[]).map(normalize),pageInfo:d.collection.products.pageInfo,filters:d.collection.products.filters||[]}:null;}
+const brandCollectionsFor=(collections:Collection[])=>collections.filter(c=>c.handle&&c.title&&c.vendor&&brandKey(c.title)!==brandKey("BuyHoreca")&&brandKey(c.title)===brandKey(c.vendor));
+const categoryCollectionsFor=(collections:Collection[])=>collections.filter(c=>c.handle!=="all"&&brandKey(c.title)!==brandKey(c.vendor||"__no_vendor__"));
+
+function normalizeArticle(raw:any):BlogArticle{const tags=Array.isArray(raw?.tags)?raw.tags.filter((x:any):x is string=>typeof x==="string"):[];return {id:raw.id,handle:raw.handle,title:raw.title,excerpt:raw.excerpt,excerptHtml:raw.excerptHtml,contentHtml:raw.contentHtml||"",publishedAt:raw.publishedAt,image:raw.image,tags,blogHandle:raw.blog?.handle||"",blogTitle:raw.blog?.title||"",seo:raw.seo};}
+async function getBlogs(){const d:any=await shopifyFetch(BLOGS,{first:20});return (d.blogs?.nodes||[]).map((b:any)=>({id:b.id,handle:b.handle,title:b.title,articles:(b.articles?.nodes||[]).map(normalizeArticle)})) as Blog[];}
+async function getBlog(handle:string){const d:any=await shopifyFetch(BLOG,{handle});return d.blog?{id:d.blog.id,handle:d.blog.handle,title:d.blog.title,articles:(d.blog.articles?.nodes||[]).map(normalizeArticle)} as Blog:null;}
+async function getArticle(blog:string,handle:string){const d:any=await shopifyFetch(ARTICLE,{blog,handle});return d.blog?.articleByHandle?normalizeArticle(d.blog.articleByHandle):null;}
+function Stars({value,count}:{value?:number;count?:number}){if(typeof value!=="number")return null;return <span className="flex items-center gap-1 text-[12px] font-semibold"><span className="text-amber-500">★</span>{value.toFixed(1)}{typeof count==="number"&&<span className="font-medium text-slate-500">({count})</span>}</span>}
+const WISHLIST_KEY="buyhoreca_wishlist";
+const RECENT_KEY="buyhoreca_recently_viewed";
+const WISHLIST_SNAPSHOT_KEY="buyhoreca_wishlist_snapshots";
+const COMPARE_KEY="buyhoreca_compare";
+const COMPARE_SNAPSHOT_KEY="buyhoreca_compare_snapshots";
+function readStoredIds(key:string):string[]{if(typeof window==="undefined")return [];try{const raw=localStorage.getItem(key);if(!raw)return [];const parsed=JSON.parse(raw);return Array.isArray(parsed)?Array.from(new Set(parsed.filter((x:any):x is string=>typeof x==="string"))):[]}catch{return []}}
+function readStoredSnapshots(key:string):Record<string,Product>{if(typeof window==="undefined")return {};try{const parsed=JSON.parse(localStorage.getItem(key)||"{}");if(!parsed||typeof parsed!=="object"||Array.isArray(parsed))return {};return Object.fromEntries(Object.entries(parsed).filter(([id,v])=>typeof id==="string"&&v&&typeof v==="object")) as Record<string,Product>}catch{return {}}}
+function writeStoredJSON(key:string,value:unknown):void{try{if(typeof window!=="undefined")localStorage.setItem(key,JSON.stringify(value))}catch{}}
+
+const QUOTE_KEY="buyhoreca_quote_items";
+function readQuoteItems():QuoteItem[]{if(typeof window==="undefined")return [];try{const parsed=JSON.parse(localStorage.getItem(QUOTE_KEY)||"[]");if(!Array.isArray(parsed))return [];return parsed.filter((x:any)=>x&&typeof x==="object"&&x.product&&typeof x.product.id==="string"&&typeof x.variantId==="string").map((x:any)=>({id:String(x.id||`${x.product.id}:${x.variantId}`),product:x.product as Product,variantId:String(x.variantId),quantity:Math.max(1,Math.min(999,Number(x.quantity)||1))}));}catch{return []}}
+function writeQuoteItems(items:QuoteItem[]):void{writeStoredJSON(QUOTE_KEY,items)}
+function quoteCount():number{return readQuoteItems().length}
+function addToQuote(product:Product,variant?:Variant,quantity=1){const selected=variant||product.variants.find(v=>v.availableForSale)||product.variants[0];if(!selected)return false;const items=readQuoteItems();const id=`${product.id}:${selected.id}`;const existing=items.find(x=>x.id===id);if(existing)existing.quantity=Math.min(999,existing.quantity+Math.max(1,quantity));else items.push({id,product,variantId:selected.id,quantity:Math.max(1,quantity)});writeQuoteItems(items);window.dispatchEvent(new CustomEvent("buyhoreca:quote",{detail:items}));window.dispatchEvent(new CustomEvent("buyhoreca:toast",{detail:`${product.name} added to quote`}));trackEvent("add_to_quote",{item_id:product.id,item_name:product.name,item_brand:product.brand,quantity:quantity});return true}
+function updateQuoteItem(id:string,quantity:number){const items=readQuoteItems().map(x=>x.id===id?{...x,quantity}:x).filter(x=>x.quantity>0);writeQuoteItems(items);window.dispatchEvent(new CustomEvent("buyhoreca:quote",{detail:items}))}
+function removeQuoteItem(id:string){const items=readQuoteItems().filter(x=>x.id!==id);writeQuoteItems(items);window.dispatchEvent(new CustomEvent("buyhoreca:quote",{detail:items}))}
+function clearQuote(){writeQuoteItems([]);window.dispatchEvent(new CustomEvent("buyhoreca:quote",{detail:[]}))}
+
+
+function ProductCard({p,onAdd,onQuick,onAdded}:{p:Product;onAdd:(p:Product,v?:Variant,q?:number)=>Promise<any>;onQuick:(p:Product)=>void;onAdded?:()=>void}){
+ const [q,setQ]=useState(1); const [busy,setBusy]=useState(false); const [added,setAdded]=useState(false); const [saved,setSaved]=useState(false); const [compared,setCompared]=useState(false); const [imageIndex,setImageIndex]=useState(0);
+ const v=p.variants.find(x=>x.availableForSale)||p.variants[0]; const thumbs=p.images.slice(0,3); const activeImage=p.images[imageIndex]||p.images[0];
+ useEffect(()=>{const sync=()=>{setSaved(readStoredIds(WISHLIST_KEY).includes(p.id));setCompared(readStoredIds(COMPARE_KEY).includes(p.id))};sync();const onStorage=(e:StorageEvent)=>{if(e.key===WISHLIST_KEY||e.key===COMPARE_KEY)sync()};window.addEventListener("buyhoreca:wishlist",sync);window.addEventListener("buyhoreca:compare",sync);window.addEventListener("storage",onStorage);return()=>{window.removeEventListener("buyhoreca:wishlist",sync);window.removeEventListener("buyhoreca:compare",sync);window.removeEventListener("storage",onStorage)}},[p.id]);
+ const add=async()=>{if(!v||!p.availableForSale||!v.availableForSale||busy)return;setBusy(true);try{const result=await onAdd(p,v,q);if(result){setAdded(true);onAdded?.();trackEvent("add_to_cart",{item_id:p.id,item_name:p.name,item_brand:p.brand,quantity:q});window.setTimeout(()=>setAdded(false),1400)}}finally{setBusy(false)}};
+ const toggleWish=(e?:ReactMouseEvent<HTMLButtonElement>)=>{e?.preventDefault();e?.stopPropagation();const current=readStoredIds(WISHLIST_KEY);const next=current.includes(p.id)?current.filter(x=>x!==p.id):[...current,p.id];const existing=readStoredSnapshots(WISHLIST_SNAPSHOT_KEY);if(next.includes(p.id))existing[p.id]=p;else delete existing[p.id];writeStoredJSON(WISHLIST_KEY,next);writeStoredJSON(WISHLIST_SNAPSHOT_KEY,existing);setSaved(next.includes(p.id));trackEvent(next.includes(p.id)?"add_to_wishlist":"remove_from_wishlist",{item_id:p.id,item_name:p.name,item_brand:p.brand});window.dispatchEvent(new CustomEvent("buyhoreca:wishlist",{detail:next}));window.dispatchEvent(new CustomEvent("buyhoreca:toast",{detail:next.includes(p.id)?`${p.name} saved to wishlist`:`${p.name} removed from wishlist`}))};
+ const toggleCompare=(e?:ReactMouseEvent<HTMLButtonElement>)=>{e?.preventDefault();e?.stopPropagation();const current=readStoredIds(COMPARE_KEY);const wasSaved=current.includes(p.id);const next=wasSaved?current.filter(x=>x!==p.id):current.length>=4?current:[...current,p.id];const existing=readStoredSnapshots(COMPARE_SNAPSHOT_KEY);if(next.includes(p.id))existing[p.id]=p;else delete existing[p.id];writeStoredJSON(COMPARE_KEY,next);writeStoredJSON(COMPARE_SNAPSHOT_KEY,existing);setCompared(next.includes(p.id));window.dispatchEvent(new CustomEvent("buyhoreca:compare",{detail:next}));const message=wasSaved?`${p.name} removed from compare`:next.includes(p.id)?`${p.name} added to compare`:"Compare is limited to 4 products";window.dispatchEvent(new CustomEvent("buyhoreca:toast",{detail:message}))};
+ return <article className="bh-product-card group relative flex min-w-0 flex-col bg-white">
+  <div className="bh-product-media relative overflow-hidden bg-white">
+   <Link href={p.href} className="bh-product-image-frame flex aspect-square items-center justify-center" aria-label={`View ${p.name}`}><img src={activeImage?.url||"/product-placeholder.svg"} alt={activeImage?.altText||p.name} className="bh-product-image h-full w-full object-contain p-4 sm:p-5 transition duration-300 group-hover:scale-[1.035]" onError={(e)=>{e.currentTarget.src="/product-placeholder.svg"}}/></Link>
+   <div className="absolute left-2 top-2 flex flex-wrap gap-1.5">
+    {v?.compareAtPrice&&Number(v.compareAtPrice.amount)>Number((v?.price||p.price).amount)&&<span className="rounded bg-[#0d3328] px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-white">Sale</span>}
+    {p.boughtCount&&p.boughtCount>=25?<span className="rounded bg-white/95 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-[#0d3328] shadow-sm">Popular</span>:null}
+   </div>
+   <div className="absolute right-2 top-2 flex flex-col gap-1.5">
+    <button type="button" onClick={toggleWish} className={`bh-icon-button grid size-8 place-items-center rounded-full border bg-white/95 shadow-sm ${saved?"bh-icon-active border-[#008f68] text-[#008f68]":"border-slate-200 text-slate-700"}`} aria-label={saved?"Remove from wishlist":"Add to wishlist"} aria-pressed={saved} title={saved?"Remove from wishlist":"Add to wishlist"}><Heart size={14} fill={saved?"currentColor":"none"}/></button>
+    <button type="button" onClick={toggleCompare} className={`bh-icon-button grid size-8 place-items-center rounded-full border bg-white/95 shadow-sm ${compared?"bh-icon-active border-[#008f68] text-[#008f68]":"border-slate-200 text-slate-700"}`} aria-label={compared?"Remove from compare":"Add to compare"} aria-pressed={compared} title={compared?"Remove from compare":"Add to compare"}><ArrowLeftRight size={14}/></button>
+    <button type="button" onClick={()=>onQuick(p)} className="bh-icon-button grid size-8 place-items-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-sm" aria-label={`Quick view ${p.name}`}><Eye size={14}/></button>
+   </div>
+   {thumbs.length>1&&<div className="bh-product-thumbs absolute bottom-2 left-2 right-2 flex gap-1 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">{thumbs.map((im,i)=><button type="button" key={im.url+i} onClick={()=>setImageIndex(i)} className={`h-9 flex-1 overflow-hidden border bg-white/90 ${imageIndex===i?"border-[#008f68]":"border-slate-200"}`} aria-label={`View image ${i+1}`}><img src={im.url} alt="" className="h-full w-full object-contain object-center"/></button>)}</div>}
+  </div>
+  <div className="flex min-h-[214px] flex-1 flex-col border-t border-slate-100 px-3 pb-3 pt-3">
+   <div className="flex items-center justify-between gap-2"><div className="truncate text-[10px] font-medium uppercase tracking-[.08em] text-slate-500">{p.brand}</div>{p.productType&&<span className="hidden truncate text-[9px] font-semibold uppercase tracking-wide text-slate-400 xl:block">{p.productType}</span>}</div>
+   <Link href={p.href} className="mt-1 line-clamp-2 min-h-[40px] text-[13px] font-semibold leading-[1.18rem] text-slate-900 transition hover:text-[#008f68]">{p.name}</Link>
+   <div className="mt-1.5 min-h-4"><Stars value={p.rating} count={p.reviewCount}/></div>
+   <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-slate-500"><span>SKU: {v?.sku||"—"}</span>{p.boughtCount?<span>• {p.boughtCount.toLocaleString()} bought</span>:null}</div>
+   <div className="mt-1.5"><span className="text-[16px] font-semibold text-[#111]">{money(v?.price||p.price)}</span>{v?.compareAtPrice&&Number(v.compareAtPrice.amount)>Number((v?.price||p.price).amount)&&<span className="ml-1 text-[10px] text-slate-400 line-through">{money(v?.compareAtPrice)}</span>}</div>
+   <div className="mt-auto pt-2">{p.availableForSale&&v?.availableForSale?<><div className="flex min-h-9 gap-1.5"><div className="flex w-[76px] shrink-0 items-center justify-between rounded border border-slate-300 bg-white"><button type="button" className="grid size-8 place-items-center transition hover:bg-slate-50" onClick={()=>setQ(x=>Math.max(1,x-1))} aria-label={`Decrease quantity for ${p.name}`}><Minus size={12}/></button><span className="text-xs font-bold">{q}</span><button type="button" className="grid size-8 place-items-center transition hover:bg-slate-50" onClick={()=>setQ(x=>Math.min(99,x+1))} aria-label={`Increase quantity for ${p.name}`}><Plus size={12}/></button></div><button type="button" disabled={busy} onClick={add} className={`bh-add-button flex min-w-0 flex-1 items-center justify-center gap-1 rounded px-1.5 text-[11px] font-semibold text-white transition ${added?"bg-[#006f52]":"bg-[#008f68] hover:bg-[#007b5a]"} disabled:opacity-60`}><span className={added?"bh-check-pop":""}>{busy?<RefreshCw size={13} className="animate-spin"/>:added?<Check size={13}/>:<ShoppingCart size={13}/>}</span><span className="truncate">{busy?"Adding…":added?"Added":"Add to Cart"}</span></button></div><button type="button" onClick={()=>addToQuote(p,v,q)} className="mt-2 inline-flex h-8 w-full items-center justify-center gap-1 rounded border border-slate-300 bg-white text-[10px] font-semibold text-slate-700 transition hover:border-[#008f68] hover:text-[#008f68]"><FileText size={12}/> Add to Quote</button></>:<button type="button" onClick={()=>{addToQuote(p,v,Math.max(1,q));location.href="/quote"}} className="flex h-9 w-full items-center justify-center rounded border border-slate-300 bg-white text-[11px] font-semibold transition hover:border-[#008f68] hover:text-[#008f68]">Request a Quote</button>}</div>
+  </div>
+ </article>
+}
+function StoreHeader({cartCount,wishlistCount,setCartOpen,collections,cartPulse}:{cartCount:number;wishlistCount:number;setCartOpen:(v:boolean)=>void;collections:Collection[];cartPulse:boolean}){
+ const [mobile,setMobile]=useState(false);const [quoteItems,setQuoteItems]=useState<QuoteItem[]>([]);
+ useEffect(()=>{setQuoteItems(readQuoteItems());const sync=()=>setQuoteItems(readQuoteItems());window.addEventListener("buyhoreca:quote",sync);window.addEventListener("storage",sync);return()=>{window.removeEventListener("buyhoreca:quote",sync);window.removeEventListener("storage",sync)}},[]);
+ const [q,setQ]=useState("");
+ const [focus,setFocus]=useState(false);
+ const [categoryOpen,setCategoryOpen]=useState(false);
+ const [categoryQuery,setCategoryQuery]=useState("");
+ const [hoverNav,setHoverNav]=useState<string|null>(null);
+ const submit=(e:any)=>{e.preventDefault();const term=q.trim();if(term){trackEvent("search",{search_term:term});location.href=`/search?q=${encodeURIComponent(term)}`}};
+ const primary=[
+  ["Restaurant Equipment",["Kitchen Tools","Preparation Supplies","Measuring Equipments","Kitchen Cutlery","Thermometer"]],
+  ["Food & Beverage",["Baking","Coffee Accessories","Servingware","Condiment Holders","Beverage Dispensers"]],
+  ["Tabletop & Service",["Service Supplies","Tabletop Disposables","Amenities","Buffet Service","Bread Baskets"]],
+  ["Storage & Transport",["Storage & Transport","Buffet Risers & Displays","Hotel","Bed & Bath Linens"]],
+  ["Bakery",["Bakery","Baking Pans","Bakeware & Molds","Baking Tools & Utensils","Baking Mat"]],
+  ["Bar & Beverage",["Bar Solution","Barware","Brewing Equipment","Pizza Peels","Coffee Accessories"]],
+  ["Business Type",["Hotel","Bakery","Coffee","Bar supplies","Banquet supplies"]],
+  ["Cleaning & Hygiene",["Cleaning & Hygiene","Cleaning Supplies","Hygiene","Janitorial","Waste Management"]],
+  ["Disposables & Packaging",["Disposables","Tabletop Disposables","Food Packaging","Takeaway Packaging","Cups & Containers"]]
+ ] as const;
+ const categoryCollections=useMemo(()=>categoryCollectionsFor(collections),[collections]);
+ const findCollection=(name:string)=>categoryCollections.find(c=>c.title.toLowerCase()===name.toLowerCase());
+ const filteredAll=useMemo(()=>{const term=categoryQuery.trim().toLowerCase();return term?categoryCollections.filter(c=>c.title.toLowerCase().includes(term)):categoryCollections},[categoryCollections,categoryQuery]);
+ const matchingCategories=q.trim()?categoryCollections.filter(c=>c.title.toLowerCase().includes(q.trim().toLowerCase())).slice(0,8):categoryCollections.slice(0,8);
+ const prefixSuggestions=q.trim()?categoryCollections.filter(c=>c.title.toLowerCase().startsWith(q.trim().toLowerCase())).slice(0,7):categoryCollections.slice(0,8);
+ const [suggestions,setSuggestions]=useState<{products:Product[];collections:any[];articles:any[]}>({products:[],collections:[],articles:[]});
+ useEffect(()=>{const term=q.trim();if(!term){setSuggestions({products:[],collections:[],articles:[]});return}let live=true;const t=setTimeout(()=>{getPredictiveSearch(term).then(r=>{if(live)setSuggestions(r)}).catch(()=>{if(live)setSuggestions({products:[],collections:[],articles:[]})})},160);return()=>{live=false;clearTimeout(t)}},[q]);
+ useEffect(()=>{const onKey=(e:KeyboardEvent)=>{if(e.key==="Escape"){setFocus(false);setCategoryOpen(false);setMobile(false);setHoverNav(null)}};window.addEventListener("keydown",onKey);return()=>window.removeEventListener("keydown",onKey)},[]);
+ const suggestionBody=(<div className="mt-3 grid gap-2"><button type="button" onClick={submit} className="flex items-center gap-2 rounded px-3 py-2.5 text-left text-sm font-medium hover:bg-slate-50"><Search size={14} className="text-slate-400"/>Search for “{q.trim()||"products"}”</button>{suggestions.products.slice(0,5).map(p=><Link key={p.id} href={p.href} onClick={()=>setFocus(false)} className="flex items-center gap-3 rounded px-3 py-2 text-sm font-medium hover:bg-slate-50"><div className="size-10 shrink-0 overflow-hidden rounded bg-slate-50">{p.images[0]&&<img src={p.images[0].url} alt="" className="h-full w-full object-contain object-center" loading="lazy"/>}</div><div className="min-w-0"><div className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-500">{p.brand}</div><div className="truncate">{p.name}</div></div></Link>)}{prefixSuggestions.map(c=><Link key={c.id} href={`/categories/${c.handle}`} onClick={()=>setFocus(false)} className="flex items-center gap-3 rounded px-3 py-2 text-sm font-medium hover:bg-slate-50"><div className="size-9 shrink-0 overflow-hidden rounded bg-slate-100">{c.image&&<img src={c.image.url} alt="" className="h-full w-full object-cover object-center" loading="lazy"/>}</div><span>{c.title}</span></Link>)}{suggestions.collections.filter(c=>!prefixSuggestions.some(x=>x.id===c.id)).slice(0,3).map(c=><Link key={c.id} href={`/categories/${c.handle}`} onClick={()=>setFocus(false)} className="flex items-center gap-3 rounded px-3 py-2 text-xs font-medium hover:bg-slate-50"><div className="size-9 shrink-0 overflow-hidden rounded bg-slate-100">{c.image&&<img src={c.image.url} alt="" className="h-full w-full object-cover object-center" loading="lazy"/>}</div><span>{c.title}</span></Link>)}{suggestions.articles.slice(0,2).map(a=><Link key={a.id} href={`/blog/${a.blog?.handle||""}/${a.handle}`} onClick={()=>setFocus(false)} className="flex items-center gap-3 rounded px-3 py-2 text-xs font-medium hover:bg-slate-50"><div className="size-9 shrink-0 overflow-hidden rounded bg-slate-50">{a.image&&<img src={a.image.url} alt="" className="h-full w-full object-cover object-center" loading="lazy"/>}</div><div className="min-w-0"><span className="block truncate">{a.title}</span><span className="text-[10px] font-medium text-slate-400">Article</span></div></Link>)}</div>);
+ return <header className="sticky top-0 z-50 bg-white shadow-[0_1px_0_rgba(15,38,48,.08)]">
+  <div className="bg-[#dfe5df] text-[#25332d]"><div className="mx-auto flex max-w-[1920px] items-center justify-between px-4 py-1.5 text-[11px] font-medium"><div className="flex gap-5"><span>Need help? <a href="tel:+971509936806" className="font-medium hover:underline">+971 50 993 6806</a></span><span className="hidden sm:inline">Professional HoReCa supply across the UAE</span></div><Link href="/quote" className="hidden font-medium hover:underline sm:inline">Request a Quote →</Link></div></div>
+  <div className="mx-auto flex max-w-[1920px] items-center gap-3 px-4 py-3.5">
+   <button type="button" onClick={()=>setMobile(!mobile)} className="grid size-10 shrink-0 place-items-center border border-slate-200 lg:hidden" aria-expanded={mobile} aria-controls="mobile-navigation" aria-label={mobile?"Close menu":"Open menu"}><Menu size={20}/></button>
+   <Link href="/" className="bh-logo shrink-0" aria-label="BuyHoreca home"><img src={LOGO_SRC} alt="BuyHoreca.com" width={2151} height={677} loading="eager" decoding="async"/></Link>
+   <div className="relative mx-auto hidden max-w-[820px] flex-1 md:block">
+    <form onSubmit={submit} className="flex h-11 overflow-hidden rounded border border-slate-400 bg-white shadow-sm focus-within:border-[#008f68]" role="search">
+     <button type="button" onClick={()=>{setCategoryOpen(v=>{const next=!v;if(!next)setCategoryQuery("");return next});setFocus(false)}} aria-haspopup="menu" aria-expanded={categoryOpen} aria-controls="all-category-list" className="flex w-[155px] shrink-0 items-center justify-between border-r border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700"><span>All Categories</span><ChevronDown size={13}/></button>
+     <input value={q} onFocus={()=>{setFocus(true);setCategoryOpen(false)}} onChange={e=>setQ(e.target.value)} className="min-w-0 flex-1 px-4 text-sm outline-none" placeholder="What are you looking for?" aria-label="Search products, brands, categories and SKUs"/>
+     <button type="submit" className="grid w-14 shrink-0 place-items-center bg-[#008f68] text-white" aria-label="Search"><Search size={19}/></button>
+    </form>
+    {categoryOpen && (
+      <div id="all-category-list" role="menu" className="bh-search-panel absolute left-0 right-0 top-[calc(100%+6px)] z-[100] overflow-hidden rounded border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,38,48,.18)]" onMouseLeave={()=>setCategoryOpen(false)}>
+        <div className="border-b border-slate-200 p-3">
+          <div className="flex items-center gap-2 rounded border border-slate-300 bg-white px-3">
+            <Search size={14} className="text-slate-400"/>
+            <input value={categoryQuery} onChange={e=>setCategoryQuery(e.target.value)} placeholder="Search categories..." className="h-10 min-w-0 flex-1 text-sm outline-none" aria-label="Search all categories"/>

@@ -209,7 +209,7 @@ html,body{min-width:0}
 .prose h2,.prose h3,.prose h4{font-weight:700}
 
 /* Render large catalogue sections efficiently without changing layout */
-.bh-catalog-grid,.bh-blog-carousel{contain:layout paint}
+.bh-catalog-grid,.bh-blog-carousel{contain:layout}
 html{scrollbar-gutter:stable}
 
 
@@ -317,4 +317,154 @@ button,input,select,textarea{max-width:100%}
  .bh-hero-offer-panel{min-height:360px}
  .bh-promo-hero-card{min-height:180px}
  .bh-promo-hero-card:last-child{border-top:1px solid rgba(255,255,255,.12)}
+}
+
+/* Final mobile floating-control clearance */
+@media(max-width:767px){
+ .bh-whatsapp{bottom:78px!important;right:12px}
+ .bh-toast{bottom:78px}
+ .bh-promo-hero-image{object-position:center center}
+}
+@media(pointer:coarse){.bh-product-thumbs{opacity:1}}
+
+/* Minimum touch target sizing for primary interactive controls */
+.bh-product-card button,.bh-carousel-arrow,.bh-mobile-bar a,.bh-mobile-bar button{min-height:32px}
+
+/* ==========================================================================\n   Final device-responsive hardening\n   Mobile-first fluid rules intentionally target layout ranges, not individual\n   handset models. This covers 320px phones through 8K/ultrawide displays.\n   ========================================================================== */
+
+/* Shared fluid page gutters. Existing utility classes keep their hierarchy;\n   these rules only prevent edge collisions and runaway width. */
+main{width:100%;min-width:0}
+main > section, main > div{min-width:0}
+
+/* 320–359px micro phones: prioritize legibility over dense side-by-side grids. */
+@media (max-width:359px){
+  .bh-catalog-grid{grid-template-columns:1fr!important;gap:10px!important}
+  .bh-brand-grid{grid-template-columns:1fr 1fr!important;gap:8px!important}
+  .bh-category-rail-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .bh-service-grid{grid-template-columns:1fr!important}
+  .bh-trust-grid{grid-template-columns:1fr!important}
+  .bh-logo{width:154px;height:50px}
+  .bh-logo img{width:154px;max-height:50px}
+  .bh-header-menu-toggle{width:38px;height:38px}
+  .bh-mobile-bar{left:6px;right:6px;gap:1px;padding:4px}
+  .bh-mobile-bar a,.bh-mobile-bar button{min-height:44px;padding:8px 2px;font-size:8px}
+  .bh-primary-button,.bh-secondary-button,.bh-hero-button,.bh-hero-outline-button{padding-inline:11px;min-height:44px}
+  .bh-promo-hero-card{min-height:175px}
+  .bh-home-hero>div:first-child{min-height:430px}
+  .bh-home-hero>div:first-child > div.relative{padding:30px 18px}
+  .bh-hero-category-card{min-height:150px!important}
+  .bh-control{min-width:0}
+}
+
+/* 360–575px phones / narrow landscape. */
+@media (min-width:360px) and (max-width:575px){
+  .bh-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+  .bh-category-rail-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .bh-service-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .bh-trust-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+
+/* Keep the desktop navigation off 768–1099px tablets. The existing menu button\n   remains available there, so the tablet header behaves like a touch layout. */
+@media (min-width:768px) and (max-width:1099px){
+  .bh-primary-nav{display:none!important}
+  .bh-header-menu-toggle{display:grid!important}
+  .bh-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .bh-brand-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .bh-category-rail-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  .bh-service-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .bh-trust-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+
+/* 1024–1279px laptops / tablet landscape. */
+@media (min-width:1024px) and (max-width:1279px){
+  .bh-catalog-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .bh-brand-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  .bh-category-rail-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+  .bh-mega{width:min(1000px,calc(100vw - 24px))}
+}
+
+/* 1280–1599px desktop. */
+@media (min-width:1280px) and (max-width:1599px){
+  .bh-catalog-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .bh-brand-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+  .bh-category-rail-grid{grid-template-columns:repeat(8,minmax(0,1fr))!important}
+}
+
+/* 1600–1919px large desktop. */
+@media (min-width:1600px) and (max-width:1919px){
+  .bh-catalog-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  .bh-brand-grid{grid-template-columns:repeat(7,minmax(0,1fr))!important}
+  .bh-category-rail-grid{grid-template-columns:repeat(9,minmax(0,1fr))!important}
+}
+
+/* 1920–2559px Full HD / QHD / large TV viewports. */
+@media (min-width:1920px) and (max-width:2559px){
+  .bh-catalog-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+  .bh-brand-grid{grid-template-columns:repeat(8,minmax(0,1fr))!important}
+  .bh-category-rail-grid{grid-template-columns:repeat(10,minmax(0,1fr))!important}
+  .bh-mega{width:min(1760px,calc(100vw - 48px))}
+}
+
+/* 2560–3839px 2K/5K/ultrawide. Keep content readable instead of stretching. */
+@media (min-width:2560px) and (max-width:3839px){
+  .bh-catalog-grid{grid-template-columns:repeat(7,minmax(0,1fr))!important}
+  .bh-brand-grid{grid-template-columns:repeat(9,minmax(0,1fr))!important}
+  .bh-category-rail-grid{grid-template-columns:repeat(11,minmax(0,1fr))!important}
+  .bh-mega{width:min(1840px,calc(100vw - 64px))}
+}
+
+/* 3840px+ 4K/8K smart-TV and workstation widths. */
+@media (min-width:3840px){
+  .bh-catalog-grid{grid-template-columns:repeat(8,minmax(0,1fr))!important}
+  .bh-brand-grid{grid-template-columns:repeat(10,minmax(0,1fr))!important}
+  .bh-category-rail-grid{grid-template-columns:repeat(12,minmax(0,1fr))!important}
+  .bh-mega{width:min(2200px,calc(100vw - 96px))}
+}
+
+/* Fluid headline scale where a fixed Tailwind step would be too abrupt. */
+.bh-fluid-display{font-size:clamp(2rem,1.35rem + 2vw,4rem);line-height:1}
+.bh-fluid-section-title{font-size:clamp(1.2rem,1rem + .45vw,1.7rem);line-height:1.15}
+
+/* Prevent sticky/filter/drawer controls from becoming wider than the viewport. */
+.bh-search-panel,.bh-mega,.bh-cart-drawer,[role="dialog"]{max-width:100vw}
+.bh-cart-drawer{max-height:100dvh}
+
+/* Mobile product detail controls: let buttons wrap cleanly without overflow. */
+@media (max-width:767px){
+  .bh-product-card .bh-add-button{min-height:40px}
+  .bh-product-card .bh-product-image-frame{min-height:0}
+  .bh-product-card .bh-product-media img{padding:10px}
+  .bh-blog-card{min-width:0}
+  .bh-promo-hero-grid{min-height:360px}
+  .bh-primary-nav{display:none!important}
+  .bh-trust-mini{min-height:60px;padding:8px 6px}
+}
+
+/* Tablet portrait safety: never create a horizontal scrollbar from a long label. */
+@media (min-width:768px) and (max-width:1099px){
+  .bh-primary-nav-track{overflow:hidden!important}
+  .bh-nav-link,.bh-primary-nav-item{min-width:0;white-space:normal}
+  .bh-mega{left:50%;transform:translateX(-50%);max-height:calc(100dvh - 140px)}
+}
+
+/* Safe-area support for notched phones and modern foldables. */
+@supports (padding:max(0px)){ 
+  .bh-mobile-bar{padding-bottom:max(4px,env(safe-area-inset-bottom))}
+}
+
+/* Avoid hover-only affordances on coarse pointers and TV remotes. */
+@media (hover:none), (pointer:coarse){
+  .bh-product-card:hover,.bh-content-card:hover,.bh-feature-tile:hover,.bh-blog-card:hover{transform:none}
+  .bh-product-card:hover{box-shadow:none}
+}
+
+/* TV/remote accessibility: slightly larger controls at very wide touch/remote UIs. */
+@media (min-width:1920px){
+  .bh-primary-button,.bh-secondary-button{min-height:46px}
+  .bh-carousel-arrow{width:40px;height:40px}
+}
+
+/* Respect user's motion setting even for the responsive enhancements. */
+@media (prefers-reduced-motion:reduce){
+  .bh-product-image,.bh-promo-hero-image,.bh-brand-tile,.bh-blog-card{transition:none!important}
 }

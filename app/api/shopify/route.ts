@@ -5,17 +5,43 @@ const token = process.env.SHOPIFY_STOREFRONT_TOKEN || process.env.NEXT_PUBLIC_SH
 const version = process.env.SHOPIFY_API_VERSION || process.env.NEXT_PUBLIC_SHOPIFY_API_VERSION || "2026-07";
 const endpoint = `https://${storeDomain}/api/${version}/graphql.json`;
 
+const publicError = () => NextResponse.json({ errors: [{ message: "Store data is temporarily unavailable." }] }, { status: 502 });
+
 export async function POST(request: Request) {
   if (!token) return NextResponse.json({ errors: [{ message: "Store connection is not configured." }] }, { status: 503 });
+
   let body: unknown;
   try { body = await request.json(); } catch { return NextResponse.json({ errors: [{ message: "Invalid store request." }] }, { status: 400 }); }
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json({ errors: [{ message: "Invalid store request." }] }, { status: 400 });
+  }
+
+  const input = body as { query?: unknown; variables?: unknown; operationName?: unknown };
+  if (typeof input.query !== "string" || !input.query.trim() || input.query.length > 50000) {
+    return NextResponse.json({ errors: [{ message: "Invalid store query." }] }, { status: 400 });
+  }
+  if (input.variables !== undefined && (input.variables === null || typeof input.variables !== "object" || Array.isArray(input.variables))) {
+    return NextResponse.json({ errors: [{ message: "Invalid store variables." }] }, { status: 400 });
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000);
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
-    const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token }, body: JSON.stringify(body), cache: "no-store", signal: controller.signal });
-    clearTimeout(timeout);
-    const json = await response.json();
-    if (!response.ok || json?.errors?.length) return NextResponse.json({ errors: [{ message: "Store data is temporarily unavailable." }] }, { status: response.ok ? 502 : response.status });
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Shopify-Storefront-Access-Token": token },
+      body: JSON.stringify(body),
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    const json = await response.json().catch(() => null);
+    if (!response.ok || json?.errors?.length) {
+      return NextResponse.json({ errors: [{ message: "Store data is temporarily unavailable." }] }, { status: response.ok ? 502 : response.status });
+    }
     return NextResponse.json({ data: json.data });
-  } catch { return NextResponse.json({ errors: [{ message: "Store data is temporarily unavailable." }] }, { status: 502 }); }
+  } catch {
+    return publicError();
+  } finally {
+    clearTimeout(timeout);
+  }
 }

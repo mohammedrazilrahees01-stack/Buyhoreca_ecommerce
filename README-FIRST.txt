@@ -1,38 +1,37 @@
-BUYHORECA — CANONICAL SHOPIFY STOREFRONT
-=========================================
+BUYHORECA — FINAL WORKING SOURCE NOTES
 
-This is the single canonical frontend architecture. Do not recreate legacy route files such as app/shop/page.tsx or static lib/buyhoreca-data files.
+Brand system:
+Shopify Collection title = brand name
+Shopify Collection image = brand logo
+Shopify automated collection condition can be Vendor = the same brand
+Website automatically discovers matching brand collections and builds brand cards/pages. No local brand-logo folder is required.
 
-Canonical routes:
-  app/[[...slug]]/page.tsx
-  app/layout.tsx
-  app/globals.css
+Adding a brand requires NO code change:
+1) Set product Vendor/Brand.
+2) Create matching Shopify Collection.
+3) Upload the logo as Collection image.
+4) Save.
 
-Shopify source of truth:
-  products, variants, pricing, media, availability, collections, search, cart, blogs/articles.
+The active storefront does not use local brand logo files or brand metaobjects.
 
-Customer experience:
-  No custom login page. Customers can browse and add to cart without creating a frontend account. Shopify checkout handles any account/sign-in requirement configured by the store.
-  Customer-facing errors are human-friendly; API details are logged only to the browser console for development.
+Audit:
+126 PASS / 0 FAIL / 1 WARN in the static comprehensive audit. See COMPREHENSIVE_AUDIT_2026-10-12.txt and FINAL_RELEASE_AUDIT_2026-10-12.md.
 
-Hero assets:
-  public/images/hero/hero-main.jpg
-  public/images/hero/hero-coffee.jpg
-  public/images/hero/hero-kitchen.jpg
+Build note:
+Static TypeScript/TSX syntax audit passed. A full npm/Next build could not be run because npm dependency installation timed out in this environment.
 
-Optional collection image fallbacks:
-  public/images/collections/<shopify-collection-handle>.jpg
 
-Environment variables (keep your own .env.local):
-  NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN
-  NEXT_PUBLIC_SHOPIFY_STOREFRONT_TOKEN
-  NEXT_PUBLIC_SHOPIFY_API_VERSION=2026-07
+COMPETITOR / B2B RELEASE
+Read COMPLETE_B2B_IMPLEMENTATION_PLAN_2026-10-12.md for the current implemented feature matrix and the remaining data/service requirements.
 
-Install/run:
-  npm install
-  npm run dev
+BRANDS
+Create a Shopify Collection whose title exactly matches the brand name. Upload the brand logo as the Collection image. Prefer an automated collection with Vendor equals the same brand name. The storefront uses the Collection image directly; no local brand image file is required.
 
-Production validation:
-  npm run build
+QUOTE
+Use Add to Quote on products to build a multi-item browser-persistent quote basket. Submission currently opens WhatsApp with the consolidated request.
 
-The storefront uses Shopify cursor pagination so the Shop and collection pages can continue loading until the end of the live catalogue instead of truncating the store to the first page.
+SHOP FILTERS
+The main catalogue reads Shopify collection/search ProductFilter definitions. Configure desired filters in Shopify Search & Discovery.
+
+DISCOUNTS
+Discount codes are applied through Shopify. The storefront does not hardcode discount eligibility.

@@ -8,8 +8,10 @@
     "start": "next start",
     "lint": "eslint .",
     "audit": "node scripts/audit-storefront.mjs",
-    "audit:final": "node scripts/final-production-audit.mjs",
-    "test:wishlist": "node scripts/test-wishlist.mjs"
+    "audit:final": "node scripts/comprehensive-audit.mjs",
+    "test:wishlist": "node scripts/test-wishlist.mjs",
+    "audit:comprehensive": "node scripts/comprehensive-audit.mjs",
+    "audit:responsive-seo": "node scripts/responsive-seo-audit.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.14",

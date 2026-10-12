@@ -3,10 +3,12 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://buyhoreca.com").replace(/\/$/, "");
+
 export const viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#008f68" };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://buyhoreca.com"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "BuyHoreca | Professional HoReCa Equipment & Supplies",
     template: "%s | BuyHoreca",
@@ -14,11 +16,16 @@ export const metadata: Metadata = {
   description: "Professional HoReCa equipment and supplies for hospitality, kitchens, coffee, bakery, hotel, service and foodservice operations.",
   applicationName: "BuyHoreca",
   keywords: ["HoReCa equipment", "hotel supplies", "restaurant supplies", "commercial kitchen equipment", "hospitality supplies", "UAE foodservice"],
-  alternates: { canonical: "https://buyhoreca.com" },
+  alternates: { canonical: siteUrl },
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-touch-icon.png",
+  },
+  formatDetection: { telephone: false },
   openGraph: {
     title: "BuyHoreca | Professional HoReCa Equipment & Supplies",
     description: "Professional hospitality equipment and supplies from the BuyHoreca catalogue.",
-    url: "https://buyhoreca.com",
+    url: siteUrl,
     siteName: "BuyHoreca",
     type: "website",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "BuyHoreca — Professional HoReCa Equipment & Supplies" }],
@@ -31,8 +38,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   const gaId = process.env.NEXT_PUBLIC_GA4_ID;
   const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
-  const organizationSchema = {"@context":"https://schema.org","@type":"Organization","name":"BuyHoreca Trading Co. LLC","url":"https://buyhoreca.com","logo":"https://buyhoreca.com/images/buyhoreca-logo-header.png"};
-  const websiteSchema = {"@context":"https://schema.org","@type":"WebSite","name":"BuyHoreca","url":"https://buyhoreca.com","potentialAction":{"@type":"SearchAction","target":"https://buyhoreca.com/search?q={search_term_string}","query-input":"required name=search_term_string"}};
+  const organizationSchema = {"@context":"https://schema.org","@type":"Organization","name":"BuyHoreca Trading Co. LLC","url":siteUrl,"logo":`${siteUrl}/images/buyhoreca-logo-header.png`,"contactPoint":[{"@type":"ContactPoint","telephone":"+971509936806","contactType":"customer service","areaServed":"AE","availableLanguage":["en"]}]};
+  const websiteSchema = {"@context":"https://schema.org","@type":"WebSite","name":"BuyHoreca","url":siteUrl,"potentialAction":{"@type":"SearchAction","target":`${siteUrl}/search?q={search_term_string}`,"query-input":"required name=search_term_string"}};
   return <html lang="en">
     <body>{children}<script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(organizationSchema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(websiteSchema)}}/>
       {gaId && <><Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive"/><Script id="ga4-init" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){window.dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}',{anonymize_ip:true});`}</Script></>}
