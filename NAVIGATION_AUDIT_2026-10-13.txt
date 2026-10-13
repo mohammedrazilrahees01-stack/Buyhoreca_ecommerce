@@ -1,0 +1,13 @@
+BuyHoreca Navigation Audit — 2026-10-13
+
+PASS: Desktop green navigation contains exactly 8 primary groups.
+PASS: Order matches requested list.
+PASS: Quote is not rendered as a green primary-nav item.
+PASS: Quote remains available in the upper header utility area.
+PASS: Each primary item has editable related submenu entries.
+PASS: Shop by Brand submenu is collection-driven and links to /brands/<collection-handle>.
+PASS: Collection images are used for brand logo thumbnails.
+PASS: TypeScript/TSX parse diagnostics: 0.
+PASS: Existing comprehensive audit: 141 PASS / 0 FAIL / 1 WARN.
+PASS: Existing responsive/SEO audit: 48 PASS / 0 FAIL / 1 WARN.
+WARN: Full Next.js production build remains environment-limited because node_modules is unavailable.
