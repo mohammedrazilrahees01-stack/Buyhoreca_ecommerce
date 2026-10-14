@@ -1,0 +1,10 @@
+PASS quantityAvailable queried
+PASS currentlyNotInStock queried
+PASS zero-stock is non-purchasable
+PASS low-stock label
+PASS out-of-stock quote CTA
+PASS checkout blocked on stock issue
+PASS global add guard
+PASS cart stock guard
+PASS inventory scope documented
+PASS cart increment disabled at reported max

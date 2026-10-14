@@ -1,0 +1,51 @@
+[PASS] Responsive range marker 359px is represented
+[PASS] Responsive range marker 360px is represented
+[PASS] Responsive range marker 575px is represented
+[PASS] Responsive range marker 576px is represented
+[PASS] Responsive range marker 767px is represented
+[PASS] Responsive range marker 768px is represented
+[PASS] Responsive range marker 1023px is represented
+[PASS] Responsive range marker 1024px is represented
+[PASS] Responsive range marker 1279px is represented
+[PASS] Responsive range marker 1280px is represented
+[PASS] Responsive range marker 1599px is represented
+[PASS] Responsive range marker 1600px is represented
+[PASS] Responsive range marker 1919px is represented
+[PASS] Responsive range marker 1920px is represented
+[PASS] Responsive range marker 2559px is represented
+[PASS] Responsive range marker 2560px is represented
+[PASS] Responsive range marker 3839px is represented
+[PASS] Responsive range marker 3840px is represented
+[PASS] 320px micro-phone safety rule exists
+[PASS] 360–575px phone rule exists
+[PASS] 768–1099px tablet rule exists
+[PASS] 1024–1279px laptop rule exists
+[PASS] 1280–1599px desktop rule exists
+[PASS] 1600–1919px large desktop rule exists
+[PASS] 1920–2559px wide-display rule exists
+[PASS] 2560–3839px ultra-wide rule exists
+[PASS] 3840px+ 4K/8K rule exists
+[PASS] Product catalog gets explicit responsive columns
+[PASS] Brand grid gets explicit responsive columns
+[PASS] Category rail gets responsive columns
+[PASS] Service tiles have responsive mobile handling
+[PASS] Touch safe-area handling exists
+[PASS] Reduced motion handling exists
+[PASS] Ultra-wide max-width containment exists
+[PASS] Tablet desktop nav is suppressed below 1100px
+[PASS] Mobile quick nav is hidden at tablet width
+[PASS] Quote page is noindex
+[PASS] Product metadata uses Shopify SEO fields
+[PASS] Collection metadata uses Shopify SEO fields
+[PASS] Brand metadata uses collection SEO/image
+[PASS] Product structured data includes category
+[PASS] Product structured data marks NewCondition
+[PASS] Collection/brand ItemList structured data is present
+[PASS] Article metadata/schema tracks updatedAt
+[PASS] Organization contact point structured data exists
+[PASS] Sitemap classifies brand collections using sampled vendors
+[PASS] Sitemap references configured site base
+[PASS] Robots exposes sitemap
+[WARN] Fixed pixel widths remain in UI CSS — 71 declarations remain; each is reviewed as a bounded control/logo/menu width rather than a page-level width.
+
+RESPONSIVE/SEO AUDIT: 48 PASS / 0 FAIL / 1 WARN

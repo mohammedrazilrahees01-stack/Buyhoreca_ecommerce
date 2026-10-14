@@ -1,0 +1,104 @@
+{
+  "generatedAt": "2026-10-14T07:33:29.276Z",
+  "summary": {
+    "PASS": 19,
+    "FAIL": 0
+  },
+  "checks": [
+    {
+      "status": "PASS",
+      "name": "Vertical nested scrollers have Lenis isolation + mouse wheel + keyboard scrolling",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Horizontal rails have wheel + keyboard scrolling",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Lenis nested scrolling/anchor options enabled",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Wheel forwarding helpers present",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Keyboard scroll helpers present",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Focus-trap utility present",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Vertical overflow containers detected for audit",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "No duplicate mobile navigation key pattern remains",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Reduced-motion-safe manual rail scrolling present",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Blog rail uses continuous requestAnimationFrame motion",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Blog auto-scroll does not pause merely on hover",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Reduced-motion handling present in source and CSS",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Horizontal touch gestures explicitly supported",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Vertical touch gestures explicitly supported",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Lenis CSS scroll-behavior override present",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Quick View uses native internal scrolling",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Blog rail uses native internal horizontal scrolling",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "Modal semantics present",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "All buttons declare explicit type",
+      "detail": ""
+    }
+  ]
+}

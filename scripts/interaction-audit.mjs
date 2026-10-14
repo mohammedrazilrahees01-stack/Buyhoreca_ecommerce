@@ -1,0 +1,38 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const src = fs.readFileSync(path.join(root, 'app/[[...slug]]/Storefront.tsx'), 'utf8');
+const css = fs.readFileSync(path.join(root, 'app/globals.css'), 'utf8');
+const checks = [];
+const pass = (name, detail='') => checks.push({status:'PASS',name,detail});
+const fail = (name, detail='') => checks.push({status:'FAIL',name,detail});
+const has = (re) => re.test(src);
+
+(has(/data-lenis-prevent[^\n]*data-scroll-axis="y"[^\n]*onWheel=\{forwardVerticalWheel\}[^\n]*onKeyDown=\{handleScrollableKeys\}/) ? pass : fail)('Vertical nested scrollers have Lenis isolation + mouse wheel + keyboard scrolling');
+(has(/data-scroll-axis="x"[^\n]*onWheel=\{forwardHorizontalWheel\}[^\n]*onKeyDown=\{handleHorizontalKeys\}/) ? pass : fail)('Horizontal rails have wheel + keyboard scrolling');
+(has(/new Lenis\(\{[^}]*allowNestedScroll:true[^}]*anchors:true/) ? pass : fail)('Lenis nested scrolling/anchor options enabled');
+(has(/function forwardVerticalWheel/) && has(/function forwardHorizontalWheel/) ? pass : fail)('Wheel forwarding helpers present');
+(has(/function handleScrollableKeys/) && has(/function handleHorizontalKeys/) ? pass : fail)('Keyboard scroll helpers present');
+(has(/function useFocusTrap/) ? pass : fail)('Focus-trap utility present');
+([...src.matchAll(/overflow-y-auto|overflow-auto/g)].length > 0 ? pass : fail)('Vertical overflow containers detected for audit');
+(!/key=\{h\}/.test(src) ? pass : fail)('No duplicate mobile navigation key pattern remains');
+(has(/preferredScrollBehavior\(\)/) ? pass : fail)('Reduced-motion-safe manual rail scrolling present');
+(has(/const speed=\.018/) && has(/requestAnimationFrame\(tick\)/) ? pass : fail)('Blog rail uses continuous requestAnimationFrame motion');
+(!/onMouseEnter=\{\(\)=>setPaused\(true\)\}/.test(src) ? pass : fail)('Blog auto-scroll does not pause merely on hover');
+(has(/prefers-reduced-motion/) && css.includes('@media(prefers-reduced-motion:reduce)') ? pass : fail)('Reduced-motion handling present in source and CSS');
+(has(/data-scroll-axis="x"/) && css.includes('[data-scroll-axis="x"]{touch-action:pan-x}') ? pass : fail)('Horizontal touch gestures explicitly supported');
+(has(/data-scroll-axis="y"/) && css.includes('[data-scroll-axis="y"]{touch-action:pan-y}') ? pass : fail)('Vertical touch gestures explicitly supported');
+(css.includes('.lenis.lenis-smooth{scroll-behavior:auto!important}') ? pass : fail)('Lenis CSS scroll-behavior override present');
+(has(/className="max-h-\[92vh\].*overflow-auto[^\n]*data-lenis-prevent/) ? pass : fail)('Quick View uses native internal scrolling');
+(has(/className="bh-blog-carousel bh-blog-auto-carousel.*data-lenis-prevent data-scroll-axis="x"/) ? pass : fail)('Blog rail uses native internal horizontal scrolling');
+(has(/role="dialog"[^\n]*aria-modal="true"/) ? pass : fail)('Modal semantics present');
+const buttonTags = [...src.matchAll(/<button\b([^>]*)>/g)];
+const missingButtonType = buttonTags.filter(m => !/\btype\s*=/.test(m[1]));
+if (!missingButtonType.length) pass('All buttons declare explicit type'); else fail('All buttons declare explicit type', `${missingButtonType.length} button(s) missing type`);
+const statusCounts = checks.reduce((a,c)=>(a[c.status]++,a),{PASS:0,FAIL:0});
+const report = {generatedAt:new Date().toISOString(), summary:statusCounts, checks};
+fs.writeFileSync(path.join(root,'INTERACTION_AUDIT_2026-10-14.json'), JSON.stringify(report,null,2));
+for (const c of checks) console.log(`${c.status} | ${c.name}${c.detail?` | ${c.detail}`:''}`);
+console.log(`SUMMARY ${statusCounts.PASS} PASS / ${statusCounts.FAIL} FAIL`);
+process.exit(statusCounts.FAIL ? 1 : 0);
