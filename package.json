@@ -11,7 +11,8 @@
     "audit:final": "node scripts/comprehensive-audit.mjs",
     "test:wishlist": "node scripts/test-wishlist.mjs",
     "audit:comprehensive": "node scripts/comprehensive-audit.mjs",
-    "audit:responsive-seo": "node scripts/responsive-seo-audit.mjs"
+    "audit:responsive-seo": "node scripts/responsive-seo-audit.mjs",
+    "audit:interaction": "node scripts/interaction-audit-2026-10-14.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.14",

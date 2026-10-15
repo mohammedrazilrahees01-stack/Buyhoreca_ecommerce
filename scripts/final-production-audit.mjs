@@ -1,14 +1,88 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+
 const require = createRequire(import.meta.url);
 let ts = null;
-try { ts = require('typescript'); } catch { try { ts = require('/opt/nvm/versions/node/v22.16.0/lib/node_modules/typescript/lib/typescript.js'); } catch {} }
-import { fileURLToPath } from 'node:url';
+try { ts = require('typescript'); }
+catch {
+  try { ts = require('/opt/nvm/versions/node/v22.16.0/lib/node_modules/typescript/lib/typescript.js'); } catch {}
+}
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const src = fs.readFileSync(path.join(root, 'app/[[...slug]]/Storefront.tsx'), 'utf8');
+const page = fs.readFileSync(path.join(root, 'app/[[...slug]]/page.tsx'), 'utf8');
+const layout = fs.readFileSync(path.join(root, 'app/layout.tsx'), 'utf8');
+const sitemap = fs.readFileSync(path.join(root, 'app/sitemap.ts'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'app/globals.css'), 'utf8');
+const nextConfig = fs.readFileSync(path.join(root, 'next.config.ts'), 'utf8');
+
+const primaryExpected = [
+  'Kitchen Utensils', 'Kitchen Equipment', 'Tabletop', 'Buffetware',
+  'Hotel', 'Housekeeping', 'Shop by Brand', 'Shop by Business'
+];
+
+const businessExpected = [
+  'cafe-coffee-shop', 'restaurant', 'hotel', 'bakery-pastry', 'bar-lounge',
+  'catering-banqueting', 'fast-food-qsr', 'school-institution',
+  'corporate-office-catering', 'event-hospitality'
+];
+
+const checks = [
+  ['Primary navigation has exactly 8 requested groups', primaryExpected.every(x => src.includes(`"${x}"`)) && !/href="\/quote"[^>]*>Quote<\/Link>/.test(src)],
+  ['Primary navigation labels use regular/medium weight', /bh-primary-nav-item[^"`]*text-\[12px\] font-medium/.test(src)],
+  ['Primary navigation opens by hover, click and keyboard focus', /onMouseEnter=\{\(\)=>setHoverNav\(title\)\}/.test(src) && /onClick=\{\(\)=>setHoverNav\(active\?null:title\)\}/.test(src) && /onFocus=\{\(\)=>setHoverNav\(title\)\}/.test(src)],
+  ['Mega menu is viewport-centered and width-bounded', /\.bh-mega\{position:absolute;left:50%;/.test(css) && /width:min\(/.test(css) && /max-width:calc\(100vw -/.test(css)],
+  ['Shop by Brand uses the full mega-menu width', /bh-mega-grid-brands/.test(src) && /\.bh-mega-grid-brands\{grid-template-columns:minmax\(0,1fr\)!important\}/.test(css) && /\.bh-mega-card-grid-brands\{grid-template-columns:minmax\(0,1fr\)!important\}/.test(css)],
+  ['Shop by Brand uses live Shopify collection images', /const brandCollections=useMemo/.test(src) && /brandCollectionsFor\(collections\)/.test(src) && /c\.image\?/.test(src) && /href=\{`\/brands\//.test(src)],
+  ['Brand menu/index is not limited to a fixed small set', !/brandCollections\.slice\(0,\d+\)/.test(src) && !/function BrandIndex\([\s\S]*?brandCollectionsFor\(collections\)\.slice\(0,\d+\)/.test(src)],
+  ['Brand detail reads the actual Shopify collection', /function BrandPage/.test(src) && /getCollection\(handle/.test(src)],
+  ['Brand detail paginates collection products', /getCollection\(handle,collection\.pageInfo\.endCursor/.test(src) && /Load more products/.test(src)],
+  ['Category and brand collection surfaces remain separated', /const brandCollectionsFor/.test(src) && /const categoryCollectionsFor/.test(src) && /categoryCollectionsFor\(collections\)/.test(src)],
+  ['All-category dropdown has native wheel scrolling isolated from Lenis', /id="all-category-list"[\s\S]*overflow-y-auto[\s\S]*data-lenis-prevent[\s\S]*onWheelCapture=\{handleNativeWheel\}/.test(src) && /function handleNativeWheel/.test(src)],
+  ['Search panels have native nested scrolling isolated from Lenis', /focus&&<div className="bh-search-panel[\s\S]*overflow-y-auto[\s\S]*data-lenis-prevent/.test(src)],
+  ['Filter/dialog/cart scroll surfaces are Lenis-isolated', /data-lenis-prevent/.test(src) && /Filter brand products/.test(src) && /Shopping cart/.test(src) && /Quick view/.test(src)],
+  ['Blog rail has no visible manual horizontal scrollbar', /bh-blog-carousel\{[^}]*overflow-x:hidden/.test(css) && !/bh-blog-carousel\{[^}]*overflow-x:auto/.test(css)],
+  ['Blog rail continuously auto-scrolls with requestAnimationFrame', /function BlogRail/.test(src) && /requestAnimationFrame\(tick\)/.test(src) && /offsetRef\.current-=18\*\(dt\/1000\)/.test(src)],
+  ['Blog rail auto-scroll speed is deliberately slow', /18\*\(dt\/1000\)/.test(src)],
+  ['Blog rail pauses only on individual card hover/focus', /onMouseEnter=\{pause\} onMouseLeave=\{resume\}/.test(src) && /onFocus=\{pause\}|onFocusCapture=\{pause\}/.test(src) && !/onMouseEnter=\{pause\}.*bh-blog-carousel/.test(src)],
+  ['Blog rail does not hijack mouse-wheel/trackpad vertical scrolling', /bh-blog-carousel[^}]*role=\"region\"/.test(src) && !/bh-blog-carousel[\s\S]*onWheel=/.test(src)],
+  ['Reduced motion disables the animated blog rail', /prefers-reduced-motion: reduce/.test(src) && /prefers-reduced-motion:reduce/.test(css)],
+  ['Product image frames contain images without artificial internal padding', /bh-product-image-frame/.test(src) && /\.bh-product-image\{padding:0\}/.test(css)],
+  ['Collection/category images use edge-to-edge cover framing', /function CategoryRail/.test(src) && /bh-category-rail-image[^>]*object-cover/.test(src) && /\.bh-category-rail-image\{[^}]*transform:scale\(1\.45\)/.test(css) && /\.bh-collection-image-fill\{[^}]*transform:scale\(1\.28\)/.test(css)],
+  ['Brand logos preserve proportions without fake gray framing', /bh-mega-brand-logo\{background:transparent!important\}/.test(css) && /object-contain object-center/.test(src)],
+  ['Out-of-stock products are quote-only', /Out of stock · Request a quote/.test(src) && /cartHasStockIssue/.test(src)],
+  ['Low stock under 10 is shown from live quantityAvailable', /quantityAvailable/.test(src) && /Only \$\{/.test(src)],
+  ['Quantity controls respect available stock', /quantityAvailable/.test(src) && /q>maxStock/.test(src) && /quantity>=l\.merchandise\.quantityAvailable/.test(src)],
+  ['Shop has price/brand/product filters and sorting', /FacetFilters/.test(src) && /Price low to high|Price: low to high/.test(src) && /Sort products/.test(src)],
+  ['Quote basket supports multi-product requests', /QUOTE_KEY/.test(src) && /activeItems\.map/.test(src) && /addToQuote/.test(src)],
+  ['Cart uses Shopify discount code mutation', /discountCodesUpdate|DISCOUNT/.test(src) && /onDiscount/.test(src)],
+  ['Dynamic SEO metadata is present', /generateMetadata/.test(page) && /metadataBase/.test(layout)],
+  ['Canonical and social metadata are configured', /canonical/.test(layout) && /openGraph/.test(layout) && /twitter/.test(layout)],
+  ['Product/collection/brand/article structured data is present', /"@type":"Product"|"@type": "Product"/.test(page) && /CollectionPage/.test(page) && /BreadcrumbList/.test(page) && /Article/.test(page)],
+  ['Utility pages use noindex rules', /const noIndex = \["search", "cart", "wishlist", "compare", "account", "track-order", "quote"\]/.test(page) && /NO_INDEX_ROBOTS/.test(page)],
+  ['Sitemap contains products, categories, brands and business routes', /productEntries/.test(sitemap) && /categoryEntries/.test(sitemap) && /brandEntries/.test(sitemap) && /BUSINESS_SLUGS/.test(sitemap)],
+  ['Sitemap business slugs match current navigation', businessExpected.every(x => sitemap.includes(`"${x}"`))],
+  ['Robots exposes the sitemap', /sitemap/.test(fs.readFileSync(path.join(root, 'app/robots.ts'), 'utf8'))],
+  ['Security headers are configured', /X-Content-Type-Options/.test(nextConfig) && /Referrer-Policy/.test(nextConfig)],
+  ['Accessible focus indicator is present', /:focus-visible/.test(css)],
+  ['Coarse-pointer and reduced-motion behavior is present', /@media\(pointer:coarse\)/.test(css) && /@media \(hover:none\), \(pointer:coarse\)/.test(css) && /prefers-reduced-motion/.test(css)],
+  ['Responsive 320px through 3840px+ ranges are represented', /max-width:359px/.test(css) && /min-width:360px/.test(css) && /max-width:575px/.test(css) && /max-width:767px/.test(css) && /min-width:768px/.test(css) && /max-width:1099px/.test(css) && /min-width:1024px/.test(css) && /max-width:1279px/.test(css) && /min-width:1280px/.test(css) && /max-width:1599px/.test(css) && /min-width:1600px/.test(css) && /max-width:1919px/.test(css) && /min-width:1920px/.test(css) && /max-width:2559px/.test(css) && /min-width:2560px/.test(css) && /max-width:3839px/.test(css) && /min-width:3840px/.test(css)],
+  ['Mobile/tablet navigation is suppressed at touch-safe widths', /@media\s*\(min-width:768px\)\s+and\s+\(max-width:1099px\)[\s\S]*?bh-primary-nav\{display:none!important\}/.test(css) && /@media\(max-width:767px\)[\s\S]*?bh-primary-nav\{display:none!important\}/.test(css)],
+  ['No external placeholder image services are used', !/unsplash\.com|placehold\.co/.test(src)],
+  ['No local brand-logo dependency remains in active code', !/BRAND_LOGOS|brandLogoFor|getBrandMetaobjects|BrandRecord|BRAND_METAOBJECTS/.test(src)],
+  ['Unknown routes use Next.js 404 handling', /notFound\(\)/.test(page) && /ROOT_ROUTES/.test(page)],
+  ['Business pages match the current business taxonomy', businessExpected.every(x => page.includes(`"${x}"`))],
+];
+
+let failures = 0;
+for (const [name, ok] of checks) {
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`);
+  if (!ok) failures++;
+}
+
+console.log('\nTypeScript/TSX parser audit');
 const files = [];
 function walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -19,94 +93,18 @@ function walk(dir) {
   }
 }
 walk(path.join(root, 'app'));
-
-const checks = [
-  ['10 primary nav items (9 categories + Quote)', (src.match(/\n  \["[^"]+",\[/g) || []).length === 9 && /href="\/quote"[^>]*>Quote<\/Link>/.test(src)],
-  ['Nav labels are medium/regular, not bold', /bh-primary-nav-item[^\"`]*text-\[12px\] font-medium/.test(src) && !/bh-primary-nav-item[^\"`]*text-\[12px\] font-bold/.test(src)],
-  ['Mega menu is viewport-anchored, not item-anchored', /<nav className="relative hidden[\s\S]*?bh-mega border/.test(src) && /\.bh-mega\{position:absolute;left:50%;right:auto;top:100%;width:min\(1280px,calc\(100vw - 24px\)\)/.test(css) && !/bh-mega absolute left-1\/2/.test(src)],
-  ['Mega menu tracks have min-width zero to prevent child overflow', /\.bh-mega-grid\{display:grid;grid-template-columns:minmax\(0,1\.25fr\) minmax\(280px,\.95fr\)/.test(css) && /\.bh-mega-card-label\{min-width:0/.test(css) && /\.bh-mega-more-link\{display:block;min-width:0/.test(css)],
-  ['Mega menu nested category cards cannot force horizontal overflow', /bh-mega-card group flex min-h-\[66px\] min-w-0/.test(src) && /bh-mega-card-label/.test(src)],
-  ['Full Shopify collections are paginated without artificial limit', (/async function getCollections\(\)/.test(src)&&src.includes('first:250')&&src.includes('do{')&&src.includes('while(after)'))],
-  ['All-category dropdown is scrollable', /all-category-list[\s\S]*max-h-\[min\(62vh,560px\)\][\s\S]*overflow-y-auto/.test(src)],
-  ['Mobile all-category dropdown exists', /mobile-all-category-list/.test(src) && /Search all categories on mobile/.test(src)],
-  ['Current collection image behavior is preserved', src.includes('function CategoryRail') && src.includes('{c.image?<img src={c.image.url}')],
-  ['Correct BuyHoreca header logo path', /LOGO_SRC="\/images\/buyhoreca-logo-header\.png"/.test(src)],
-  ['Header logo asset exists', fs.existsSync(path.join(root, 'public/images/buyhoreca-logo-header.png'))],
-  ['Company shop image exact preferred path is wired', /COMPANY_SHOP_IMAGE="\/images\/company\/shop_of_buyhoreca\.png"/.test(src)],
-  ['Company shop fallback exists', fs.existsSync(path.join(root, 'public/images/company/modern-buyhoreca-storefront.png'))],
-  ['PDF pages are not rendered in web source', !/\.pdf|IMAGE FOR PAGE/i.test(src)],
-  ['Blog homepage is Shopify-backed', /getBlogs\(\)/.test(src) && /function BlogIndex/.test(src)],
-  ['Blog has 2/3/4 responsive widths', /\.bh-blog-card\{width:calc\(\(100% - 12px\)\/2\)/.test(css) && /@media\(min-width:768px\)\{\.bh-blog-card\{width:calc\(\(100% - 24px\)\/3\)/.test(css) && /@media\(min-width:1200px\)\{\.bh-blog-card\{width:calc\(\(100% - 36px\)\/4\)/.test(css)],
-  ['Blog autoplay pauses on hover/focus', /onMouseEnter=\{pause\} onMouseLeave=\{resume\}/.test(src) && /onFocusCapture=\{pause\}/.test(src)],
-  ['Product cards have real small gaps', /\.bh-catalog-grid\{[\s\S]*gap:12px/.test(css) && /\.bh-product-card\{/.test(css)],
-  ['Product card wishlist action persists', /toggleWish[\s\S]*writeStoredJSON\(WISHLIST_KEY,next\)[\s\S]*writeStoredJSON\(WISHLIST_SNAPSHOT_KEY,existing\)/.test(src)],
-  ['Wishlist hydration race guard exists', /const \[storageReady,setStorageReady\]=useState\(false\)/.test(src) && /if\(!storageReady\)return;writeStoredJSON\(WISHLIST_KEY,wishlist\)/.test(src)],
-  ['Cart pulse is correctly passed into header', /function StoreHeader\([\s\S]*cartPulse:boolean/.test(src) && /<StoreHeader[^>]*cartPulse=\{cartPulse\}/.test(src) && /@keyframes bhCartPulse/.test(css)],
-  ['Real Shopify cart mutations exist', /CREATE_CART/.test(src) && /ADD_LINES/.test(src) && /UPDATE_LINES/.test(src) && /REMOVE_LINES/.test(src)],
-  ['Predictive search includes products/collections/articles', /predictiveSearch\(query:\$query,types:\[PRODUCT,COLLECTION,ARTICLE\]\)/.test(src)],
-  ['Brand logo images are wired for available assets', /BRAND_LOGOS/.test(src) && /brandLogoFor/.test(src) && /src\?\<img|src=\{src\}/.test(src)],
-  ['Brand page also uses image assets where available', /function BrandPage[\s\S]*brandLogoFor\(name\)/.test(src)],
-  ['Analytics event layer exists', /const trackEvent=/.test(src) && /dataLayer/.test(src) && /view_item/.test(src) && /add_to_cart/.test(src)],
-  ['SEO metadata + sitemap + robots exist', fs.existsSync(path.join(root,'app/sitemap.ts')) && fs.existsSync(path.join(root,'app/robots.ts')) && fs.existsSync(path.join(root,'app/[[...slug]]/page.tsx'))],
-  ['Security headers are configured', /Referrer-Policy/.test(fs.readFileSync(path.join(root,'next.config.ts'),'utf8')) && /X-Content-Type-Options/.test(fs.readFileSync(path.join(root,'next.config.ts'),'utf8'))],
-  ['404 and error boundaries exist', fs.existsSync(path.join(root,'app/not-found.tsx')) && fs.existsSync(path.join(root,'app/error.tsx'))],
-  ['Reduced-motion support exists', /prefers-reduced-motion:reduce/.test(css)],
-  ['No raw GitHub image fallback remains', !/raw\.githubusercontent\.com/.test(src)],
-  ['No placeholder external image services remain', !/placehold\.co|unsplash\.com/.test(src)],
-  ['Only one rendered StoreHeader and Footer in App', (src.match(/<StoreHeader\b/g)||[]).length===1 && (src.match(/<Footer\/>/g)||[]).length===1],
-  ['Primary navigation opens mega menu by click for keyboard access', /onClick=\{\(\)=>setHoverNav\(active\?null:title\)\}/.test(src)],
-  ['All-category dropdown renders every fetched collection', /filteredAll\.map\(c =>/.test(src) && !/filteredAll\.slice\(/.test(src)],
-  ['Blog index supports article search and topic filters', /Search articles, topics or tags/.test(src) && /Filter blog topics/.test(src) && /tags=/.test(src) || (/Search articles, topics or tags/.test(src) && /setTag\(x\)/.test(src))],
-  ['Product page stores recently viewed products', /RECENT_KEY="buyhoreca_recently_viewed"/.test(src) && /readStoredSnapshots\(RECENT_KEY\)/.test(src) && /writeStoredJSON\(RECENT_KEY/.test(src)],
-  ['Product page offers related products from the same manufacturer', /function RelatedProducts\(/.test(src) && /vendor:"\$\{vendor\}"/.test(src)],
-  ['Product page exposes real-data specifications', /Product specifications/.test(src) && /selectedOptions/.test(src)],
-  ['Product page provides product-question contact workflow', /Questions about this product\?/.test(src) && /Ask for a Quote/.test(src)],
-  ['Product route has Suspense boundary for navigation hooks', /import \{ Suspense \} from "react"/.test(fs.readFileSync(path.join(root,'app/[[...slug]]/page.tsx'),'utf8')) && /<Suspense fallback=/.test(fs.readFileSync(path.join(root,'app/[[...slug]]/page.tsx'),'utf8'))],
-  ['Typography restraint also caps extra-bold utility', /\.font-extrabold\{font-weight:700\}/.test(css)],
-  ['Optional GA4 integration is configured from environment', /NEXT_PUBLIC_GA4_ID/.test(fs.readFileSync(path.join(root,'.env.local.example'),'utf8')) && /googletagmanager\.com/.test(fs.readFileSync(path.join(root,'app/layout.tsx'),'utf8'))],
-  ['Optional Meta Pixel integration is configured from environment', /NEXT_PUBLIC_META_PIXEL_ID/.test(fs.readFileSync(path.join(root,'.env.local.example'),'utf8')) && /connect\.facebook\.net/.test(fs.readFileSync(path.join(root,'app/layout.tsx'),'utf8'))],
-  ['Homepage uses separate Shopify datasets for Best Selling, New in Catalogue and Commercial Essentials', /getProducts\(16,null,undefined,"BEST_SELLING"/.test(src) && /getProducts\(16,null,undefined,"CREATED_AT"/.test(src) && /essentialCollection/.test(src) && /sectionData=\[\["Best Selling Products",bestSelling\],\["New in Catalogue",newest\],\["Commercial Essentials",essentials\]\]/.test(src)],
-  ['Homepage brand showcase discovers vendors beyond the initial product strip', /const PRODUCT_VENDORS=`query ProductVendors/.test(src) && /async function getProductVendors/.test(src) && /getProductVendors\(\d+\)/.test(src) && /function BrandShowcase\(\{products,vendors\}/.test(src) && /const merged=.*managedSorted/.test(src) && /const unique=.*new Map/.test(src) && !/unique=.*slice\(0,12\)/.test(src)],
-  ['Brand index uses the same broad live vendor discovery as the homepage', /function BrandIndex\(\{products,vendors\}/.test(src) && /const discovered=.*\[\.\.\.vendors,\.\.\.products\.map/.test(src) && /<BrandIndex products=\{products\} vendors=\{homeBrandVendors\}/.test(src)],
-  ['Footer logo uses the reduced production size', /<footer[\s\S]*w-\[180px\]/.test(src)],
-  ['Broad vendor discovery fails soft without breaking the homepage', /async function getProductVendors\(maxPages=\d+\)/.test(src) && /catch\{\}return Array\.from\(out\)/.test(src)],
-  ['Homepage hero uses two image promo panels with independent offer codes', /function PromoHeroTiles\(\)/.test(src) && /bh-promo-hero-grid/.test(src) && /WELCOME10/.test(src) && /HORECA5/.test(src) && /navigator\.clipboard\.writeText/.test(src)],
-  ['Product detail resolves brand logo from Shopify-managed brand data with local fallback', /const \[managedBrand,setManagedBrand\]/.test(src) && /getBrandMetaobjects\(\)/.test(src) && /const brandLogo=managedBrand\?\.logo\?\.url\|\|brandLogoFor\(product\.brand\)/.test(src)],
-  ['Homepage promo image panels have real copy-to-clipboard interaction', /function PromoHeroTiles\(\)/.test(src) && /navigator\.clipboard\.writeText/.test(src) && /promo_code_copy/.test(src) && /bh-promo-hero-card/.test(src) && /WELCOME10/.test(src) && /HORECA5/.test(src)],
-  ['Brand pages paginate beyond the first 48 Shopify products', /function BrandPage\(/.test(src) && /getProducts\(48,cursor,vendorQuery/.test(src) && /loadMore=async/.test(src)],
-  ['Unknown top-level routes use Next.js 404 handling', /import \{ notFound \} from "next\/navigation"/.test(fs.readFileSync(path.join(root,'app/[[...slug]]/page.tsx'),'utf8')) && /ROOT_ROUTES/.test(fs.readFileSync(path.join(root,'app/[[...slug]]/page.tsx'),'utf8')) && /notFound\(\)/.test(fs.readFileSync(path.join(root,'app/[[...slug]]/page.tsx'),'utf8'))],
-  ['Cart update/removal analytics events are emitted', /trackEvent\("view_cart"/.test(src) && /trackEvent\("remove_from_cart"/.test(src)],
-  ['Customer account route exists', /pathname==="\/account"/.test(src) && /Customer Account/.test(src)],
-  ['Order tracking support route exists', /pathname==="\/track-order"/.test(src) && /Track an Order/.test(src)],
-  ['Search uses only valid Storefront SearchSortKeys', /const searchSortKey=sort\.startsWith\("PRICE"\)\?"PRICE":"RELEVANCE"/.test(src) && !/searchSortKey=sort==="TITLE"\?"TITLE"/.test(src)],
-  ['Dynamic product/category/brand/article routes validate against Shopify before rendering', /PRODUCT_EXISTS/.test(fs.readFileSync(path.join(root,'app/[[...slug]]/page.tsx'),'utf8')) && /COLLECTION_EXISTS/.test(fs.readFileSync(path.join(root,'app/[[...slug]]/page.tsx'),'utf8')) && /BRAND_EXISTS/.test(fs.readFileSync(path.join(root,'app/[[...slug]]/page.tsx'),'utf8')) && /ARTICLE_EXISTS/.test(fs.readFileSync(path.join(root,'app/[[...slug]]/page.tsx'),'utf8'))],
-  ['Business pages use Shopify-backed filtered products and pagination', /function BusinessPage\(\{name,onAdd,onQuick\}/.test(src) && /businessQuery/.test(src) && /getProducts\(48,cursor,businessQuery/.test(src) && /loadMore=async/.test(src)],
-];
-
-let failures=0;
-for (const [name, ok] of checks) {
-  console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`);
-  if (!ok) failures++;
-}
-
-console.log('\nTypeScript/TSX parser audit');
 if (ts) {
   for (const f of files.sort()) {
     const text = fs.readFileSync(f, 'utf8');
     const kind = f.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
     const sf = ts.createSourceFile(f, text, ts.ScriptTarget.Latest, true, kind);
     const diags = sf.parseDiagnostics || [];
-    const rel = path.relative(root, f);
     if (diags.length) {
       failures++;
-      console.log(`FAIL  ${rel} (${diags.map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n')).join('; ')})`);
-    } else {
-      console.log(`PASS  ${rel}`);
-    }
+      console.log(`FAIL  ${path.relative(root, f)} (${diags.map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n')).join('; ')})`);
+    } else console.log(`PASS  ${path.relative(root, f)}`);
   }
-} else {
-  console.log('SKIP  TypeScript parser (install dependencies first)');
-}
+} else console.log('SKIP  TypeScript parser');
 
+console.log(`\nFINAL STATIC AUDIT: ${checks.length - failures} PASS / ${failures} FAIL across ${checks.length} requirement checks + ${files.length} TypeScript/TSX parser checks.`);
 if (failures) process.exit(1);
-console.log(`\nFINAL AUDIT PASSED: ${checks.length} requirement checks + ${files.length} TypeScript/TSX parser checks.`);

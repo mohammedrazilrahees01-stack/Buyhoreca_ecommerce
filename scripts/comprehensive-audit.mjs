@@ -89,7 +89,7 @@ test('Product information uses real interactive tabs', /function ProductInfoTabs
 // Routing / content
 for (const route of ['', 'shop','categories','brands','business','search','cart','wishlist','compare','quote','about','contact','faq','shipping','account','track-order','blog']) test(`Root route allowed: ${route || '/'}`, new RegExp(`"${route}"`).test(page) || (route === '' && /new Set\(\[/.test(page)));
 test('Business index component present', /function BusinessIndex\(\)/.test(storefront) && /pathname==="\/business"/.test(storefront));
-test('Business index cards link to business routes', /function BusinessIndex[\s\S]*href=\{`\/business\/\$\{slugify\(x\)\}`\}/.test(storefront));
+test('Business index cards link to business routes', /function BusinessIndex[\s\S]*href=\{`\/business\/\$\{businessSlugFor\(x\)\}`\}/.test(storefront));
 test('Business detail supports load more', /function BusinessPage[\s\S]*loadMore=async/.test(storefront));
 
 // UI hardening / responsive checks

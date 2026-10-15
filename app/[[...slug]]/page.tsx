@@ -72,8 +72,8 @@ const COLLECTION_SCHEMA = `query CollectionSchema($handle:String!){collection(ha
 const ARTICLE_SCHEMA = `query ArticleSchema($blog:String!,$handle:String!){blog(handle:$blog){articleByHandle(handle:$handle){handle title excerpt contentHtml seo{title description}image{url width height altText}publishedAt updatedAt blog{handle title}}}}`;
 
 const BUSINESS_SLUGS = new Set([
-  "hotel", "bakery", "coffee-shop", "bar-supplies", "pizzeria", "ice-cream-shop",
-  "restaurant", "catering", "banquet", "kitchen-operations", "retail-store", "food-truck",
+  "cafe-coffee-shop", "restaurant", "hotel", "bakery-pastry", "bar-lounge",
+  "catering-banqueting", "fast-food-qsr", "school-institution", "corporate-office-catering", "event-hospitality",
 ]);
 
 const NO_INDEX_ROBOTS: Metadata["robots"] = {

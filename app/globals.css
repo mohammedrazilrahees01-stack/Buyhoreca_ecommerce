@@ -14,10 +14,10 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;background:#fff}
-.lenis.lenis-smooth{scroll-behavior:auto!important}
 body{margin:0;max-width:100%;overflow-x:hidden;background:#fff;color:var(--bh-ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 button,a,input,select,textarea{touch-action:manipulation}
 button{cursor:pointer}
+:focus-visible{outline:2px solid var(--bh-green);outline-offset:2px}
 img{max-width:100%;height:auto}
 iframe{max-width:100%}
 ::selection{background:#cfeee3;color:#08291f}
@@ -86,7 +86,7 @@ nav[aria-label="Primary navigation"]{position:relative;overflow:visible}
 @media(min-width:1536px){.bh-catalog-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}}
 
 /* Blog carousel: exactly 2 / 3 / 4 visible cards */
-.bh-blog-carousel{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+.bh-blog-carousel{display:flex;gap:12px;overflow-x:hidden;scrollbar-width:none;overscroll-behavior:contain;scroll-behavior:auto;will-change:scroll-position}
 .bh-blog-carousel::-webkit-scrollbar{display:none}
 .bh-blog-card{width:calc((100% - 12px)/2);scroll-snap-align:start}
 @media(min-width:768px){.bh-blog-card{width:calc((100% - 24px)/3)}}
@@ -150,7 +150,7 @@ main{min-width:0}
 }
 @media(max-width:360px){
  .bh-logo{width:175px;height:55px}.bh-logo img{width:175px;height:auto;max-height:55px}
- .bh-product-card .bh-product-media img{padding:.4rem}
+ .bh-product-card .bh-product-media img{padding:0}
 }
 @media(max-width:360px){
  .bh-catalog-grid{grid-template-columns:1fr;gap:10px}
@@ -225,7 +225,7 @@ button,input,select,textarea{max-width:100%}
  .bh-logo{width:164px;height:52px}.bh-logo img{width:164px;max-height:52px}
  .bh-catalog-grid{gap:8px}
  .bh-product-card{font-size:12px}
- .bh-product-card .bh-product-media img{padding:.3rem}
+ .bh-product-card .bh-product-media img{padding:0}
  .bh-primary-button,.bh-secondary-button,.bh-hero-button,.bh-hero-outline-button{padding-inline:12px}
 }
 @media(min-width:1920px){
@@ -283,7 +283,7 @@ button,input,select,textarea{max-width:100%}
  .bh-brand-grid{gap:8px}
  .bh-brand-tile{min-height:94px;padding-inline:9px}
  .bh-brand-logo-frame{height:58px}
- .bh-product-image{padding:12px}
+ .bh-product-image{padding:0}
  .bh-home-hero>div:first-child{min-height:470px}
  .bh-hero-category-panel,.bh-hero-category-pair,.bh-hero-category-card{min-height:235px}
 }
@@ -434,7 +434,7 @@ main > section, main > div{min-width:0}
 @media (max-width:767px){
   .bh-product-card .bh-add-button{min-height:40px}
   .bh-product-card .bh-product-image-frame{min-height:0}
-  .bh-product-card .bh-product-media img{padding:10px}
+  .bh-product-card .bh-product-media img{padding:0}
   .bh-blog-card{min-width:0}
   .bh-promo-hero-grid{min-height:360px}
   .bh-primary-nav{display:none!important}
@@ -470,44 +470,90 @@ main > section, main > div{min-width:0}
   .bh-product-image,.bh-promo-hero-image,.bh-brand-tile,.bh-blog-card{transition:none!important}
 }
 
+/* Final interaction hardening: nested scroll surfaces must not be intercepted by Lenis. */
+[data-lenis-prevent]{overscroll-behavior:contain}
+.bh-mega-grid-brands{grid-template-columns:minmax(0,1fr)!important}
+.bh-mega-brand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;min-width:0;overscroll-behavior:contain}
+.bh-mega-brand-grid .bh-mega-card{min-width:0}
+.bh-mega-brand-logo{background:transparent!important}
+@media(max-width:767px){.bh-mega-brand-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:768px) and (max-width:1199px){.bh-mega-brand-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}}
+@media(prefers-reduced-motion:reduce){.bh-blog-carousel{scroll-behavior:auto!important}}
 
-/* Interaction hardening: native wheel, touch and keyboard scrolling for all internal rails. */
-.bh-search-panel [tabindex="0"],
-.bh-mega [tabindex="0"],
-.bh-blog-carousel[tabindex="0"],
-.bh-primary-nav-track[tabindex="0"],
-.bh-search-panel,
-.bh-mega {
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-}
-.bh-search-panel [tabindex="0"]:focus-visible,
-.bh-mega [tabindex="0"]:focus-visible,
-.bh-blog-carousel:focus-visible,
-.bh-primary-nav-track:focus-visible {
-  outline: 2px solid #008f68;
-  outline-offset: -2px;
-}
-.bh-blog-auto-carousel {
-  scroll-snap-type: none !important;
-  scrollbar-width: none;
-}
-.bh-blog-auto-carousel::-webkit-scrollbar { display: none; }
-@media (prefers-reduced-motion: reduce) {
-  .bh-blog-auto-carousel { scroll-behavior: auto !important; }
-}
-@media (pointer: coarse) {
-  .bh-search-panel [tabindex="0"], .bh-mega [tabindex="0"], .bh-blog-carousel {
-    scroll-behavior: auto;
-  }
+/* ==========================================================================
+   FINAL PRODUCTION POLISH — nested scrolling, full-width brand mega menu,
+   edge-to-edge collection imagery, and continuous blog marquee.
+   ========================================================================== */
+
+/* Native nested scrolling: dropdowns/drawers own their wheel/touchpad motion. */
+[data-lenis-prevent]{overscroll-behavior:contain;scrollbar-gutter:stable both-edges}
+
+/* Brand mega menu must use the entire content column, not one grid cell. */
+.bh-mega-grid-brands{grid-template-columns:minmax(0,1fr)!important}
+.bh-mega-card-grid-brands{grid-template-columns:minmax(0,1fr)!important}
+.bh-mega-brand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;min-width:0;max-width:none;width:100%;overflow-y:auto;overscroll-behavior:contain}
+.bh-mega-brand-grid .bh-mega-card{min-width:0;width:100%}
+.bh-mega-brand-logo{background:transparent!important;display:flex;align-items:center;justify-content:center}
+@media(max-width:767px){.bh-mega-brand-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}
+@media(min-width:768px) and (max-width:1199px){.bh-mega-brand-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}}
+
+/* Shopify collection imagery is intentionally edge-to-edge. The scale removes
+   letterbox-like source whitespace while keeping the collection frame stable. */
+.bh-collection-image-fill{display:block;transform:scale(1.28);transform-origin:center;will-change:transform}
+.bh-category-rail-image{display:block;transform:scale(1.45);transform-origin:center;will-change:transform}
+.group:hover .bh-collection-image-fill{transform:scale(1.32)}
+.group:hover .bh-category-rail-image{transform:scale(1.48)}
+
+/* Keep brand marks, product photos and logos proportionally contained. */
+.bh-brand-logo-frame img,.bh-mega-brand-logo img{object-fit:contain!important;object-position:center!important;transform-origin:center}
+.bh-product-image{object-fit:contain!important;object-position:center!important}
+
+/* Continuous blog marquee: viewport clips; track itself never exposes a
+   horizontal scrollbar. Two equal groups create a seamless loop. */
+.bh-blog-carousel{position:relative;display:block;overflow:hidden;overscroll-behavior:contain;contain:layout paint;width:100%;min-width:0}
+.bh-blog-track{display:flex;width:max-content;min-width:max-content;transform:translate3d(0,0,0);will-change:transform}
+.bh-blog-group{display:flex;flex:0 0 auto;gap:12px;min-width:0}
+.bh-blog-group-duplicate{pointer-events:none;user-select:none}
+.bh-blog-card{flex:0 0 calc((min(100%, 100cqw) - 12px)/2);width:calc((min(100%, 100cqw) - 12px)/2);min-width:0}
+.bh-blog-carousel{container-type:inline-size}
+@container (min-width:768px){.bh-blog-card{flex-basis:calc((100cqw - 24px)/3);width:calc((100cqw - 24px)/3)}}
+@container (min-width:1200px){.bh-blog-card{flex-basis:calc((100cqw - 36px)/4);width:calc((100cqw - 36px)/4)}}
+@media(max-width:480px){.bh-blog-group{gap:9px}.bh-blog-card{flex-basis:calc((100cqw - 9px)/2);width:calc((100cqw - 9px)/2)}}
+
+/* Prevent giant screens from creating unreadably tiny dense controls. */
+@media(min-width:3840px){
+  body{font-size:16px}
+  .bh-primary-nav-item{font-size:14px!important}
+  .bh-mega-brand-grid{grid-template-columns:repeat(auto-fill,minmax(205px,1fr))}
+  .bh-blog-group{gap:16px}
 }
 
+/* Stronger no-horizontal-overflow guarantee for every viewport and input mode. */
+html,body,#main-content{max-width:100vw}
+img,video,svg,canvas,iframe{max-width:100%}
+.bh-mega,.bh-search-panel,.bh-cart-drawer,[role="dialog"]{overflow-x:hidden}
 
-/* Native nested scrolling: Lenis stays out of the way while users scroll internal panels. */
-[data-scroll-axis="x"]{touch-action:pan-x}
-[data-scroll-axis="y"]{touch-action:pan-y}
-.bh-blog-auto-carousel{overflow-anchor:none;scrollbar-width:none}
-.bh-search-panel,.bh-mega,[data-scroll-axis="y"]{overscroll-behavior:contain}
-@media (pointer:coarse){
-  [data-scroll-axis="x"]{scroll-snap-type:none!important}
+@media(prefers-reduced-motion:reduce){
+  .bh-blog-track{transform:none!important;will-change:auto}
+  .bh-collection-image-fill,.bh-category-rail-image{transform:none!important;will-change:auto}
 }
+
+/* Final image-fill correction: preserve the crop even when reduced motion is enabled. */
+@media (prefers-reduced-motion: reduce){
+  .bh-collection-image-fill{transform:scale(1.28)!important;will-change:auto}
+  .bh-category-rail-image{transform:scale(1.45)!important;will-change:auto}
+}
+
+/* Native nested scrolling: wheel/touchpad gestures stay inside the active panel. */
+[data-native-scroll]{
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+}
+
+/* Brand menu uses the full available mega-menu width and keeps one internal scroll region. */
+.bh-mega-grid-brands>div{min-width:0;width:100%}
+.bh-mega-grid-brands .bh-mega-brand-grid{max-height:min(56vh,520px);width:100%;min-width:0;overflow-y:auto;overflow-x:hidden}
+
+/* Avoid an outer mega-menu scrollbar fighting the inner brand/category scrollbar. */
+.bh-mega{overflow-x:hidden;overflow-y:hidden}

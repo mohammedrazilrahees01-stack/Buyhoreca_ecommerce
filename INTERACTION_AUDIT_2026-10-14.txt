@@ -1,20 +1,17 @@
-PASS | Vertical nested scrollers have Lenis isolation + mouse wheel + keyboard scrolling
-PASS | Horizontal rails have wheel + keyboard scrolling
-PASS | Lenis nested scrolling/anchor options enabled
-PASS | Wheel forwarding helpers present
-PASS | Keyboard scroll helpers present
-PASS | Focus-trap utility present
-PASS | Vertical overflow containers detected for audit
-PASS | No duplicate mobile navigation key pattern remains
-PASS | Reduced-motion-safe manual rail scrolling present
-PASS | Blog rail uses continuous requestAnimationFrame motion
-PASS | Blog auto-scroll does not pause merely on hover
-PASS | Reduced-motion handling present in source and CSS
-PASS | Horizontal touch gestures explicitly supported
-PASS | Vertical touch gestures explicitly supported
-PASS | Lenis CSS scroll-behavior override present
-PASS | Quick View uses native internal scrolling
-PASS | Blog rail uses native internal horizontal scrolling
-PASS | Modal semantics present
-PASS | All buttons declare explicit type
-SUMMARY 19 PASS / 0 FAIL
+[PASS] Category dropdown is a Lenis-isolated native scroll surface
+[PASS] Mobile category dropdown is a Lenis-isolated native scroll surface
+[PASS] Search suggestion columns are Lenis-isolated
+[PASS] Filter and dialog scrolling is Lenis-isolated
+[PASS] Brand mega menu uses a full-width grid mode
+[PASS] Brand mega menu renders the live brand collection set
+[PASS] Brand logo uses Shopify collection image
+[PASS] Blog auto-scroll uses requestAnimationFrame
+[PASS] Blog auto-scroll is continuous and slow
+[PASS] Blog rail does not pause on the whole container
+[PASS] Blog cards pause individually on hover
+[PASS] Blog rail hides manual overflow
+[PASS] Business route allow-list matches navigation slugs
+[PASS] Keyboard focus opens primary navigation menus
+[PASS] Reduced motion disables animated blog auto-scroll
+
+INTERACTION AUDIT: 15 PASS / 0 FAIL

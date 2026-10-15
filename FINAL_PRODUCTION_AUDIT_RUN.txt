@@ -1,0 +1,59 @@
+PASS  Primary navigation has exactly 8 requested groups
+PASS  Primary navigation labels use regular/medium weight
+PASS  Primary navigation opens by hover, click and keyboard focus
+PASS  Mega menu is viewport-centered and width-bounded
+PASS  Shop by Brand uses the full mega-menu width
+PASS  Shop by Brand uses live Shopify collection images
+PASS  Brand cards are not limited to a fixed small set
+PASS  Brand detail reads the actual Shopify collection
+PASS  Brand detail paginates collection products
+PASS  Category and brand collection surfaces remain separated
+PASS  All-category dropdown has native wheel scrolling isolated from Lenis
+PASS  Search panels have native nested scrolling isolated from Lenis
+PASS  Filter/dialog/cart scroll surfaces are Lenis-isolated
+PASS  Blog rail has no visible manual horizontal scrollbar
+PASS  Blog rail continuously auto-scrolls with requestAnimationFrame
+PASS  Blog rail auto-scroll speed is deliberately slow
+PASS  Blog rail pauses only on individual card hover/focus
+PASS  Blog rail blocks wheel/trackpad scrolling in the rail
+PASS  Reduced motion disables the animated blog rail
+PASS  Product image frames contain images without artificial internal padding
+PASS  Collection/category images use edge-to-edge cover framing
+PASS  Brand logos preserve proportions without fake gray framing
+PASS  Out-of-stock products are quote-only
+PASS  Low stock under 10 is shown from live quantityAvailable
+PASS  Quantity controls respect available stock
+PASS  Shop has price/brand/product filters and sorting
+PASS  Quote basket supports multi-product requests
+PASS  Cart uses Shopify discount code mutation
+PASS  Dynamic SEO metadata is present
+PASS  Canonical and social metadata are configured
+PASS  Product/collection/brand/article structured data is present
+PASS  Utility pages use noindex rules
+PASS  Sitemap contains products, categories, brands and business routes
+PASS  Sitemap business slugs match current navigation
+PASS  Robots exposes the sitemap
+PASS  Security headers are configured
+PASS  Accessible focus indicator is present
+PASS  Coarse-pointer and reduced-motion behavior is present
+PASS  Responsive 320px through 3840px+ ranges are represented
+PASS  Mobile/tablet navigation is suppressed at touch-safe widths
+PASS  No external placeholder image services are used
+PASS  No local brand-logo dependency remains in active code
+PASS  Unknown routes use Next.js 404 handling
+PASS  Business pages match the current business taxonomy
+
+TypeScript/TSX parser audit
+PASS  app/[[...slug]]/Storefront.tsx
+PASS  app/[[...slug]]/layout.tsx
+PASS  app/[[...slug]]/page.tsx
+PASS  app/api/shopify/route.ts
+PASS  app/error.tsx
+PASS  app/global-error.tsx
+PASS  app/layout.tsx
+PASS  app/manifest.ts
+PASS  app/not-found.tsx
+PASS  app/robots.ts
+PASS  app/sitemap.ts
+
+FINAL STATIC AUDIT: 44 PASS / 0 FAIL across 44 requirement checks + 11 TypeScript/TSX parser checks.

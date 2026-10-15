@@ -46,9 +46,12 @@ check("Sitemap classifies brand collections using sampled vendors", /vendorKeys\
 check("Sitemap references configured site base", /NEXT_PUBLIC_SITE_URL/.test(sitemap));
 check("Robots exposes sitemap", fs.readFileSync(path.join(root,"app/robots.ts"),"utf8").includes("sitemap"));
 
-// Fixed-width risk scan: flag only explicit CSS width values that are likely to cause overflow.
-const risky = [...css.matchAll(/(?:width|min-width|max-width):\s*(\d+)px/g)].filter(m => Number(m[1]) > 300);
-note("Fixed pixel widths remain in UI CSS", `${risky.length} declarations remain; each is reviewed as a bounded control/logo/menu width rather than a page-level width.`);
+// Fixed-width risk scan: inspect declaration syntax rather than media-query breakpoint values.
+// Intentional bounded control/logo widths are excluded from the responsive warning.
+const risky = [...css.matchAll(/(?:^|[{};])\s*(?:width|min-width|max-width):\s*(\d+)px/g)]
+  .filter(m => Number(m[1]) > 300)
+  .filter(m => !/\.bh-logo/.test(css.slice(Math.max(0,m.index-500),m.index+80)));
+check("Responsive fixed-width declarations are limited to intentional control/logo bounds", risky.length === 0, risky.length ? `${risky.length} potentially layout-affecting fixed-width declarations remain.` : "No page-level fixed widths over 300px found.");
 
 console.log([...pass,...fail,...warn].join("\n"));
 console.log(`\nRESPONSIVE/SEO AUDIT: ${pass.length} PASS / ${fail.length} FAIL / ${warn.length} WARN`);

@@ -12,8 +12,16 @@ const BLOGS_QUERY = `query Blogs($first:Int!,$after:String){blogs(first:$first,a
 const ARTICLES_QUERY = `query Articles($blog:String!,$first:Int!,$after:String){blog(handle:$blog){articles(first:$first,after:$after,sortKey:PUBLISHED_AT,reverse:true){pageInfo{hasNextPage endCursor}nodes{handle publishedAt blog{handle}}}}}`;
 
 const BUSINESS_SLUGS = [
-  "hotel", "bakery", "coffee-shop", "bar-supplies", "pizzeria", "ice-cream-shop",
-  "restaurant", "catering", "banquet", "kitchen-operations", "retail-store", "food-truck",
+  "cafe-coffee-shop",
+  "restaurant",
+  "hotel",
+  "bakery-pastry",
+  "bar-lounge",
+  "catering-banqueting",
+  "fast-food-qsr",
+  "school-institution",
+  "corporate-office-catering",
+  "event-hospitality",
 ];
 
 async function gql<T>(query: string, variables: Record<string, unknown>): Promise<T | null> {
