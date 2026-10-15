@@ -10,7 +10,7 @@ Desktop primary navigation is intentionally limited to 10 items total, including
 Predictive search exposes products, collections and articles while typing. The All Categories selector has its own category-search input. Mobile provides the same full category access.
 
 ## Categories
-The homepage category rail continues to display each collection's Shopify-provided featured image. The presentation of that rail was deliberately left unchanged after user approval.
+The homepage Featured Categories rail displays each collection's Shopify-provided featured image inside a responsive 1:1 square frame. Images fill edge-to-edge with `object-fit: cover`; the frame has no border, rounded mask, or artificial inner padding.
 
 ## Brand assets
 The package uses local logo assets where they are available. It does not fabricate manufacturer marks for vendors without an actual supplied local logo file. Missing local brand assets therefore fall back to clean vendor text instead of an invented logo.

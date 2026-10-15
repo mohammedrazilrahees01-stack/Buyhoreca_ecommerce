@@ -1,6 +1,6 @@
 BuyHoreca Comprehensive Audit
 Date: 2026-10-12
-PASS: 141  FAIL: 0  WARN: 1
+PASS: 150  FAIL: 0  WARN: 1
 
 [PASS] Syntax parse: app/[[...slug]]/Storefront.tsx — No TypeScript/TSX parse diagnostics
 [PASS] Syntax parse: app/[[...slug]]/page.tsx — No TypeScript/TSX parse diagnostics
@@ -48,7 +48,11 @@ PASS: 141  FAIL: 0  WARN: 1
 [PASS] Cart uses Shopify discount-code mutation
 [PASS] Cart exposes live discount applicability
 [PASS] Main shop catalogue loads Shopify all-collection filters
-[PASS] Main shop catalogue sends selected ProductFilter inputs
+[PASS] Main shop catalogue sends active ProductFilter inputs
+[PASS] Out-of-stock values are stripped from every shared filter panel
+[PASS] Baseline availability filter offers In stock only
+[PASS] Out-of-stock selections are hidden, rejected, and excluded from Shopify requests
+[PASS] Product stock states and quote flows remain intact
 [PASS] Brand pages support Shopify facet filtering
 [PASS] Brand pages support sorting and pagination
 [PASS] Category index excludes brand collections
@@ -82,11 +86,15 @@ PASS: 141  FAIL: 0  WARN: 1
 [PASS] Cart drawer action buttons stack on mobile
 [PASS] All form submit buttons have explicit type
 [PASS] Mobile floating controls clear bottom navigation
+[PASS] WhatsApp uses the CSS positioning rule without conflicting utility positions
 [PASS] Touch devices keep product thumbnails available
 [PASS] Catalog paint containment does not clip overflow/shadows
 [PASS] Blog rail is 2/3/4 responsive
 [PASS] Brand grid is responsive 2/3/4/6
 [PASS] Mega menu stays within viewport
+[PASS] Category mega-menu thumbnails use a dedicated landscape frame
+[PASS] Category thumbnails fill the frame without changing brand-logo containment
+[PASS] Missing category thumbnails use an icon, not a text placeholder
 [PASS] Mobile mega/search panels stay within viewport
 [PASS] Main content has zero minimum width
 [PASS] Small phone product grid collapses safely
@@ -132,6 +140,7 @@ PASS: 141  FAIL: 0  WARN: 1
 [PASS] robots exposes sitemap
 [PASS] manifest is configured
 [PASS] API validates JSON request object
+[PASS] API bounds JSON request payload size
 [PASS] API requires GraphQL query string
 [PASS] API caps GraphQL query length
 [PASS] API validates variables object

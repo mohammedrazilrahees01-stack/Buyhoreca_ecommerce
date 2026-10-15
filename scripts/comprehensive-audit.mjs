@@ -25,12 +25,15 @@ const warn = (name, detail='') => results.push({status:'WARN',name,detail});
 const test = (name, condition, detail='') => condition ? pass(name,detail) : fail(name,detail);
 
 function parseTsx(file, source) {
-  try {
-    const ts = require('/opt/nvm/versions/node/v22.16.0/lib/node_modules/typescript/lib/typescript.js');
-    const kind = file.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
-    const sf = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, kind);
-    return sf.parseDiagnostics.length === 0 ? null : sf.parseDiagnostics.map(d => ts.flattenDiagnosticMessageText(d.messageText, ' '));
-  } catch (e) { return [`parser unavailable: ${e.message}`]; }
+  let ts;
+  try { ts = require('typescript'); }
+  catch {
+    try { ts = require('/opt/nvm/versions/node/v22.16.0/lib/node_modules/typescript/lib/typescript.js'); }
+    catch (e) { return [`parser unavailable: ${e.message}`]; }
+  }
+  const kind = file.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const sf = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, kind);
+  return sf.parseDiagnostics.length === 0 ? null : sf.parseDiagnostics.map(d => ts.flattenDiagnosticMessageText(d.messageText, ' '));
 }
 
 for (const [rel, src] of Object.entries({
@@ -79,7 +82,11 @@ test('Quote page supports multiple products and quantities', /function QuotePage
 test('Cart uses Shopify discount-code mutation', /const UPDATE_DISCOUNTS=/.test(storefront) && /cartDiscountCodesUpdate\(/.test(storefront));
 test('Cart exposes live discount applicability', /discountCodes\{code applicable\}/.test(storefront) && /applicable\?"Applied":"Not applicable"/.test(storefront));
 test('Main shop catalogue loads Shopify all-collection filters', /function Catalog[\s\S]*getCollection\("all"/.test(storefront) && /function Catalog[\s\S]*<FacetFilters/.test(storefront));
-test('Main shop catalogue sends selected ProductFilter inputs', /function Catalog[\s\S]*Object\.values\(selected\)\.map\(x=>x\.input\)/.test(storefront) && /getCollection\(allCollection\.handle,reset\?null:cursor,inputs/.test(storefront) && /getSearch\(term\.trim\(\),reset\?null:cursor,inputs/.test(storefront));
+test('Main shop catalogue sends active ProductFilter inputs', /function Catalog[\s\S]*activeFacetInputs\(selected\)/.test(storefront) && /getCollection\(allCollection\.handle,reset\?null:cursor,inputs/.test(storefront) && /getSearch\(term\.trim\(\),reset\?null:cursor,inputs/.test(storefront));
+test('Out-of-stock values are stripped from every shared filter panel', storefront.includes('values:f.values.filter(v=>!isOutOfStockFilterLabel(v.label))') && storefront.includes('.filter(f=>f.values.length>0)'));
+test('Baseline availability filter offers In stock only', /baseline-availability[^;]+label:\"In stock\"/.test(storefront) && !storefront.includes('id:"unavailable",label:"Out of stock"'));
+test('Out-of-stock selections are hidden, rejected, and excluded from Shopify requests', /const activeFacetSelections=\(selected:Record<string,AppliedFacet>\)=>Object\.values\(selected\)\.filter\(item=>!isOutOfStockFilterLabel\(item\.label\)\)/.test(storefront) && /const activeFacetInputs=\(selected:Record<string,AppliedFacet>\)=>activeFacetSelections\(selected\)\.map\(item=>item\.input\)/.test(storefront) && (storefront.match(/if\(isOutOfStockFilterLabel\(value\.label\)\)return;/g)||[]).length===4);
+test('Product stock states and quote flows remain intact', /const variantOutOfStock=/.test(storefront) && /Out of stock · Request a quote/.test(storefront) && /Request a Quote/.test(storefront));
 test('Brand pages support Shopify facet filtering', /function BrandPage[\s\S]*FacetFilters/.test(storefront) && /function BrandPage[\s\S]*getCollection\(handle/.test(storefront));
 test('Brand pages support sorting and pagination', /function BrandPage[\s\S]*Sort brand products/.test(storefront) && /function BrandPage[\s\S]*loadMore=async/.test(storefront));
 test('Category index excludes brand collections', /function CategoryIndex[\s\S]*const items=categoryCollectionsFor\(collections\)/.test(storefront));
@@ -100,12 +107,16 @@ test('FAQ h1 is restrained', /Frequently Asked Questions<\/h1>/.test(storefront)
 test('Track order h1 is restrained', /Track an Order<\/h1>/.test(storefront) && /text-3xl font-semibold md:text-4xl/.test(storefront));
 test('Cart drawer action buttons stack on mobile', /className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2"/.test(storefront));
 test('All form submit buttons have explicit type', !/<button\b(?![^>]*\btype\s*=)[^>]*>/.test(storefront));
-test('Mobile floating controls clear bottom navigation', /\.bh-whatsapp\{bottom:78px!important/.test(css) && /\.bh-toast\{bottom:78px/.test(css));
+test('Mobile floating controls clear bottom navigation', /\.bh-whatsapp\{bottom:calc\(82px \+ env\(safe-area-inset-bottom, 0px\)\)!important;right:12px!important;z-index:100!important/.test(css) && /\.bh-toast\{bottom:78px/.test(css));
+test('WhatsApp uses the CSS positioning rule without conflicting utility positions', /className=\"bh-whatsapp grid size-14/.test(storefront) && !/className=\"bh-whatsapp[^\"]*\b(?:fixed|bottom-5|right-5|z-40)\b/.test(storefront) && /\.bh-whatsapp\{position:fixed;/.test(css));
 test('Touch devices keep product thumbnails available', /@media\(pointer:coarse\)\{\.bh-product-thumbs\{opacity:1\}\}/.test(css));
 test('Catalog paint containment does not clip overflow/shadows', !/\.bh-catalog-grid,\.bh-blog-carousel\{contain:layout paint\}/.test(css));
 test('Blog rail is 2/3/4 responsive', /\.bh-blog-card\{width:calc\(\(100% - 12px\)\/2\)/.test(css) && /@media\(min-width:768px\)\{\.bh-blog-card\{width:calc\(\(100% - 24px\)\/3\)\}\}/.test(css) && /@media\(min-width:1200px\)\{\.bh-blog-card\{width:calc\(\(100% - 36px\)\/4\)\}\}/.test(css));
 test('Brand grid is responsive 2/3/4/6', /\.bh-brand-grid\{display:grid;grid-template-columns:repeat\(2/.test(css) && /@media\(min-width:640px\).*repeat\(3/.test(css) && /@media\(min-width:768px\).*repeat\(4/.test(css) && /@media\(min-width:1024px\).*repeat\(6/.test(css));
 test('Mega menu stays within viewport', /\.bh-mega\{.*max-width:calc\(100vw - 24px\)/.test(css));
+test('Category mega-menu thumbnails use a dedicated landscape frame', /className="bh-mega-category-thumb shrink-0 overflow-hidden rounded-\[7px\] bg-slate-100"/.test(storefront) && /\.bh-mega-category-thumb\{display:block;flex:0 0 68px;width:68px;height:48px;aspect-ratio:17\/12/.test(css));
+test('Category thumbnails fill the frame without changing brand-logo containment', /\.bh-mega-category-thumb img\{display:block;width:100%;height:100%;max-width:none;object-fit:cover!important;object-position:center!important/.test(css) && /\.bh-brand-logo-frame img,\.bh-mega-brand-logo img\{object-fit:contain!important/.test(css));
+test('Missing category thumbnails use an icon, not a text placeholder', storefront.includes('aria-hidden="true"><Package size={18}/></div>') && storefront.includes('bh-mega-category-thumb'));
 test('Mobile mega/search panels stay within viewport', /max-width:calc\(100vw - 16px\)/.test(css));
 test('Main content has zero minimum width', /main\{min-width:0\}/.test(css));
 test('Small phone product grid collapses safely', /@media\(max-width:360px\)[\s\S]*\.bh-catalog-grid\{grid-template-columns:1fr/.test(css));
@@ -114,7 +125,7 @@ test('Product image frames have stable aspect ratio and contain positioning', /b
 test('Brand cards use fixed, centered logo frames', /bh-brand-logo-frame\{display:flex;align-items:center;justify-content:center/.test(css) && /bh-brand-logo-frame img\{.*object-fit:contain/.test(css));
 test('Category media is edge-to-edge inside its frame', /bh-hero-category-card img\{.*object-fit:cover/.test(css));
 test('Promo offers remain vertically stacked', /bh-promo-hero-grid\{display:grid;grid-template-columns:1fr;grid-template-rows:repeat\(2/.test(css));
-test('Floating mobile controls do not overlap navigation', /body\{padding-bottom:76px\}/.test(css) && /\.bh-whatsapp\{bottom:78px!important/.test(css));
+test('Floating mobile controls do not overlap navigation', /body\{padding-bottom:76px\}/.test(css) && /\.bh-whatsapp\{bottom:calc\(82px \+ env\(safe-area-inset-bottom, 0px\)\)!important;right:12px!important;z-index:100!important/.test(css));
 test('Product brand link uses the real collection handle', /RelatedProducts[\s\S]*brandCollection\?\.handle[\s\S]*href=\{`\/brands\/\$\{encodeURIComponent\(brandCollection\.handle\)\}`\}/.test(storefront));
 test('Product detail brand logo links to its brand collection', /brandCollection\?\<Link/.test(storefront) || /View .* brand/.test(storefront) && /encodeURIComponent\(brandCollection\.handle\)/.test(storefront));
 test('Catalog sort control is labelled', /<select value=\{sort\} onChange=\{e=>setSort\(e.target.value\)\} aria-label=\"Sort products\"/.test(storefront));
@@ -164,6 +175,7 @@ for (const item of [
 
 // API safety
 test('API validates JSON request object', /const input = body as \{ query\?: unknown; variables\?: unknown; operationName\?: unknown \};/.test(api));
+test('API bounds JSON request payload size', /MAX_REQUEST_BYTES = 192 \* 1024/.test(api) && /content-length/.test(api) && /new TextEncoder\(\)\.encode\(rawBody\)\.byteLength > MAX_REQUEST_BYTES/.test(api));
 test('API requires GraphQL query string', /typeof input.query !== "string"/.test(api) && /input.query.length > 50000/.test(api));
 test('API caps GraphQL query length', /query\.length > 50000/.test(api));
 test('API validates variables object', /input.variables !== undefined && \(input.variables === null \|\| typeof input.variables !== "object"/.test(api));

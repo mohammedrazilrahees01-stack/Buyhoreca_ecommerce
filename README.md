@@ -1,26 +1,27 @@
-# BuyHoreca — Vercel build fix for commit 5afda13
+# BuyHoreca — Full project source
 
-This is a **minimal overlay**, not a replacement copy of the repository.
+Full Next.js + Shopify storefront source, updated 15 October 2026.
 
-The latest GitHub repository is the base. Apply these two source fixes without deleting or replacing the existing public/Shopify assets.
+## Latest UI change
 
-## 1. app/manifest.ts
-Replace the existing manifest with the supplied file. The only functional change is:
+Collection pages now replace the oversized/cropped collection-image banner with a compact **New Arrivals** strip using the live Shopify catalogue. It retrieves the four newest-created products through a lightweight query, keeps the product grid visible sooner than the old banner, and uses swipe scrolling on small screens with responsive grids on larger screens. Homepage Featured Categories keeps the existing 1:1 rounded image treatment.
 
-`purpose: "any maskable"` → `purpose: "maskable"`
+## Verification performed
 
-## 2. app/[[...slug]]/Storefront.tsx
-In the existing `CategoryIndex` function, add these two declarations immediately after the opening `{`:
+- Comprehensive source/TSX audit: 143 PASS / 0 FAIL / 1 environment warning.
+- Responsive/SEO audit: 53 PASS / 0 FAIL / 0 WARN.
+- Interaction audit: 15 PASS / 0 FAIL.
+- Wishlist test: PASS.
+- No TypeScript/TSX parser diagnostics in the checked app files.
 
-`const categorySchema={"@context":"https://schema.org","@type":"CollectionPage","name":"BuyHoreca Categories","description":"Explore the live BuyHoreca collections.","url":"https://buyhoreca.com/categories"};`
+A clean production build and a live authenticated Shopify checkout smoke test have not been completed on this exact archive. The deployment/domain mismatch and Shopify upstream timeout errors noted in the release docs must be resolved before production rollout.
 
-`const categoryBreadcrumb={"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://buyhoreca.com/"},{"@type":"ListItem","position":2,"name":"Categories","item":"https://buyhoreca.com/categories"}]};`
+## Run locally
 
-The supplied STORE_FRONT_PATCH.txt also shows the complete corrected CategoryIndex function.
+1. Copy `.env.local.example` to `.env.local` and provide valid Shopify Storefront API values. Never commit real credentials.
+2. Run `npm ci`.
+3. Run `npm run audit:responsive-seo`, `npm run audit:interaction`, `npm run test:wishlist`, and `npm run audit:final`.
+4. Run `npx tsc --noEmit` and `npm run build`.
+5. Complete visual checks on a phone, tablet, laptop, and desktop, including search, filters, cart, discounts, quote submission, and checkout.
 
-## After applying
-Run:
-
-`npm run build`
-
-The two TypeScript errors from the reported Vercel build should be gone. Do not remove existing `public/images`, Shopify configuration, or other project files.
+See `CATEGORY_NEW_ARRIVALS_STRIP_2026-10-15.md` and the release status files for details.

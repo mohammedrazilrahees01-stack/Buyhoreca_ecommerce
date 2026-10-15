@@ -1,0 +1,35 @@
+{
+  "product": "BuyHoreca Next.js + Shopify storefront",
+  "releaseDate": "2026-10-15",
+  "sourceArchive": "Full BuyHoreca project with mobile responsive, SEO, WhatsApp, rounded square category image, and live Shopify New Arrivals strip changes",
+  "automatedChecks": {
+    "comprehensiveStaticAndTsxAudit": {
+      "pass": 143,
+      "fail": 0,
+      "warn": 1
+    },
+    "responsiveSeoAudit": {
+      "pass": 53,
+      "fail": 0,
+      "warn": 0
+    },
+    "interactionAudit": {
+      "pass": 15,
+      "fail": 0,
+      "warn": 0
+    },
+    "wishlistTest": "PASS",
+    "typescriptTsxSyntaxParser": "PASS"
+  },
+  "buildStatusForThisExactArchive": "NOT LOCALLY VERIFIED: dependencies were not installed in artifact-building environment; syntax/static audits pass",
+  "knownReleaseBlockers": [
+    "Latest configured Vercel main deployment previously failed; new source is not deployed automatically",
+    "Official buyhoreca.com domain was observed serving a different storefront from the Next.js Vercel app",
+    "Shopify upstream timeout/reset errors recorded in Vercel runtime logs",
+    "Full ESLint cleanup and exact-lockfile dependency audit remain outstanding",
+    "Live cart, discounts, quote submission, and checkout smoke tests have not been completed against this exact archive"
+  ],
+  "secretsIncluded": false,
+  "deploymentPerformed": false,
+  "latestUiChange": "Replaced the oversized collection-image banner on category pages with a compact New Arrivals strip powered by a lightweight newest-first Shopify query; mobile swipe rail and responsive desktop grids."
+}
