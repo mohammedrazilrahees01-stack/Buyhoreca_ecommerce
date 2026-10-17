@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Storefront from "./Storefront";
+import { getCuratedBrandByName, getCuratedBrandBySlug } from "../../lib/brand-directory";
+import { serializeJsonLd } from "../../lib/json-ld";
+import { POLICY_ROUTES, policyHtmlToText } from "../../lib/shopify-policies";
 
 const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://buyhoreca.com").replace(/\/$/, "");
 const storeDomain = process.env.SHOPIFY_STORE_DOMAIN || process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || "buyhoreca.myshopify.com";
@@ -70,6 +73,8 @@ const ARTICLE_EXISTS = `query ArticleExists($blog:String!,$handle:String!){blog(
 const PRODUCT_SCHEMA = `query ProductSchema($handle:String!){product(handle:$handle){handle title description vendor productType seo{title description}featuredImage{url width height altText}images(first:10){nodes{url width height altText}}variants(first:100){nodes{id sku availableForSale price{amount currencyCode} compareAtPrice{amount currencyCode}}}reviewRating:metafield(namespace:"reviews",key:"rating"){value}reviewRatingCount:metafield(namespace:"reviews",key:"rating_count"){value}}}`;
 const COLLECTION_SCHEMA = `query CollectionSchema($handle:String!){collection(handle:$handle){handle title description seo{title description}image{url width height altText}products(first:10){nodes{vendor handle title}}}}`;
 const ARTICLE_SCHEMA = `query ArticleSchema($blog:String!,$handle:String!){blog(handle:$blog){articleByHandle(handle:$handle){handle title excerpt contentHtml seo{title description}image{url width height altText}publishedAt updatedAt blog{handle title}}}}`;
+const SHOP_POLICIES_META = `query ShopPoliciesMeta{shop{privacyPolicy{title body url}refundPolicy{title body url}shippingPolicy{title body url}termsOfService{title body url}}}`;
+
 
 const BUSINESS_SLUGS = new Set([
   "cafe-coffee-shop", "restaurant", "hotel", "bakery-pastry", "bar-lounge",
@@ -150,7 +155,7 @@ const STATIC_META: Record<string, { title: string; description: string }> = {
   shipping: { title: "Shipping & Delivery", description: "Shipping and delivery information for BuyHoreca orders and commercial requirements." },
 };
 
-const ROOT_ROUTES = new Set(["", "shop", "categories", "collections", "products", "brands", "business", "search", "cart", "wishlist", "compare", "quote", "about", "contact", "faq", "shipping", "account", "track-order", "blog"]);
+const ROOT_ROUTES = new Set(["", "shop", "categories", "collections", "products", "brands", "business", "search", "cart", "wishlist", "compare", "quote", "about", "contact", "faq", "shipping", "account", "track-order", "blog", "policies"]);
 
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }): Promise<Metadata> {
   const { slug = [] } = await params;
@@ -193,6 +198,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
       const canonical = `${baseUrl}/brands/${encodeURIComponent(c.handle || handle)}`;
       return metadataFor({ title, description, url: canonical, image: c.image, keywords: [c.title, "HoReCa", "hospitality equipment", "BuyHoreca"] });
     }
+    const plannedBrand = getCuratedBrandBySlug(handle);
+    if (plannedBrand) {
+      return metadataFor({
+        title: `${plannedBrand.name} HoReCa Products`,
+        description: `Explore ${plannedBrand.name} through the BuyHoreca brand directory. Its dedicated product collection is being prepared; contact BuyHoreca for availability and bulk quotations.`,
+        url: `${baseUrl}/brands/${encodeURIComponent(plannedBrand.slug)}`,
+        robots: NO_INDEX_ROBOTS,
+        keywords: [plannedBrand.name, "HoReCa", "hospitality equipment", "BuyHoreca"],
+      });
+    }
   }
 
   if (slug[0] === "business" && slug[1]) {
@@ -217,6 +232,22 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
 
   if (route === "collections") {
     return metadataFor({ title: "Categories", description: "Explore the live BuyHoreca collections.", url: `${baseUrl}/categories`, robots: NO_INDEX_ROBOTS });
+  }
+
+  if (slug.length === 2 && slug[0] === "policies") {
+    const handle = decodeURIComponent(slug[1]);
+    const config = POLICY_ROUTES[handle];
+    if (!config) return metadataFor({ title: "Policy not found", description: "This BuyHoreca policy page is not available.", url: `${baseUrl}/policies/${encodeURIComponent(handle)}`, robots: NO_INDEX_ROBOTS });
+    const result = await shopifyMeta<any>(SHOP_POLICIES_META, {});
+    const policy = result.ok ? result.data?.shop?.[config.key] : null;
+    const bodyText = policyHtmlToText(String(policy?.body || ""));
+    return metadataFor({
+      title: String(policy?.title || config.title),
+      description: bodyText ? bodyText.slice(0, 155) : config.description,
+      url: `${baseUrl}/policies/${handle}`,
+      robots: bodyText ? undefined : NO_INDEX_ROBOTS,
+      keywords: [config.title, "BuyHoreca", "HoReCa"],
+    });
   }
 
   const meta = STATIC_META[route] || { title: "BuyHoreca", description: DEFAULT_SITE_DESCRIPTION };
@@ -357,7 +388,9 @@ async function buildStructuredData(slug: string[]): Promise<Record<string, unkno
 
 export default async function Page({ params }: { params: Promise<{ slug?: string[] }> }) {
   const { slug = [] } = await params;
+  if (slug.length === 1 && slug[0] === "shipping") redirect("/policies/shipping-policy");
   if (slug.length > 0 && !ROOT_ROUTES.has(slug[0])) notFound();
+  if (slug[0] === "policies" && (slug.length !== 2 || !POLICY_ROUTES[decodeURIComponent(slug[1] || "")])) notFound();
 
   if (slug[0] === "products") {
     if (slug.length !== 2) notFound();
@@ -381,7 +414,8 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
       const titleKey = String(collection?.title || "").trim().toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
       const vendorKey = String(collection?.products?.nodes?.[0]?.vendor || "").trim().toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, " ").trim().replace(/\s+/g, " ");
       const validBrand = Boolean(collection && titleKey && vendorKey && titleKey === vendorKey && vendorKey !== "buyhoreca");
-      if (result.ok && !validBrand) notFound();
+      const knownBrand = getCuratedBrandBySlug(decodeURIComponent(slug[1])) || (collection ? getCuratedBrandByName(String(collection.title || "")) : undefined);
+      if (result.ok && !validBrand && !knownBrand) notFound();
     }
   }
 
@@ -401,7 +435,7 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
   return (
     <>
       {structuredData.map((schema, index) => (
-        <script key={`schema-${index}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+        <script key={`schema-${index}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }} />
       ))}
       <Suspense fallback={<div className="min-h-screen bg-white" aria-label="Loading BuyHoreca" />}>
         <Storefront />

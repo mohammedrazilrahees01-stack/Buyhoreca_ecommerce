@@ -1,27 +1,47 @@
-# BuyHoreca — Full project source
+# BuyHoreca — full-site correction candidate
 
-Full Next.js + Shopify storefront source, updated 15 October 2026.
+Next.js + Shopify storefront source. This archive contains the 16 October 2026 source audit fixes, including the blog loop/spacing correction, cursor-safe sitemap/blog pagination, safe JSON-LD serialization, responsive reduced-motion behavior, mobile navigation/sort corrections, and direct quote-row interaction fixes.
 
-## Latest UI change
+## Read this before release
 
-Collection pages now replace the oversized/cropped collection-image banner with a compact **New Arrivals** strip using the live Shopify catalogue. It retrieves the four newest-created products through a lightweight query, keeps the product grid visible sooner than the old banner, and uses swipe scrolling on small screens with responsive grids on larger screens. Homepage Featured Categories keeps the existing 1:1 rounded image treatment.
+This is a **corrected source candidate, not a production-certified/deployed release**. The full Next.js build, whole-project semantic TypeScript, ESLint, authenticated Shopify cart/discount/quote/checkout, production domain routing, and real deployed-site performance/SEO have not been verified here. The environment could not install project dependencies from npm. The lockfile also lacks direct package entries for `eslint` and `eslint-config-next` and must be regenerated with working registry access. English/Arabic routes and RTL are also not implemented yet. The account page now hands off to Shopify’s standard `/account/login` endpoint by default; live account authentication still depends on Shopify’s customer-account mode being enabled.
 
-## Verification performed
+Start with `FULL_SITE_AUDIT_AND_FIX_LOG_2026-10-16.md` for exact findings, fix details, test results, and outstanding production gates. `ZIP_REVIEW_2026-10-16.md` records the archive and integrity review. Older dated audit files are historical snapshots; use the 16 October report for the current source state.
 
-- Comprehensive source/TSX audit: 143 PASS / 0 FAIL / 1 environment warning.
-- Responsive/SEO audit: 53 PASS / 0 FAIL / 0 WARN.
-- Interaction audit: 15 PASS / 0 FAIL.
-- Wishlist test: PASS.
-- No TypeScript/TSX parser diagnostics in the checked app files.
+## Local setup
 
-A clean production build and a live authenticated Shopify checkout smoke test have not been completed on this exact archive. The deployment/domain mismatch and Shopify upstream timeout errors noted in the release docs must be resolved before production rollout.
+1. Copy `.env.local.example` to `.env.local` and fill in valid Shopify Storefront API values and the canonical site URL. Never commit real tokens.
+2. Use Node.js `>=20.9.0`.
+3. Run `npm ci`.
+4. Run `npm run dev` for local UI inspection.
 
-## Run locally
+## Featured category grid update (17 October 2026)
 
-1. Copy `.env.local.example` to `.env.local` and provide valid Shopify Storefront API values. Never commit real credentials.
-2. Run `npm ci`.
-3. Run `npm run audit:responsive-seo`, `npm run audit:interaction`, `npm run test:wishlist`, and `npm run audit:final`.
-4. Run `npx tsc --noEmit` and `npm run build`.
-5. Complete visual checks on a phone, tablet, laptop, and desktop, including search, filters, cart, discounts, quote submission, and checkout.
+The home page category rail can use up to 36 real Shopify collections and is capped at three rows at each responsive breakpoint. At 1600–1919px it allows 27 cards (9 columns × 3 rows), rather than stopping at 24 and leaving the final row incomplete. See `FEATURED_CATEGORIES_GRID_FIX_2026-10-17.md`; run `npm run test:category-grid` for its regression checks.
 
-See `CATEGORY_NEW_ARRIVALS_STRIP_2026-10-15.md` and the release status files for details.
+## Available source/regression audits
+
+```bash
+npm run audit:production
+npm run audit:final
+npm run audit:responsive-seo
+npm run audit:interaction
+npm run test:release-hardening
+npm run test:product-blog
+npm run test:brand-directory
+npm run test:checkout-integration
+npm run test:availability-filter
+npm run test:inventory
+npm run test:wishlist
+npm run test:account-policies
+npm run test:quote-flow
+npx tsc --noEmit
+npm run lint
+npm run build
+```
+
+The automated source audits do not replace the production build or live checkout verification. Before release, follow the explicit external checklist in `FULL_SITE_AUDIT_AND_FIX_LOG_2026-10-16.md`.
+
+## Shopify offer configuration
+
+The homepage displays copy actions for `WELCOME10` and `HORECA5`. Confirm that the codes are active and that their exact eligibility/threshold rules in Shopify match the advertised text before promoting them to customers.

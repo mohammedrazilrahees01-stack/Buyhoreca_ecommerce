@@ -20,7 +20,7 @@ const nextConfig = fs.readFileSync(path.join(root, 'next.config.ts'), 'utf8');
 
 const primaryExpected = [
   'Kitchen Utensils', 'Kitchen Equipment', 'Tabletop', 'Buffetware',
-  'Hotel', 'Housekeeping', 'Shop by Brand', 'Shop by Business'
+  'Hotel specials', 'Housekeeping', 'Shop by Brand', 'Shop by Business'
 ];
 
 const businessExpected = [
@@ -35,17 +35,17 @@ const checks = [
   ['Primary navigation opens by hover, click and keyboard focus', /onMouseEnter=\{\(\)=>setHoverNav\(title\)\}/.test(src) && /onClick=\{\(\)=>setHoverNav\(active\?null:title\)\}/.test(src) && /onFocus=\{\(\)=>setHoverNav\(title\)\}/.test(src)],
   ['Mega menu is viewport-centered and width-bounded', /\.bh-mega\{position:absolute;left:50%;/.test(css) && /width:min\(/.test(css) && /max-width:calc\(100vw -/.test(css)],
   ['Shop by Brand uses the full mega-menu width', /bh-mega-grid-brands/.test(src) && /\.bh-mega-grid-brands\{grid-template-columns:minmax\(0,1fr\)!important\}/.test(css) && /\.bh-mega-card-grid-brands\{grid-template-columns:minmax\(0,1fr\)!important\}/.test(css)],
-  ['Shop by Brand uses live Shopify collection images', /const brandCollections=useMemo/.test(src) && /brandCollectionsFor\(collections\)/.test(src) && /c\.image\?/.test(src) && /href=\{`\/brands\//.test(src)],
+  ['Shop by Brand prefers live Shopify collection images', /const brandDirectory=useMemo\(\(\)=>buildBrandDirectory\(collections\),\[collections\]\)/.test(src) && /const src=c\?\.image\?\.url\|\|b\.logoPath/.test(src) && /const src=item\.collection\?\.image\?\.url\|\|item\.logoPath/.test(src)],
   ['Brand menu/index is not limited to a fixed small set', !/brandCollections\.slice\(0,\d+\)/.test(src) && !/function BrandIndex\([\s\S]*?brandCollectionsFor\(collections\)\.slice\(0,\d+\)/.test(src)],
   ['Brand detail reads the actual Shopify collection', /function BrandPage/.test(src) && /getCollection\(handle/.test(src)],
-  ['Brand detail paginates collection products', /getCollection\(handle,collection\.pageInfo\.endCursor/.test(src) && /Load more products/.test(src)],
-  ['Category and brand collection surfaces remain separated', /const brandCollectionsFor/.test(src) && /const categoryCollectionsFor/.test(src) && /categoryCollectionsFor\(collections\)/.test(src)],
+  ['Brand detail paginates collection products', /getCollection\(resolvedHandle,collection\.pageInfo\.endCursor/.test(src) && /Load more products/.test(src)],
+  ['Category and brand collection surfaces remain separated', /buildBrandDirectory\(collections\)/.test(src) && /const categoryCollectionsFor=/.test(src) && /function CategoryIndex\(\{collections\}:\{collections:Collection\[\]\}\)\{const items=categoryCollectionsFor\(collections\)/.test(src)],
   ['All-category dropdown has native wheel scrolling isolated from Lenis', /id="all-category-list"[\s\S]*overflow-y-auto[\s\S]*data-lenis-prevent[\s\S]*onWheelCapture=\{handleNativeWheel\}/.test(src) && /function handleNativeWheel/.test(src)],
   ['Search panels have native nested scrolling isolated from Lenis', /focus&&<div className="bh-search-panel[\s\S]*overflow-y-auto[\s\S]*data-lenis-prevent/.test(src)],
   ['Filter/dialog/cart scroll surfaces are Lenis-isolated', /data-lenis-prevent/.test(src) && /Filter brand products/.test(src) && /Shopping cart/.test(src) && /Quick view/.test(src)],
-  ['Blog rail has no visible manual horizontal scrollbar', /bh-blog-carousel\{[^}]*overflow-x:hidden/.test(css) && !/bh-blog-carousel\{[^}]*overflow-x:auto/.test(css)],
-  ['Blog rail continuously auto-scrolls with requestAnimationFrame', /function BlogRail/.test(src) && /requestAnimationFrame\(tick\)/.test(src) && /offsetRef\.current-=18\*\(dt\/1000\)/.test(src)],
-  ['Blog rail auto-scroll speed is deliberately slow', /18\*\(dt\/1000\)/.test(src)],
+  ['Blog rail hides overflow during motion and supports manual scrolling for reduced motion', /\.bh-blog-carousel\{position:relative;display:block;overflow:hidden;/.test(css) && /@media\(prefers-reduced-motion:reduce\)\{[\s\S]*?\.bh-blog-carousel\{overflow-x:auto/.test(css)],
+  ['Blog rail continuously auto-scrolls with requestAnimationFrame', /function BlogRail/.test(src) && /requestAnimationFrame\(tick\)/.test(src) && /offsetRef\.current=\(offsetRef\.current\+18\*\(dt\/1000\)\)%cycle/.test(src)],
+  ['Blog rail moves leftward continuously at a restrained speed', /offsetRef\.current=\(offsetRef\.current\+18\*\(dt\/1000\)\)%cycle/.test(src) && /translate3d\(\$\{-offsetRef\.current\}px,0,0\)/.test(src)],
   ['Blog rail pauses only on individual card hover/focus', /onMouseEnter=\{pause\} onMouseLeave=\{resume\}/.test(src) && /onFocus=\{pause\}|onFocusCapture=\{pause\}/.test(src) && !/onMouseEnter=\{pause\}.*bh-blog-carousel/.test(src)],
   ['Blog rail does not hijack mouse-wheel/trackpad vertical scrolling', /bh-blog-carousel[^}]*role=\"region\"/.test(src) && !/bh-blog-carousel[\s\S]*onWheel=/.test(src)],
   ['Reduced motion disables the animated blog rail', /prefers-reduced-motion: reduce/.test(src) && /prefers-reduced-motion:reduce/.test(css)],
@@ -94,6 +94,7 @@ function walk(dir) {
   }
 }
 walk(path.join(root, 'app'));
+walk(path.join(root, 'lib'));
 if (ts) {
   for (const f of files.sort()) {
     const text = fs.readFileSync(f, 'utf8');

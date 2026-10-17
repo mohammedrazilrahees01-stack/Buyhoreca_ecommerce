@@ -46,13 +46,19 @@ for (const [rel, src] of Object.entries({
   'app/api/shopify/route.ts': api,
   'app/error.tsx': errors,
   'app/not-found.tsx': notFound,
+  'lib/brand-directory.ts': fs.readFileSync(path.join(ROOT, 'lib/brand-directory.ts'), 'utf8'),
+  'lib/json-ld.ts': fs.readFileSync(path.join(ROOT, 'lib/json-ld.ts'), 'utf8'),
+  'lib/shopify-pagination.ts': fs.readFileSync(path.join(ROOT, 'lib/shopify-pagination.ts'), 'utf8'),
+  'lib/customer-account.ts': fs.readFileSync(path.join(ROOT, 'lib/customer-account.ts'), 'utf8'),
+  'lib/shopify-policies.ts': fs.readFileSync(path.join(ROOT, 'lib/shopify-policies.ts'), 'utf8'),
+  'lib/quote-items.ts': fs.readFileSync(path.join(ROOT, 'lib/quote-items.ts'), 'utf8'),
 })) {
   const diags = parseTsx(path.join(ROOT, rel), src);
   test(`Syntax parse: ${rel}`, !diags, diags ? diags.join('; ') : 'No TypeScript/TSX parse diagnostics');
 }
 
 // Required files
-for (const rel of ['app/layout.tsx','app/globals.css','app/sitemap.ts','app/robots.ts','app/manifest.ts','app/api/shopify/route.ts','app/[[...slug]]/Storefront.tsx','app/[[...slug]]/page.tsx','public/og-image.png','public/apple-touch-icon.png','app/icon.png']) {
+for (const rel of ['app/layout.tsx','app/globals.css','app/sitemap.ts','app/robots.ts','app/manifest.ts','app/api/shopify/route.ts','app/[[...slug]]/Storefront.tsx','app/[[...slug]]/page.tsx','lib/brand-directory.ts','lib/json-ld.ts','lib/shopify-pagination.ts','lib/customer-account.ts','lib/shopify-policies.ts','public/og-image.png','public/apple-touch-icon.png','app/icon.png']) {
   test(`Required file exists: ${rel}`, fs.existsSync(path.join(ROOT, rel)));
 }
 
@@ -60,11 +66,16 @@ for (const rel of ['app/layout.tsx','app/globals.css','app/sitemap.ts','app/robo
 const activeBrandRefs = ['BRAND_LOGOS','BrandRecord','getBrandMetaobjects','BRAND_METAOBJECTS','brandLogoFor','NEXT_PUBLIC_SHOPIFY_BRAND_METAOBJECT_TYPE'];
 for (const ref of activeBrandRefs) test(`No legacy brand-${ref} reference in active source`, ![storefront,page,layout,api,envExample].some(s => s.includes(ref)), 'Collection images are the sole logo source in active app code');
 test('Collection query includes collection image and vendor seed', /const COLLECTIONS=.*image\{url/.test(storefront) && /products\(first:1\)\{nodes\{vendor\}\}/.test(storefront));
+const brandDirectorySource = fs.readFileSync(path.join(ROOT, 'lib/brand-directory.ts'), 'utf8');
+const brandLogoFiles = fs.readdirSync(path.join(ROOT, 'public/images/brands')).filter(name => name.endsWith('.png'));
+test('Curated directory covers 64 logo references plus four existing brands', /CURATED_BRANDS/.test(brandDirectorySource) && (brandDirectorySource.match(/logoPath: brandAsset\(/g)||[]).length === 64 && /name: \"Hamilton Beach\"/.test(brandDirectorySource) && /name: \"JB Products\"/.test(brandDirectorySource) && /name: \"Jiwins\"/.test(brandDirectorySource) && /name: \"Manitowoc\"/.test(brandDirectorySource));
+test('All supplied individual brand logo crops are included', brandLogoFiles.length === 64 && brandLogoFiles.every(name => fs.statSync(path.join(ROOT, 'public/images/brands', name)).size > 0), `${brandLogoFiles.length}/64 assets found`);
+test('Planned brands are visible without fake product collections and stay noindex', /status: collection \? \"available\" : \"coming-soon\"/.test(brandDirectorySource) && /robots: NO_INDEX_ROBOTS/.test(page));
 test('Single collection query includes collection image', /const COLLECTION=.*image\{url/.test(storefront));
-test('Brand matching is collection-title to collection product vendor', /brandCollectionsFor=/.test(storefront) && /brandKey\(c\.title\)===brandKey\(c\.vendor\)/.test(storefront));
-test('Home brand cards use Shopify collection image', /function BrandShowcase[\s\S]*c\.image\?\.url[\s\S]*<img/.test(storefront));
-test('All Brands links use collection handle', /function BrandIndex[\s\S]*href=\{`\/brands\/\$\{encodeURIComponent\(c\.handle\)\}`\}/.test(storefront));
-test('Brand page loads actual Shopify collection', /function BrandPage[\s\S]*getCollection\(handle/.test(storefront));
+test('Brand matching uses normalized Shopify collection title or planned handle', /buildBrandDirectory\(collections\)/.test(storefront) && /function bestCollectionMatch/.test(fs.readFileSync(path.join(ROOT,'lib/brand-directory.ts'),'utf8')) && /collection\.handle === brand\.slug/.test(fs.readFileSync(path.join(ROOT,'lib/brand-directory.ts'),'utf8')));
+test('Home brand cards prefer Shopify collection images and fall back to curated logos', /function BrandLogoVisual[\s\S]*item\.collection\?\.image\?\.url\|\|item\.logoPath/.test(storefront) && /function BrandShowcase[\s\S]*buildBrandDirectory\(collections\)/.test(storefront));
+test('Brand cards link to real collection handles or stable planned slugs', /function BrandLogoCard[\s\S]*item\.collection\?\.handle\|\|item\.slug/.test(storefront));
+test('Brand page resolves live collection handles and safely narrows curated entries', /const brandEntry=brandDirectory\.find\(item=>item\.slug===handle\|\|item\.collection\?\.handle===handle\)\|\|getCuratedBrandBySlug\(handle\)/.test(storefront) && /const resolvedHandle\s*=\s*brandEntry\s*&&\s*"collection"\s+in\s+brandEntry\s*\?\s*\(brandEntry\.collection\?\.handle\s*\|\|\s*handle\)\s*:\s*handle/.test(storefront) && /getCollection\(resolvedHandle/.test(storefront));
 test('Brand page paginates collection products', /function BrandPage[\s\S]*loadMore=async/.test(storefront));
 test('Product detail uses matching collection image for brand logo', /const brandCollection=useMemo\(\(\)=>collections\.find\(c=>brandKey\(c\.title\)===brandKey\(product\.brand\)\)/.test(storefront) && /const brandLogo=brandCollection\?\.image\?\.url/.test(storefront));
 test('Brand discovery is collection-driven without a full product-vendor scan', !/getProductVendors|PRODUCT_VENDORS|homeBrandVendors|brandVendors/.test(storefront));
@@ -87,11 +98,18 @@ test('Out-of-stock values are stripped from every shared filter panel', storefro
 test('Baseline availability filter offers In stock only', /baseline-availability[^;]+label:\"In stock\"/.test(storefront) && !storefront.includes('id:"unavailable",label:"Out of stock"'));
 test('Out-of-stock selections are hidden, rejected, and excluded from Shopify requests', /const activeFacetSelections=\(selected:Record<string,AppliedFacet>\)=>Object\.values\(selected\)\.filter\(item=>!isOutOfStockFilterLabel\(item\.label\)\)/.test(storefront) && /const activeFacetInputs=\(selected:Record<string,AppliedFacet>\)=>activeFacetSelections\(selected\)\.map\(item=>item\.input\)/.test(storefront) && (storefront.match(/if\(isOutOfStockFilterLabel\(value\.label\)\)return;/g)||[]).length===4);
 test('Product stock states and quote flows remain intact', /const variantOutOfStock=/.test(storefront) && /Out of stock · Request a quote/.test(storefront) && /Request a Quote/.test(storefront));
-test('Brand pages support Shopify facet filtering', /function BrandPage[\s\S]*FacetFilters/.test(storefront) && /function BrandPage[\s\S]*getCollection\(handle/.test(storefront));
+test('Brand pages support Shopify facet filtering', /function BrandPage[\s\S]*FacetFilters/.test(storefront) && /function BrandPage[\s\S]*getCollection\(resolvedHandle/.test(storefront));
 test('Brand pages support sorting and pagination', /function BrandPage[\s\S]*Sort brand products/.test(storefront) && /function BrandPage[\s\S]*loadMore=async/.test(storefront));
 test('Category index excludes brand collections', /function CategoryIndex[\s\S]*const items=categoryCollectionsFor\(collections\)/.test(storefront));
 test('Header category search excludes brand collections', /const categoryCollections=useMemo\(\(\)=>categoryCollectionsFor\(collections\)/.test(storefront));
 test('Product information uses real interactive tabs', /function ProductInfoTabs/.test(storefront) && /role="tablist"/.test(storefront) && /role="tabpanel"/.test(storefront));
+test('Product page supports copy SKU, share, save and compare actions', /const copySku=async/.test(storefront) && /const shareProduct=async/.test(storefront) && /const toggleSaved=/.test(storefront) && /const toggleCompared=/.test(storefront));
+test('Product page supports direct quantity entry and estimated subtotal', /aria-label="Product quantity"/.test(storefront) && /Estimated subtotal/.test(storefront) && /lineSubtotal:Money/.test(storefront));
+test('Unavailable product variants can be selected for precise quote requests', /onClick=\{\(\)=>selectVariant\(v\)\}/.test(storefront) && /if\(addToQuote\(product,variant,q\)\)window.location.href=\"\/quote\"/.test(storefront));
+test('Blog marquee uses dynamic copies and all supplied article cards', /const items=articles;/.test(storefront) && /const needed=Math.max\(2,Math.ceil\(viewport\/cycle\)\+1\)/.test(storefront) && /Array.from\(\{length:copyCount\}/.test(storefront));
+test('Blog marquee seam uses exact group width without an external gap', /const cycle=cycleWidth\(\);/.test(storefront) && /offsetRef.current=\(offsetRef.current\+18\*\(dt\/1000\)\)%cycle/.test(storefront) && /offsetRef.current=\(\(offsetRef.current%cycle\)\+cycle\)%cycle/.test(storefront));
+test('Blog marquee has dynamic copies and reduced-motion fallback', /bh-blog-group-duplicate\{display:none!important\}/.test(css) && /bh-blog-carousel\{overflow-x:auto;scroll-behavior:auto!important/.test(css));
+test('Blog index pagination has cursor guards and a separate lightweight home query', /query Blogs\(\$first:Int!,\$after:String\)/.test(storefront) && /query BlogArticles\(\$handle:String!,\$first:Int!,\$after:String\)/.test(storefront) && /query HomeBlogs\(\$first:Int!\)/.test(storefront) && /collectPages/.test(storefront) && /seenCursors/.test(fs.readFileSync(path.join(ROOT, 'lib/shopify-pagination.ts'), 'utf8')) && /nextCursor\s*===\s*after/.test(fs.readFileSync(path.join(ROOT, 'lib/shopify-pagination.ts'), 'utf8')));
 
 // Routing / content
 for (const route of ['', 'shop','categories','brands','business','search','cart','wishlist','compare','quote','about','contact','faq','shipping','account','track-order','blog']) test(`Root route allowed: ${route || '/'}`, new RegExp(`"${route}"`).test(page) || (route === '' && /new Set\(\[/.test(page)));
@@ -111,7 +129,7 @@ test('Mobile floating controls clear bottom navigation', /\.bh-whatsapp\{bottom:
 test('WhatsApp uses the CSS positioning rule without conflicting utility positions', /className=\"bh-whatsapp grid size-14/.test(storefront) && !/className=\"bh-whatsapp[^\"]*\b(?:fixed|bottom-5|right-5|z-40)\b/.test(storefront) && /\.bh-whatsapp\{position:fixed;/.test(css));
 test('Touch devices keep product thumbnails available', /@media\(pointer:coarse\)\{\.bh-product-thumbs\{opacity:1\}\}/.test(css));
 test('Catalog paint containment does not clip overflow/shadows', !/\.bh-catalog-grid,\.bh-blog-carousel\{contain:layout paint\}/.test(css));
-test('Blog rail is 2/3/4 responsive', /\.bh-blog-card\{width:calc\(\(100% - 12px\)\/2\)/.test(css) && /@media\(min-width:768px\)\{\.bh-blog-card\{width:calc\(\(100% - 24px\)\/3\)\}\}/.test(css) && /@media\(min-width:1200px\)\{\.bh-blog-card\{width:calc\(\(100% - 36px\)\/4\)\}\}/.test(css));
+test('Blog rail is 2/3/4 responsive', /\.bh-blog-card\{flex:0 0 calc\(\(100cqw - 12px\)\/2\);width:calc\(\(100cqw - 12px\)\/2\);min-width:0\}/.test(css) && /@container \(min-width:768px\)\{\.bh-blog-card\{flex-basis:calc\(\(100cqw - 24px\)\/3\);width:calc\(\(100cqw - 24px\)\/3\)\}\}/.test(css) && /@container \(min-width:1200px\)\{\.bh-blog-card\{flex-basis:calc\(\(100cqw - 36px\)\/4\);width:calc\(\(100cqw - 36px\)\/4\)\}\}/.test(css));
 test('Brand grid is responsive 2/3/4/6', /\.bh-brand-grid\{display:grid;grid-template-columns:repeat\(2/.test(css) && /@media\(min-width:640px\).*repeat\(3/.test(css) && /@media\(min-width:768px\).*repeat\(4/.test(css) && /@media\(min-width:1024px\).*repeat\(6/.test(css));
 test('Mega menu stays within viewport', /\.bh-mega\{.*max-width:calc\(100vw - 24px\)/.test(css));
 test('Category mega-menu thumbnails use a dedicated landscape frame', /className="bh-mega-category-thumb shrink-0 overflow-hidden rounded-\[7px\] bg-slate-100"/.test(storefront) && /\.bh-mega-category-thumb\{display:block;flex:0 0 68px;width:68px;height:48px;aspect-ratio:17\/12/.test(css));
@@ -153,6 +171,10 @@ for (const item of [
   ['twitter card configured', /twitter: \{ card: "summary_large_image"/.test(layout)],
   ['organization JSON-LD emitted', /"@type":"Organization"/.test(layout)],
   ['website SearchAction JSON-LD emitted', /"@type":"SearchAction"/.test(layout)],
+  ['JSON-LD serialization escapes HTML-sensitive characters', /serializeJsonLd/.test(layout) && /serializeJsonLd/.test(page) && /\\u003c/.test(fs.readFileSync(path.join(ROOT, 'lib/json-ld.ts'), 'utf8'))],
+  ['Sitemap omits the noindex quote route', !/staticPaths = \[\s\S]*?\"\/quote\"/.test(sitemap) && /\"quote\"/.test(page)],
+  ['Home hero has a distinct fallback and eager loading priority', /loading=\"eager\" fetchPriority=\"high\"/.test(storefront) && /image\.src=\"\/images\/hero-main\.png\"/.test(storefront) && fs.existsSync(path.join(ROOT, 'public/images/hero-main.png'))],
+  ['Catalogue product images are lazy-loaded and decoded asynchronously', /<img[^>]*loading=\"lazy\" decoding=\"async\"[^>]*className=\"bh-product-image h-full w-full object-contain/.test(storefront)],
   ['Google verification env supported', /NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION/.test(layout)],
   ['dynamic generateMetadata exists', /export async function generateMetadata/.test(page)],
   ['product SEO metadata uses Shopify SEO fields', /p\.seo\?\.title/.test(page) && /p\.seo\?\.description/.test(page)],
@@ -173,6 +195,22 @@ for (const item of [
   ['manifest is configured', /export default function manifest/.test(manifest)],
 ]) test(item[0], item[1]);
 
+// Customer-account and merchant policy pages
+const accountHelperSource = fs.readFileSync(path.join(ROOT, 'lib/customer-account.ts'), 'utf8');
+const policyHelperSource = fs.readFileSync(path.join(ROOT, 'lib/shopify-policies.ts'), 'utf8');
+test('Customer account page offers a real Shopify-hosted sign-in/create-account CTA rather than a setup warning', /function CustomerAccountPage\(\)/.test(storefront) && /Sign in or create an account/.test(storefront) && /href=\{accountUrl\}/.test(storefront) && !/Customer accounts need configuration/.test(storefront));
+test('Customer account URL must use HTTPS and rejects credentials', /target\.protocol\s*!==\s*"https:"/.test(accountHelperSource) && /target\.username\s*\|\|\s*target\.password/.test(accountHelperSource));
+test('Customer account route uses a configured vanity URL or safe default Shopify /account/login route', /NEXT_PUBLIC_SHOPIFY_CUSTOMER_ACCOUNT_URL/.test(envExample) && /shopifyCustomerLoginUrl/.test(storefront) && /\.myshopify\.com\/account\/login/.test(accountHelperSource) && /customerAccountUrl/.test(accountHelperSource));
+test('Policy pages load actual Shopify policy content without injecting merchant HTML', /SHOP_POLICIES_QUERY/.test(storefront) && /policyHtmlToText/.test(storefront) && !/dangerouslySetInnerHTML/.test(storefront.match(/function PolicyPage[\s\S]*?function BrandLogoVisual/)?.[0] || ''));
+test('Privacy, returns/refunds, shipping, and terms routes are mapped', ['privacy-policy','refund-policy','shipping-policy','terms-of-service'].every(handle => policyHelperSource.includes(`"${handle}"`)) && /slug\[0\] === "policies"/.test(page));
+test('Unpublished policies are noindex and absent from sitemap', /robots: bodyText \? undefined : NO_INDEX_ROBOTS/.test(page) && /policyEntries/.test(sitemap) && /policy\.body\.trim\(\)/.test(sitemap));
+test('Legacy shipping path redirects to canonical Shopify policy route', /redirect\("\/policies\/shipping-policy"\)/.test(page) && !/"\/shipping"/.test(sitemap));
+
+// Quote-basket behavior
+const quoteHelperSource = fs.readFileSync(path.join(ROOT, 'lib/quote-items.ts'), 'utf8');
+test('Direct product quote requests merge into an existing basket idempotently', /mergeQuoteProduct\(current,product,variant\.id/.test(storefront) && /const next=mergeQuoteProduct/.test(storefront) && /alreadyPresent/.test(quoteHelperSource) && /item\.product\.id === product\.id && item\.variantId === variantId/.test(quoteHelperSource));
+test('Quote basket persists and broadcasts a newly merged product', /writeQuoteItems\(next\);window\.dispatchEvent\(new CustomEvent\("buyhoreca:quote"/.test(storefront));
+
 // API safety
 test('API validates JSON request object', /const input = body as \{ query\?: unknown; variables\?: unknown; operationName\?: unknown \};/.test(api));
 test('API bounds JSON request payload size', /MAX_REQUEST_BYTES = 192 \* 1024/.test(api) && /content-length/.test(api) && /new TextEncoder\(\)\.encode\(rawBody\)\.byteLength > MAX_REQUEST_BYTES/.test(api));
@@ -184,6 +222,14 @@ test('API clears timeout in finally', /finally \{[\s\S]*clearTimeout/.test(api))
 test('API does not return upstream error details directly', !/json\.errors.*message|error\.message.*json/.test(api));
 
 // Project hygiene
+const lockfile = JSON.parse(fs.readFileSync(path.join(ROOT, 'package-lock.json'), 'utf8'));
+const declaredDependencies = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+const missingLockEntries = Object.keys(declaredDependencies).filter(name => !lockfile.packages?.[`node_modules/${name}`]);
+if (missingLockEntries.length) {
+  warn('package-lock dependency completeness', `Missing locked package entries: ${missingLockEntries.join(', ')}. Regenerate package-lock.json with npm install on a machine with registry access before release; do not run npm ci until fixed.`);
+} else {
+  pass('package-lock dependency completeness', 'All direct dependencies have lockfile entries');
+}
 const packageAudit = pkg.scripts?.['audit:comprehensive'] === 'node scripts/comprehensive-audit.mjs' && pkg.scripts?.['audit:final'] === 'node scripts/comprehensive-audit.mjs';
 test('Package exposes comprehensive audit scripts', packageAudit);
 test('No stale brand metaobject env setting', !/NEXT_PUBLIC_SHOPIFY_BRAND_METAOBJECT_TYPE/.test(envExample));
@@ -192,31 +238,38 @@ test('Current brand collection workflow documentation exists', fs.existsSync(pat
 test('Original source does not include local brand folder requirement', !/public\/images\/brands/.test(storefront));
 test('Obsolete Storefront backup is removed from release tree', !fs.existsSync(path.join(ROOT,'app/[[...slug]]/Storefront.tsx.bak')));
 
-// Try production build only when dependencies exist; otherwise document the blocker rather than claiming pass.
-if (fs.existsSync(path.join(ROOT,'node_modules','.bin','next'))) {
-  try {
-    execFileSync('npm',['run','build'],{cwd:ROOT,stdio:'pipe',timeout:180000});
-    pass('Next.js production build', 'npm run build completed');
-  } catch (e) {
-    fail('Next.js production build', (e.stdout?.toString() || e.stderr?.toString() || e.message).slice(-4000));
+// Run full project checks when installed toolchain exists. Missing tools are blockers,
+// not silent passes. Keep the audit suitable for CI by returning non-zero on any WARN.
+const localBin = path.join(ROOT, 'node_modules', '.bin');
+const runGate = (label, command, args, availablePath) => {
+  if (!fs.existsSync(availablePath)) {
+    warn(label, `Skipped: required local tool is missing (${path.relative(ROOT, availablePath)}). Restore dependencies and rerun before release.`);
+    return;
   }
-} else {
-  warn('Next.js production build', 'Skipped: node_modules is unavailable because npm ci timed out in this environment');
-}
+  try {
+    execFileSync(command, args, { cwd: ROOT, stdio: 'pipe', timeout: 180000, shell: process.platform === 'win32' });
+    pass(label, `${command} ${args.join(' ')} completed`);
+  } catch (e) {
+    fail(label, (e.stdout?.toString() || e.stderr?.toString() || e.message).slice(-5000));
+  }
+};
+runGate('Whole-project semantic TypeScript', process.platform === 'win32' ? path.join(localBin, 'tsc.cmd') : path.join(localBin, 'tsc'), ['--noEmit'], path.join(localBin, process.platform === 'win32' ? 'tsc.cmd' : 'tsc'));
+runGate('ESLint', process.platform === 'win32' ? path.join(localBin, 'eslint.cmd') : path.join(localBin, 'eslint'), ['.'], path.join(localBin, process.platform === 'win32' ? 'eslint.cmd' : 'eslint'));
+runGate('Next.js production build', 'npm', ['run', 'build'], path.join(localBin, process.platform === 'win32' ? 'next.cmd' : 'next'));
 
 const failed = results.filter(r => r.status === 'FAIL').length;
 const warned = results.filter(r => r.status === 'WARN').length;
 const passed = results.filter(r => r.status === 'PASS').length;
 const lines = [
   `BuyHoreca Comprehensive Audit`,
-  `Date: 2026-10-12`,
+  `Date: 2026-10-16`,
   `PASS: ${passed}  FAIL: ${failed}  WARN: ${warned}`,
   '',
   ...results.map(r => `[${r.status}] ${r.name}${r.detail ? ` — ${r.detail}` : ''}`),
   '',
-  failed ? 'AUDIT STATUS: FAILED — fix the listed failures before release.' : 'AUDIT STATUS: PASS WITH WARNINGS — no static audit failures; see warnings for environment verification gaps.'
+  failed ? 'AUDIT STATUS: FAILED — fix the listed failures before release.' : warned ? 'AUDIT STATUS: RELEASE BLOCKED — no static source assertions failed, but the warnings include unverified build/install blockers that must be resolved before release.' : 'AUDIT STATUS: PASS — static checks and configured build checks passed.'
 ];
 const output = lines.join('\n');
 console.log(output);
-fs.writeFileSync(path.join(ROOT,'COMPREHENSIVE_AUDIT_2026-10-12.txt'), output+'\n');
-if (failed) process.exit(1);
+fs.writeFileSync(path.join(ROOT,'COMPREHENSIVE_AUDIT_2026-10-16.txt'), output+'\n');
+if (failed || warned) process.exit(1);

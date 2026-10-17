@@ -1,6 +1,6 @@
 BuyHoreca Comprehensive Audit
 Date: 2026-10-12
-PASS: 150  FAIL: 0  WARN: 1
+PASS: 161  FAIL: 0  WARN: 1
 
 [PASS] Syntax parse: app/[[...slug]]/Storefront.tsx — No TypeScript/TSX parse diagnostics
 [PASS] Syntax parse: app/[[...slug]]/page.tsx — No TypeScript/TSX parse diagnostics
@@ -11,6 +11,7 @@ PASS: 150  FAIL: 0  WARN: 1
 [PASS] Syntax parse: app/api/shopify/route.ts — No TypeScript/TSX parse diagnostics
 [PASS] Syntax parse: app/error.tsx — No TypeScript/TSX parse diagnostics
 [PASS] Syntax parse: app/not-found.tsx — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: lib/brand-directory.ts — No TypeScript/TSX parse diagnostics
 [PASS] Required file exists: app/layout.tsx
 [PASS] Required file exists: app/globals.css
 [PASS] Required file exists: app/sitemap.ts
@@ -19,6 +20,7 @@ PASS: 150  FAIL: 0  WARN: 1
 [PASS] Required file exists: app/api/shopify/route.ts
 [PASS] Required file exists: app/[[...slug]]/Storefront.tsx
 [PASS] Required file exists: app/[[...slug]]/page.tsx
+[PASS] Required file exists: lib/brand-directory.ts
 [PASS] Required file exists: public/og-image.png
 [PASS] Required file exists: public/apple-touch-icon.png
 [PASS] Required file exists: app/icon.png
@@ -29,11 +31,14 @@ PASS: 150  FAIL: 0  WARN: 1
 [PASS] No legacy brand-brandLogoFor reference in active source — Collection images are the sole logo source in active app code
 [PASS] No legacy brand-NEXT_PUBLIC_SHOPIFY_BRAND_METAOBJECT_TYPE reference in active source — Collection images are the sole logo source in active app code
 [PASS] Collection query includes collection image and vendor seed
+[PASS] Curated directory covers 64 logo references plus four existing brands
+[PASS] All supplied individual brand logo crops are included — 64/64 assets found
+[PASS] Planned brands are visible without fake product collections and stay noindex
 [PASS] Single collection query includes collection image
-[PASS] Brand matching is collection-title to collection product vendor
-[PASS] Home brand cards use Shopify collection image
-[PASS] All Brands links use collection handle
-[PASS] Brand page loads actual Shopify collection
+[PASS] Brand matching uses normalized Shopify collection title or planned handle
+[PASS] Home brand cards prefer Shopify collection images and fall back to curated logos
+[PASS] Brand cards link to real collection handles or stable planned slugs
+[PASS] Brand page resolves planned slug to the actual Shopify collection handle
 [PASS] Brand page paginates collection products
 [PASS] Product detail uses matching collection image for brand logo
 [PASS] Brand discovery is collection-driven without a full product-vendor scan
@@ -58,6 +63,12 @@ PASS: 150  FAIL: 0  WARN: 1
 [PASS] Category index excludes brand collections
 [PASS] Header category search excludes brand collections
 [PASS] Product information uses real interactive tabs
+[PASS] Product page supports copy SKU, share, save and compare actions
+[PASS] Product page supports direct quantity entry and estimated subtotal
+[PASS] Unavailable product variants can be selected for precise quote requests
+[PASS] Blog marquee uses dynamic copies and all supplied article cards
+[PASS] Blog marquee seam uses exact group width without an external gap
+[PASS] Blog marquee has dynamic copies and reduced-motion fallback
 [PASS] Root route allowed: /
 [PASS] Root route allowed: shop
 [PASS] Root route allowed: categories

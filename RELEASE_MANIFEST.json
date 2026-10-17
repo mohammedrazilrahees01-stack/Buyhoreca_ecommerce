@@ -1,12 +1,26 @@
 {
   "product": "BuyHoreca Next.js + Shopify storefront",
-  "releaseDate": "2026-10-15",
-  "sourceArchive": "Full BuyHoreca project with mobile responsive, SEO, WhatsApp, rounded square category image, and live Shopify New Arrivals strip changes",
+  "releaseDate": "2026-10-16",
+  "artifactStatus": "Corrected source candidate; not production-certified and not deployed",
+  "sourceArchive": "Full-source correction pass for blog marquee loop/spacing, Shopify pagination, SEO serialization/sitemap, reduced-motion behavior, mobile navigation and catalog sorting, direct quote-row controls, and image fallback.",
   "automatedChecks": {
     "comprehensiveStaticAndTsxAudit": {
-      "pass": 143,
+      "pass": 170,
       "fail": 0,
-      "warn": 1
+      "warn": 1,
+      "warning": "Next.js build skipped: dependency installation could not complete because npm registry access failed; node_modules unavailable."
+    },
+    "productionStaticRequirements": {
+      "pass": 45,
+      "fail": 0
+    },
+    "typescriptTsxParseAudit": {
+      "pass": 14,
+      "fail": 0
+    },
+    "releaseHardeningRegression": {
+      "pass": 21,
+      "fail": 0
     },
     "responsiveSeoAudit": {
       "pass": 53,
@@ -15,21 +29,78 @@
     },
     "interactionAudit": {
       "pass": 15,
+      "fail": 0
+    },
+    "productPageBlogRegression": {
+      "pass": 14,
+      "fail": 0
+    },
+    "brandDirectoryRegression": {
+      "pass": 18,
+      "fail": 0
+    },
+    "shopifyCheckoutSourceWiring": {
+      "pass": 10,
       "fail": 0,
-      "warn": 0
+      "note": "Static source-wiring check only; not a live authenticated checkout/payment test."
+    },
+    "availabilityFilterRegression": {
+      "pass": 5,
+      "fail": 0
+    },
+    "inventoryUiTest": {
+      "pass": 10,
+      "fail": 0
     },
     "wishlistTest": "PASS",
-    "typescriptTsxSyntaxParser": "PASS"
+    "standaloneHelperStrictTypeScript": "PASS",
+    "chromiumCssFixture": {
+      "viewportsPx": [
+        320,
+        360,
+        375,
+        480,
+        500,
+        576,
+        767,
+        768,
+        800,
+        1024,
+        1199,
+        1200,
+        1280,
+        1440,
+        1920,
+        2560,
+        3840
+      ],
+      "pass": true,
+      "details": "Isolated CSS/markup fixture only; expected gap, no horizontal document overflow, hover, reduced-motion, and zero JS errors."
+    }
   },
-  "buildStatusForThisExactArchive": "NOT LOCALLY VERIFIED: dependencies were not installed in artifact-building environment; syntax/static audits pass",
-  "knownReleaseBlockers": [
-    "Latest configured Vercel main deployment previously failed; new source is not deployed automatically",
-    "Official buyhoreca.com domain was observed serving a different storefront from the Next.js Vercel app",
-    "Shopify upstream timeout/reset errors recorded in Vercel runtime logs",
-    "Full ESLint cleanup and exact-lockfile dependency audit remain outstanding",
-    "Live cart, discounts, quote submission, and checkout smoke tests have not been completed against this exact archive"
-  ],
-  "secretsIncluded": false,
+  "buildStatusForThisExactArchive": "NOT VERIFIED: npm ci/full Next.js build/whole-project semantic TypeScript/ESLint were not completed in the available environment.",
   "deploymentPerformed": false,
-  "latestUiChange": "Replaced the oversized collection-image banner on category pages with a compact New Arrivals strip powered by a lightweight newest-first Shopify query; mobile swipe rail and responsive desktop grids."
+  "secretsIncluded": false,
+  "features": [
+    "stock-aware product quantity controls and estimated line subtotal",
+    "SKU copy/share, wishlist and compare",
+    "quote basket supports multiple products and precise variant/quantity requests",
+    "continuous blog marquee with normalized leftward motion, consistent seam spacing, dynamic copies, pause behavior and reduced-motion manual scrolling",
+    "guarded cursor pagination for Shopify blog/articles/collections and nested sitemap article connection",
+    "safe JSON-LD serialization",
+    "mobile navigation sorting/key fixes and direct quote-row interactions",
+    "responsive motion/hover handling"
+  ],
+  "knownReleaseBlockers": [
+    "Full Next.js build, whole-project typecheck and lint remain unverified because dependencies could not be installed",
+    "Vercel project/domain alignment needs verification; no deployment was performed",
+    "Live Shopify catalog/cart/discount/quote/checkout/payment tests are outstanding; prior runtime logs contained upstream timeouts/resets",
+    "WELCOME10 and HORECA5 validity and eligibility must be confirmed in Shopify Admin",
+    "English/Arabic localization, locale routes, RTL layout and localized SEO are not implemented",
+    "Approved privacy/terms/returns policy destinations need to be supplied and linked",
+    "Shopify API operation allow-list/rate-limit hardening and trusted CMS HTML sanitation review remain",
+    "Official high-resolution brand logos should replace some low-resolution source collage crops",
+    "Business accounts remain deferred",
+    "Live SEO/Search Console/Lighthouse/Core Web Vitals and production sitemap/robots verification remain outstanding"
+  ]
 }

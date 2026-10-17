@@ -13,7 +13,16 @@
     "audit:comprehensive": "node scripts/comprehensive-audit.mjs",
     "audit:responsive-seo": "node scripts/responsive-seo-audit.mjs",
     "audit:interaction": "node scripts/interaction-audit-2026-10-14.mjs",
-    "test:availability-filter": "node scripts/test-availability-filter.mjs"
+    "test:availability-filter": "node scripts/test-availability-filter.mjs",
+    "test:brand-directory": "node scripts/test-brand-directory.mjs",
+    "test:checkout-integration": "node scripts/test-shopify-checkout-integration.mjs",
+    "test:product-blog": "node scripts/test-product-page-blog-marquee.mjs",
+    "test:inventory": "node scripts/test-inventory-ui.mjs",
+    "audit:production": "node scripts/final-production-audit.mjs",
+    "test:release-hardening": "node scripts/test-release-hardening.mjs",
+    "test:account-policies": "node scripts/test-account-policy-pages.mjs",
+    "test:quote-flow": "node scripts/test-quote-flow.mjs",
+    "test:category-grid": "node scripts/test-featured-category-grid.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.14",

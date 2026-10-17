@@ -1,0 +1,194 @@
+BuyHoreca Comprehensive Audit
+Date: 2026-10-16
+PASS: 184  FAIL: 0  WARN: 4
+
+[PASS] Syntax parse: app/[[...slug]]/Storefront.tsx — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: app/[[...slug]]/page.tsx — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: app/layout.tsx — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: app/sitemap.ts — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: app/robots.ts — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: app/manifest.ts — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: app/api/shopify/route.ts — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: app/error.tsx — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: app/not-found.tsx — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: lib/brand-directory.ts — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: lib/json-ld.ts — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: lib/shopify-pagination.ts — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: lib/customer-account.ts — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: lib/shopify-policies.ts — No TypeScript/TSX parse diagnostics
+[PASS] Syntax parse: lib/quote-items.ts — No TypeScript/TSX parse diagnostics
+[PASS] Required file exists: app/layout.tsx
+[PASS] Required file exists: app/globals.css
+[PASS] Required file exists: app/sitemap.ts
+[PASS] Required file exists: app/robots.ts
+[PASS] Required file exists: app/manifest.ts
+[PASS] Required file exists: app/api/shopify/route.ts
+[PASS] Required file exists: app/[[...slug]]/Storefront.tsx
+[PASS] Required file exists: app/[[...slug]]/page.tsx
+[PASS] Required file exists: lib/brand-directory.ts
+[PASS] Required file exists: lib/json-ld.ts
+[PASS] Required file exists: lib/shopify-pagination.ts
+[PASS] Required file exists: lib/customer-account.ts
+[PASS] Required file exists: lib/shopify-policies.ts
+[PASS] Required file exists: public/og-image.png
+[PASS] Required file exists: public/apple-touch-icon.png
+[PASS] Required file exists: app/icon.png
+[PASS] No legacy brand-BRAND_LOGOS reference in active source — Collection images are the sole logo source in active app code
+[PASS] No legacy brand-BrandRecord reference in active source — Collection images are the sole logo source in active app code
+[PASS] No legacy brand-getBrandMetaobjects reference in active source — Collection images are the sole logo source in active app code
+[PASS] No legacy brand-BRAND_METAOBJECTS reference in active source — Collection images are the sole logo source in active app code
+[PASS] No legacy brand-brandLogoFor reference in active source — Collection images are the sole logo source in active app code
+[PASS] No legacy brand-NEXT_PUBLIC_SHOPIFY_BRAND_METAOBJECT_TYPE reference in active source — Collection images are the sole logo source in active app code
+[PASS] Collection query includes collection image and vendor seed
+[PASS] Curated directory covers 64 logo references plus four existing brands
+[PASS] All supplied individual brand logo crops are included — 64/64 assets found
+[PASS] Planned brands are visible without fake product collections and stay noindex
+[PASS] Single collection query includes collection image
+[PASS] Brand matching uses normalized Shopify collection title or planned handle
+[PASS] Home brand cards prefer Shopify collection images and fall back to curated logos
+[PASS] Brand cards link to real collection handles or stable planned slugs
+[PASS] Brand page resolves live collection handles and safely narrows curated entries
+[PASS] Brand page paginates collection products
+[PASS] Product detail uses matching collection image for brand logo
+[PASS] Brand discovery is collection-driven without a full product-vendor scan
+[PASS] Brand route passes collection handle
+[PASS] Brand routes validate title/vendor match server-side
+[PASS] Brand route metadata uses collection image
+[PASS] Quote basket persists product + variant + quantity
+[PASS] Quote basket sync event exists
+[PASS] Product card exposes Add to Quote
+[PASS] Unavailable product surfaces route to quote flow
+[PASS] Quote page supports multiple products and quantities
+[PASS] Cart uses Shopify discount-code mutation
+[PASS] Cart exposes live discount applicability
+[PASS] Main shop catalogue loads Shopify all-collection filters
+[PASS] Main shop catalogue sends active ProductFilter inputs
+[PASS] Out-of-stock values are stripped from every shared filter panel
+[PASS] Baseline availability filter offers In stock only
+[PASS] Out-of-stock selections are hidden, rejected, and excluded from Shopify requests
+[PASS] Product stock states and quote flows remain intact
+[PASS] Brand pages support Shopify facet filtering
+[PASS] Brand pages support sorting and pagination
+[PASS] Category index excludes brand collections
+[PASS] Header category search excludes brand collections
+[PASS] Product information uses real interactive tabs
+[PASS] Product page supports copy SKU, share, save and compare actions
+[PASS] Product page supports direct quantity entry and estimated subtotal
+[PASS] Unavailable product variants can be selected for precise quote requests
+[PASS] Blog marquee uses dynamic copies and all supplied article cards
+[PASS] Blog marquee seam uses exact group width without an external gap
+[PASS] Blog marquee has dynamic copies and reduced-motion fallback
+[PASS] Blog index pagination has cursor guards and a separate lightweight home query
+[PASS] Root route allowed: /
+[PASS] Root route allowed: shop
+[PASS] Root route allowed: categories
+[PASS] Root route allowed: brands
+[PASS] Root route allowed: business
+[PASS] Root route allowed: search
+[PASS] Root route allowed: cart
+[PASS] Root route allowed: wishlist
+[PASS] Root route allowed: compare
+[PASS] Root route allowed: quote
+[PASS] Root route allowed: about
+[PASS] Root route allowed: contact
+[PASS] Root route allowed: faq
+[PASS] Root route allowed: shipping
+[PASS] Root route allowed: account
+[PASS] Root route allowed: track-order
+[PASS] Root route allowed: blog
+[PASS] Business index component present
+[PASS] Business index cards link to business routes
+[PASS] Business detail supports load more
+[PASS] No oversized standard page h1 at 5xl in active storefront — Home hero uses clamp and is intentionally larger
+[PASS] About h1 is restrained
+[PASS] Contact h1 is restrained
+[PASS] FAQ h1 is restrained
+[PASS] Track order h1 is restrained
+[PASS] Cart drawer action buttons stack on mobile
+[PASS] All form submit buttons have explicit type
+[PASS] Mobile floating controls clear bottom navigation
+[PASS] WhatsApp uses the CSS positioning rule without conflicting utility positions
+[PASS] Touch devices keep product thumbnails available
+[PASS] Catalog paint containment does not clip overflow/shadows
+[PASS] Blog rail is 2/3/4 responsive
+[PASS] Brand grid is responsive 2/3/4/6
+[PASS] Mega menu stays within viewport
+[PASS] Category mega-menu thumbnails use a dedicated landscape frame
+[PASS] Category thumbnails fill the frame without changing brand-logo containment
+[PASS] Missing category thumbnails use an icon, not a text placeholder
+[PASS] Mobile mega/search panels stay within viewport
+[PASS] Main content has zero minimum width
+[PASS] Small phone product grid collapses safely
+[PASS] Product image frames have stable aspect ratio and contain positioning
+[PASS] Brand cards use fixed, centered logo frames
+[PASS] Category media is edge-to-edge inside its frame
+[PASS] Promo offers remain vertically stacked
+[PASS] Floating mobile controls do not overlap navigation
+[PASS] Product brand link uses the real collection handle
+[PASS] Product detail brand logo links to its brand collection
+[PASS] Catalog sort control is labelled
+[PASS] Search sort control is labelled
+[PASS] Category sort control is labelled
+[PASS] Shipping UI avoids fabricated ETA data
+[PASS] Every rendered img tag has alt attribute
+[PASS] All dialog surfaces declare aria-modal
+[PASS] Skip link exists
+[PASS] Mobile nav has accessible label
+[PASS] Cart close button has accessible label and autofocus
+[PASS] Quick view close button has accessible label and autofocus
+[PASS] metadataBase uses configurable site URL
+[PASS] canonical is configured at root
+[PASS] root OpenGraph configured
+[PASS] twitter card configured
+[PASS] organization JSON-LD emitted
+[PASS] website SearchAction JSON-LD emitted
+[PASS] JSON-LD serialization escapes HTML-sensitive characters
+[PASS] Sitemap omits the noindex quote route
+[PASS] Home hero has a distinct fallback and eager loading priority
+[PASS] Catalogue product images are lazy-loaded and decoded asynchronously
+[PASS] Google verification env supported
+[PASS] dynamic generateMetadata exists
+[PASS] product SEO metadata uses Shopify SEO fields
+[PASS] collection SEO metadata uses Shopify SEO fields
+[PASS] brand SEO metadata uses collection SEO/image
+[PASS] SEO titles reserve room for root template
+[PASS] Product schema excludes zero-price quote variants
+[PASS] article SEO metadata uses Shopify SEO fields
+[PASS] noindex rules exist for utility pages
+[PASS] structured Product schema exists
+[PASS] structured CollectionPage schema exists
+[PASS] structured Article schema exists
+[PASS] structured BreadcrumbList schema exists
+[PASS] sitemap is generated
+[PASS] sitemap excludes brand collections from category URLs
+[PASS] sitemap includes brand collection URLs
+[PASS] robots exposes sitemap
+[PASS] manifest is configured
+[PASS] Customer account page offers a real Shopify-hosted sign-in/create-account CTA rather than a setup warning
+[PASS] Customer account URL must use HTTPS and rejects credentials
+[PASS] Customer account route uses a configured vanity URL or safe default Shopify /account/login route
+[PASS] Policy pages load actual Shopify policy content without injecting merchant HTML
+[PASS] Privacy, returns/refunds, shipping, and terms routes are mapped
+[PASS] Unpublished policies are noindex and absent from sitemap
+[PASS] Legacy shipping path redirects to canonical Shopify policy route
+[PASS] Direct product quote requests merge into an existing basket idempotently
+[PASS] Quote basket persists and broadcasts a newly merged product
+[PASS] API validates JSON request object
+[PASS] API bounds JSON request payload size
+[PASS] API requires GraphQL query string
+[PASS] API caps GraphQL query length
+[PASS] API validates variables object
+[PASS] API uses abort timeout
+[PASS] API clears timeout in finally
+[PASS] API does not return upstream error details directly
+[WARN] package-lock dependency completeness — Missing locked package entries: eslint, eslint-config-next. Regenerate package-lock.json with npm install on a machine with registry access before release; do not run npm ci until fixed.
+[PASS] Package exposes comprehensive audit scripts
+[PASS] No stale brand metaobject env setting
+[PASS] Current brand collection workflow documentation exists
+[PASS] Original source does not include local brand folder requirement
+[PASS] Obsolete Storefront backup is removed from release tree
+[WARN] Whole-project semantic TypeScript — Skipped: required local tool is missing (node_modules/.bin/tsc). Restore dependencies and rerun before release.
+[WARN] ESLint — Skipped: required local tool is missing (node_modules/.bin/eslint). Restore dependencies and rerun before release.
+[WARN] Next.js production build — Skipped: required local tool is missing (node_modules/.bin/next). Restore dependencies and rerun before release.
+
+AUDIT STATUS: RELEASE BLOCKED — no static source assertions failed, but the warnings include unverified build/install blockers that must be resolved before release.

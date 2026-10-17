@@ -85,12 +85,6 @@ nav[aria-label="Primary navigation"]{position:relative;overflow:visible}
 @media(min-width:1280px){.bh-catalog-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:13px}.bh-product-rail-card{width:calc((100% - 84px)/8)}}
 @media(min-width:1536px){.bh-catalog-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}}
 
-/* Blog carousel: exactly 2 / 3 / 4 visible cards */
-.bh-blog-carousel{display:flex;gap:12px;overflow-x:hidden;scrollbar-width:none;overscroll-behavior:contain;scroll-behavior:auto;will-change:scroll-position}
-.bh-blog-carousel::-webkit-scrollbar{display:none}
-.bh-blog-card{width:calc((100% - 12px)/2);scroll-snap-align:start}
-@media(min-width:768px){.bh-blog-card{width:calc((100% - 24px)/3)}}
-@media(min-width:1200px){.bh-blog-card{width:calc((100% - 36px)/4)}}
 .bh-carousel-arrow{display:grid;width:36px;height:36px;place-items:center;border:1px solid #cbd5d2;border-radius:50%;background:#fff;color:var(--bh-ink);transition:all .18s ease}
 .bh-carousel-arrow:hover{border-color:var(--bh-green);color:var(--bh-green);transform:translateY(-1px)}
 
@@ -166,7 +160,7 @@ main{min-width:0}
 /* Production responsiveness / overflow guards */
 html,body{min-width:0}
 @media(min-width:2560px){.bh-catalog-grid{gap:16px}.bh-product-card{border-radius:7px}.bh-logo{width:270px;height:84px}.bh-logo img{width:270px;height:auto;max-height:84px}}
-@media(max-width:480px){.bh-product-card .min-h-\[214px\]{min-height:205px}.bh-product-card{box-shadow:none}.bh-product-card:hover{transform:none;box-shadow:0 6px 16px rgba(16,37,45,.07)}.bh-home-hero{border-radius:4px}.bh-blog-carousel{gap:9px}.bh-blog-card{width:calc((100% - 9px)/2)}}
+@media(max-width:480px){.bh-product-card .min-h-\[214px\]{min-height:205px}.bh-product-card{box-shadow:none}.bh-product-card:hover{transform:none;box-shadow:0 6px 16px rgba(16,37,45,.07)}.bh-home-hero{border-radius:4px}}
 @media(pointer:coarse){.bh-icon-button:hover{transform:none;box-shadow:none}.bh-primary-button:hover,.bh-secondary-button:hover,.bh-hero-button:hover,.bh-hero-outline-button:hover{transform:none}}
 
 
@@ -178,7 +172,6 @@ html,body{min-width:0}
 .bh-product-card .bh-product-media img{will-change:transform}
 .bh-product-card .bh-add-button{transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease}
 .bh-product-card:has(.bh-add-button:hover) .bh-product-media img{transform:scale(1.025)}
-.bh-blog-carousel{scroll-padding-inline:2px}
 .bh-blog-card{transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
 .bh-blog-card:hover{transform:translateY(-2px);box-shadow:var(--bh-shadow);border-color:#bfd1ca}
 @media(max-width:767px){.bh-mobile-bar{bottom:max(10px,env(safe-area-inset-bottom));left:8px;right:8px}.bh-logo{margin-left:2px}}
@@ -210,7 +203,7 @@ html,body{min-width:0}
 .prose h2,.prose h3,.prose h4{font-weight:700}
 
 /* Render large catalogue sections efficiently without changing layout */
-.bh-catalog-grid,.bh-blog-carousel{contain:layout}
+.bh-catalog-grid{contain:layout}
 html{scrollbar-gutter:stable}
 
 
@@ -422,6 +415,38 @@ main > section, main > div{min-width:0}
   .bh-mega{width:min(2200px,calc(100vw - 96px))}
 }
 
+/* Featured Categories: show up to three complete rows at each responsive breakpoint.
+   The source supplies up to 36 real Shopify collections; these rules only control
+   how many cards are visible, while View all links to the full category index. */
+@media (max-width:359px){
+  .bh-category-rail-grid > a:nth-child(n+7){display:none!important}
+}
+@media (min-width:360px) and (max-width:575px){
+  .bh-category-rail-grid > a:nth-child(n+10){display:none!important}
+}
+@media (min-width:576px) and (max-width:767px){
+  .bh-category-rail-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .bh-category-rail-grid > a:nth-child(n+13){display:none!important}
+}
+@media (min-width:768px) and (max-width:1023px){
+  .bh-category-rail-grid > a:nth-child(n+16){display:none!important}
+}
+@media (min-width:1024px) and (max-width:1279px){
+  .bh-category-rail-grid > a:nth-child(n+19){display:none!important}
+}
+@media (min-width:1280px) and (max-width:1599px){
+  .bh-category-rail-grid > a:nth-child(n+25){display:none!important}
+}
+@media (min-width:1600px) and (max-width:1919px){
+  .bh-category-rail-grid > a:nth-child(n+28){display:none!important}
+}
+@media (min-width:1920px) and (max-width:2559px){
+  .bh-category-rail-grid > a:nth-child(n+31){display:none!important}
+}
+@media (min-width:2560px) and (max-width:3839px){
+  .bh-category-rail-grid > a:nth-child(n+34){display:none!important}
+}
+
 /* Fluid headline scale where a fixed Tailwind step would be too abrupt. */
 .bh-fluid-display{font-size:clamp(2rem,1.35rem + 2vw,4rem);line-height:1}
 .bh-fluid-section-title{font-size:clamp(1.2rem,1rem + .45vw,1.7rem);line-height:1.15}
@@ -478,7 +503,6 @@ main > section, main > div{min-width:0}
 .bh-mega-brand-logo{background:transparent!important}
 @media(max-width:767px){.bh-mega-brand-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(min-width:768px) and (max-width:1199px){.bh-mega-brand-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}}
-@media(prefers-reduced-motion:reduce){.bh-blog-carousel{scroll-behavior:auto!important}}
 
 /* ==========================================================================
    FINAL PRODUCTION POLISH — nested scrolling, full-width brand mega menu,
@@ -520,20 +544,19 @@ main > section, main > div{min-width:0}
    horizontal scrollbar. Two equal groups create a seamless loop. */
 .bh-blog-carousel{position:relative;display:block;overflow:hidden;overscroll-behavior:contain;contain:layout paint;width:100%;min-width:0}
 .bh-blog-track{display:flex;width:max-content;min-width:max-content;transform:translate3d(0,0,0);will-change:transform}
-.bh-blog-group{display:flex;flex:0 0 auto;gap:12px;min-width:0}
-.bh-blog-group-duplicate{pointer-events:none;user-select:none}
-.bh-blog-card{flex:0 0 calc((min(100%, 100cqw) - 12px)/2);width:calc((min(100%, 100cqw) - 12px)/2);min-width:0}
+.bh-blog-group{display:flex;flex:0 0 auto;gap:12px;padding-right:12px;min-width:0}
+.bh-blog-group-duplicate{user-select:none}
+.bh-blog-card{flex:0 0 calc((100cqw - 12px)/2);width:calc((100cqw - 12px)/2);min-width:0}
 .bh-blog-carousel{container-type:inline-size}
 @container (min-width:768px){.bh-blog-card{flex-basis:calc((100cqw - 24px)/3);width:calc((100cqw - 24px)/3)}}
 @container (min-width:1200px){.bh-blog-card{flex-basis:calc((100cqw - 36px)/4);width:calc((100cqw - 36px)/4)}}
-@media(max-width:480px){.bh-blog-group{gap:9px}.bh-blog-card{flex-basis:calc((100cqw - 9px)/2);width:calc((100cqw - 9px)/2)}}
+@media(max-width:480px){.bh-blog-group{gap:9px;padding-right:9px}.bh-blog-card{flex-basis:calc((100cqw - 9px)/2);width:calc((100cqw - 9px)/2)}}
 
 /* Prevent giant screens from creating unreadably tiny dense controls. */
 @media(min-width:3840px){
   body{font-size:16px}
   .bh-primary-nav-item{font-size:14px!important}
   .bh-mega-brand-grid{grid-template-columns:repeat(auto-fill,minmax(205px,1fr))}
-  .bh-blog-group{gap:16px}
 }
 
 /* Stronger no-horizontal-overflow guarantee for every viewport and input mode. */
@@ -543,6 +566,8 @@ img,video,svg,canvas,iframe{max-width:100%}
 
 @media(prefers-reduced-motion:reduce){
   .bh-blog-track{transform:none!important;will-change:auto}
+  .bh-blog-group-duplicate{display:none!important}
+  .bh-blog-carousel{overflow-x:auto;scroll-behavior:auto!important;overscroll-behavior-x:contain}
   .bh-collection-image-fill{transform:none!important;will-change:auto}
   .bh-category-rail-image{transform:none!important;will-change:auto}
 }
@@ -552,7 +577,8 @@ img,video,svg,canvas,iframe{max-width:100%}
 .bh-category-rail-frame{aspect-ratio:1/1;width:100%;max-width:160px;overflow:hidden;border:0;border-radius:12px;background:transparent}
 .bh-category-rail-frame .bh-category-rail-image{width:100%;height:100%;object-fit:cover!important;object-position:center!important;transform:none!important}
 @media (prefers-reduced-motion: reduce){
-  .bh-collection-image-fill{transform:scale(1.28)!important;will-change:auto}
+  /* Never keep a hover zoom active for users who requested reduced motion. */
+  .bh-collection-image-fill{transform:none!important;will-change:auto}
   .bh-category-rail-frame .bh-category-rail-image{transform:none!important;will-change:auto}
 }
 
@@ -569,3 +595,73 @@ img,video,svg,canvas,iframe{max-width:100%}
 
 /* Avoid an outer mega-menu scrollbar fighting the inner brand/category scrollbar. */
 .bh-mega{overflow-x:hidden;overflow-y:hidden}
+
+/* Brand directory: individual, centered logos with names underneath. */
+.bh-brand-directory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch}
+.bh-brand-directory-card{display:flex;min-width:0;min-height:154px;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;overflow:hidden;border:1px solid #dbe3e8;border-radius:8px;background:#fff;padding:10px 9px 11px;text-align:center;text-decoration:none;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.bh-brand-directory-card:hover{transform:translateY(-2px);border-color:#008f68;box-shadow:0 8px 20px rgba(15,38,48,.07)}
+.bh-brand-directory-card:focus-visible,.bh-brand-showcase-card:focus-visible{outline:2px solid #008f68;outline-offset:2px}
+.bh-brand-directory-logo{display:flex;width:100%;height:76px;min-width:0;align-items:center;justify-content:center;padding:8px 7px}
+.bh-brand-card-logo-image{display:block;width:auto;max-width:100%;height:auto;max-height:62px;object-fit:contain;object-position:center;transition:transform .2s ease}
+.bh-brand-card-logo-image-compact{max-height:48px}
+.bh-brand-directory-card:hover .bh-brand-card-logo-image,.bh-brand-showcase-card:hover .bh-brand-card-logo-image{transform:scale(1.035)}
+.bh-brand-directory-name{display:block;max-width:100%;margin-top:4px;overflow-wrap:anywhere;color:#102d37;font-size:12px;font-weight:650;line-height:1.35}
+.bh-brand-directory-status{display:block;margin-top:5px;font-size:10px;font-weight:600;line-height:1.3}
+.bh-brand-directory-status.is-available{color:#00805d}
+.bh-brand-directory-status.is-coming-soon{color:#71808a}
+.bh-brand-name-mark{display:inline-flex;min-width:76px;max-width:100%;height:48px;align-items:center;justify-content:center;border:1px dashed #cbd5d9;border-radius:6px;background:#f5f8f7;padding:8px 12px;color:#55716b;font-size:14px;font-weight:800;letter-spacing:.06em;text-align:center}
+.bh-brand-showcase-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.bh-brand-showcase-card{display:flex;min-width:0;min-height:110px;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid #dbe3e8;border-radius:7px;background:#fff;padding:9px;text-decoration:none;transition:border-color .18s ease,box-shadow .18s ease}
+.bh-brand-showcase-card:hover{border-color:#008f68;box-shadow:0 5px 15px rgba(15,38,48,.06)}
+.bh-brand-showcase-logo{display:flex;width:100%;height:54px;align-items:center;justify-content:center;overflow:hidden}
+.bh-brand-showcase-logo .bh-brand-name-mark{height:36px;min-width:58px;font-size:11px}
+.bh-brand-showcase-name{max-width:100%;overflow-wrap:anywhere;color:#102d37;font-size:11px;font-weight:650;line-height:1.25;text-align:center}
+@media(min-width:480px){.bh-brand-directory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.bh-brand-showcase-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:768px){.bh-brand-directory-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.bh-brand-showcase-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}}
+@media(min-width:1024px){.bh-brand-directory-grid{grid-template-columns:repeat(6,minmax(0,1fr))}.bh-brand-showcase-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media(min-width:1440px){.bh-brand-directory-grid{grid-template-columns:repeat(7,minmax(0,1fr))}}
+@media(min-width:1920px){.bh-brand-directory-grid{grid-template-columns:repeat(8,minmax(0,1fr))}}
+@media(max-width:360px){.bh-brand-directory-grid,.bh-brand-showcase-grid{gap:7px}.bh-brand-directory-card{min-height:144px;padding-inline:6px}.bh-brand-directory-logo{height:68px;padding-inline:2px}.bh-brand-directory-name{font-size:11px}}
+@media(hover:none){.bh-brand-directory-card:hover,.bh-brand-showcase-card:hover{transform:none;box-shadow:none}}
+@media(prefers-reduced-motion:reduce){.bh-brand-directory-card,.bh-brand-showcase-card,.bh-brand-card-logo-image{transition:none!important}}
+
+/* Final reduced-motion sweep: no hover lift, scale, shimmer, or sliding drawers.
+   Color/border/focus feedback remains available without spatial movement. */
+@media (prefers-reduced-motion: reduce){
+  .bh-primary-button:hover,
+  .bh-secondary-button:hover,
+  .bh-hero-button:hover,
+  .bh-hero-outline-button:hover,
+  .bh-nav-link:hover:after,
+  .bh-product-card:hover,
+  .bh-add-button:hover,
+  .bh-icon-button:hover,
+  .bh-feature-tile:hover,
+  .bh-carousel-arrow:hover,
+  .bh-whatsapp:hover,
+  .bh-content-card:hover,
+  .bh-product-card:has(.bh-add-button:hover) .bh-product-media img,
+  .bh-mega-card:hover .bh-mega-category-thumb img,
+  .bh-promo-hero-card:hover .bh-promo-hero-image,
+  .bh-brand-directory-card:hover,
+  .bh-brand-directory-card:hover .bh-brand-card-logo-image,
+  .bh-brand-showcase-card:hover .bh-brand-card-logo-image,
+  .group:hover .bh-collection-image-fill,
+  .bh-collection-image-fill,
+  .bh-category-rail-image,
+  .bh-brand-card-logo-image{
+    transform:none!important;
+  }
+  .bh-cart-pulse,.bh-check-pop,.bh-skeleton,.bh-overlay,.bh-cart-drawer,.bh-search-panel,.bh-mega{
+    animation:none!important;
+  }
+  .bh-blog-track,.bh-product-media img,.bh-promo-hero-image{will-change:auto}
+}
+
+/* Touch-first devices should not retain hover-only image zoom after a tap. */
+@media (hover:none), (pointer:coarse){
+  .bh-promo-hero-card:hover .bh-promo-hero-image,
+  .bh-mega-card:hover .bh-mega-category-thumb img,
+  .bh-brand-directory-card:hover .bh-brand-card-logo-image,
+  .bh-brand-showcase-card:hover .bh-brand-card-logo-image{transform:none}
+}

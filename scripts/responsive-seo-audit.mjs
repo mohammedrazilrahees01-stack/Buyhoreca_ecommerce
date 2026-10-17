@@ -46,7 +46,7 @@ check("Product structured data marks NewCondition", /itemCondition: "https:\/\/s
 check("Collection/brand ItemList structured data is present", /"@type": "ItemList"/.test(page));
 check("Article metadata/schema tracks updatedAt", /updatedAt/.test(page));
 check("Organization contact point structured data exists", /contactPoint/.test(layout));
-check("Sitemap classifies brand collections using sampled vendors", /vendorKeys\.every/.test(sitemap));
+check("Sitemap includes only linked directory brands and excludes their handles from category URLs", /buildBrandDirectory\(directoryCollections\)\.filter\(\(item\) => item\.collection\)/.test(sitemap) && /products\?\.nodes\?\.\[0\]\?\.vendor/.test(sitemap) && /brandCollections\.map/.test(sitemap) && /brandCollections\.map\(\(collection: any\) => collection\.handle\)/.test(sitemap));
 check("Sitemap references configured site base", /NEXT_PUBLIC_SITE_URL/.test(sitemap));
 check("Robots exposes sitemap", fs.readFileSync(path.join(root,"app/robots.ts"),"utf8").includes("sitemap"));
 
