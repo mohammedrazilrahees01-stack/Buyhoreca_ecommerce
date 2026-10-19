@@ -254,7 +254,7 @@ const runGate = (label, command, args, availablePath) => {
   }
 };
 runGate('Whole-project semantic TypeScript', process.platform === 'win32' ? path.join(localBin, 'tsc.cmd') : path.join(localBin, 'tsc'), ['--noEmit'], path.join(localBin, process.platform === 'win32' ? 'tsc.cmd' : 'tsc'));
-runGate('ESLint', process.platform === 'win32' ? path.join(localBin, 'eslint.cmd') : path.join(localBin, 'eslint'), ['.'], path.join(localBin, process.platform === 'win32' ? 'eslint.cmd' : 'eslint'));
+runGate('TypeScript source lint', process.execPath, ['scripts/lint-source.mjs'], path.join(ROOT, 'node_modules', 'typescript', 'lib', 'typescript.js'));
 runGate('Next.js production build', 'npm', ['run', 'build'], path.join(localBin, process.platform === 'win32' ? 'next.cmd' : 'next'));
 
 const failed = results.filter(r => r.status === 'FAIL').length;

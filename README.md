@@ -15,10 +15,6 @@ Start with `FULL_SITE_AUDIT_AND_FIX_LOG_2026-10-16.md` for exact findings, fix d
 3. Run `npm ci`.
 4. Run `npm run dev` for local UI inspection.
 
-## Featured category grid update (17 October 2026)
-
-The home page category rail can use up to 36 real Shopify collections and is capped at three rows at each responsive breakpoint. At 1600–1919px it allows 27 cards (9 columns × 3 rows), rather than stopping at 24 and leaving the final row incomplete. See `FEATURED_CATEGORIES_GRID_FIX_2026-10-17.md`; run `npm run test:category-grid` for its regression checks.
-
 ## Available source/regression audits
 
 ```bash

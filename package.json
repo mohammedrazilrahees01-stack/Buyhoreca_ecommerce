@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "node scripts/lint-source.mjs",
     "audit": "node scripts/audit-storefront.mjs",
     "audit:final": "node scripts/comprehensive-audit.mjs",
     "test:wishlist": "node scripts/test-wishlist.mjs",
@@ -22,7 +22,7 @@
     "test:release-hardening": "node scripts/test-release-hardening.mjs",
     "test:account-policies": "node scripts/test-account-policy-pages.mjs",
     "test:quote-flow": "node scripts/test-quote-flow.mjs",
-    "test:category-grid": "node scripts/test-featured-category-grid.mjs"
+    "test:category-rail": "node scripts/test-category-rail-layout.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.14",
@@ -37,9 +37,7 @@
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "typescript": "^5.8.0",
-    "eslint": "^9.0.0",
-    "eslint-config-next": "16.3.2"
+    "typescript": "^5.8.0"
   },
   "engines": {
     "node": ">=20.9.0"

@@ -415,38 +415,6 @@ main > section, main > div{min-width:0}
   .bh-mega{width:min(2200px,calc(100vw - 96px))}
 }
 
-/* Featured Categories: show up to three complete rows at each responsive breakpoint.
-   The source supplies up to 36 real Shopify collections; these rules only control
-   how many cards are visible, while View all links to the full category index. */
-@media (max-width:359px){
-  .bh-category-rail-grid > a:nth-child(n+7){display:none!important}
-}
-@media (min-width:360px) and (max-width:575px){
-  .bh-category-rail-grid > a:nth-child(n+10){display:none!important}
-}
-@media (min-width:576px) and (max-width:767px){
-  .bh-category-rail-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
-  .bh-category-rail-grid > a:nth-child(n+13){display:none!important}
-}
-@media (min-width:768px) and (max-width:1023px){
-  .bh-category-rail-grid > a:nth-child(n+16){display:none!important}
-}
-@media (min-width:1024px) and (max-width:1279px){
-  .bh-category-rail-grid > a:nth-child(n+19){display:none!important}
-}
-@media (min-width:1280px) and (max-width:1599px){
-  .bh-category-rail-grid > a:nth-child(n+25){display:none!important}
-}
-@media (min-width:1600px) and (max-width:1919px){
-  .bh-category-rail-grid > a:nth-child(n+28){display:none!important}
-}
-@media (min-width:1920px) and (max-width:2559px){
-  .bh-category-rail-grid > a:nth-child(n+31){display:none!important}
-}
-@media (min-width:2560px) and (max-width:3839px){
-  .bh-category-rail-grid > a:nth-child(n+34){display:none!important}
-}
-
 /* Fluid headline scale where a fixed Tailwind step would be too abrupt. */
 .bh-fluid-display{font-size:clamp(2rem,1.35rem + 2vw,4rem);line-height:1}
 .bh-fluid-section-title{font-size:clamp(1.2rem,1rem + .45vw,1.7rem);line-height:1.15}
@@ -664,4 +632,42 @@ img,video,svg,canvas,iframe{max-width:100%}
   .bh-mega-card:hover .bh-mega-category-thumb img,
   .bh-brand-directory-card:hover .bh-brand-card-logo-image,
   .bh-brand-showcase-card:hover .bh-brand-card-logo-image{transform:none}
+}
+
+
+/* Featured category rail: show at most three complete responsive rows.
+   The data list contains up to 36 real Shopify collections; these limits
+   match the responsive column counts above and avoid a dangling partial row. */
+@media (max-width:359px){
+  .bh-category-rail-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .bh-category-rail-grid>a:nth-child(n+7){display:none!important}
+}
+@media (min-width:360px) and (max-width:575px){
+  .bh-category-rail-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .bh-category-rail-grid>a:nth-child(n+10){display:none!important}
+}
+@media (min-width:576px) and (max-width:767px){
+  .bh-category-rail-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .bh-category-rail-grid>a:nth-child(n+13){display:none!important}
+}
+@media (min-width:768px) and (max-width:1023px){
+  .bh-category-rail-grid>a:nth-child(n+16){display:none!important}
+}
+@media (min-width:1024px) and (max-width:1279px){
+  .bh-category-rail-grid>a:nth-child(n+19){display:none!important}
+}
+@media (min-width:1280px) and (max-width:1599px){
+  .bh-category-rail-grid>a:nth-child(n+25){display:none!important}
+}
+@media (min-width:1600px) and (max-width:1919px){
+  .bh-category-rail-grid>a:nth-child(n+28){display:none!important}
+}
+@media (min-width:1920px) and (max-width:2559px){
+  .bh-category-rail-grid>a:nth-child(n+31){display:none!important}
+}
+@media (min-width:2560px) and (max-width:3839px){
+  .bh-category-rail-grid>a:nth-child(n+34){display:none!important}
+}
+@media (min-width:3840px){
+  .bh-category-rail-grid>a:nth-child(n+37){display:none!important}
 }
