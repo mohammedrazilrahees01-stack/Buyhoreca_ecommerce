@@ -5,6 +5,7 @@ const root = process.cwd();
 const s = fs.readFileSync(path.join(root, "app/[[...slug]]/Storefront.tsx"), "utf8");
 const css = fs.readFileSync(path.join(root, "app/globals.css"), "utf8");
 const page = fs.readFileSync(path.join(root, "app/[[...slug]]/page.tsx"), "utf8");
+const trackingCompatibility = fs.readFileSync(path.join(root, "app/apps/track123/page.tsx"), "utf8");
 const pass=[]; const fail=[];
 const check=(name,cond,detail="")=> (cond?pass:fail).push(`[${cond?"PASS":"FAIL"}] ${name}${detail?` — ${detail}`:""}`);
 
@@ -21,9 +22,13 @@ check("Blog rail does not pause on the whole container", !s.includes('onMouseEnt
 check("Blog cards pause individually on hover", s.includes('onMouseEnter={pause} onMouseLeave={resume} onFocus={pause} onBlur='));
 check("Blog rail hides manual overflow", css.includes('.bh-blog-carousel{position:relative;display:block;overflow:hidden') && !s.includes('onWheel={(e)=>e.preventDefault()}'));
 check("Business route allow-list matches navigation slugs", ['cafe-coffee-shop','bakery-pastry','bar-lounge','catering-banqueting','fast-food-qsr','school-institution','corporate-office-catering','event-hospitality'].every(x=>page.includes(x)));
-check("Keyboard focus opens primary navigation menus", s.includes('onFocus={()=>setHoverNav(title)}'));
+check("Pointer-aware navigation supports mouse hover and touch/pen tap", s.includes('onPointerEnter={e=>{if(e.pointerType==="mouse")') && s.includes('onPointerDown={e=>{navPointerType.current=e.pointerType') && s.includes('onFocus={e=>{if(e.currentTarget.matches(":focus-visible"))setHoverNav(title)}}'));
 check("Reduced motion disables animated blog auto-scroll and explains manual controls", s.includes('setReducedMotion(media.matches)') && s.includes('if(!t||!group.current||items.length===0||paused||!autoSlide||reducedMotion)return;') && s.includes('Reduced motion is enabled') && css.includes('prefers-reduced-motion:reduce'));
 
+check("Track123 headless widget loads from its HTTPS embed script", s.includes("track123-tracking-widget") && s.includes("https://shp.track123.com/tracking-page/build/widget.min.js") && s.includes("buyhoreca.myshopify.com"));
+check("Track123 widget has a clear service-failure fallback", s.includes("Live tracking is temporarily unavailable") && s.includes("Contact support") && s.includes("Try again"));
+check("Tracking page bypasses global catalogue loading/error state", s.includes('let content:ReactNode;if(pathname==="/track-order")content=<TrackOrderPage/>;else if(loading)'));
+check("Legacy Track123 route preserves query values for prefilled live tracking", trackingCompatibility.includes("redirect") && trackingCompatibility.includes("/track-order") && trackingCompatibility.includes("query.toString()") && s.includes('searchParams.get("nums")'));
 console.log([...pass,...fail].join("\n"));
 console.log(`\nINTERACTION AUDIT: ${pass.length} PASS / ${fail.length} FAIL`);
 process.exitCode=fail.length?1:0;

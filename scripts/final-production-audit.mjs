@@ -17,6 +17,7 @@ const layout = fs.readFileSync(path.join(root, 'app/layout.tsx'), 'utf8');
 const sitemap = fs.readFileSync(path.join(root, 'app/sitemap.ts'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'app/globals.css'), 'utf8');
 const nextConfig = fs.readFileSync(path.join(root, 'next.config.ts'), 'utf8');
+const trackingCompatibility = fs.readFileSync(path.join(root, 'app/apps/track123/page.tsx'), 'utf8');
 
 const primaryExpected = [
   'Kitchen Utensils', 'Kitchen Equipment', 'Tabletop', 'Buffetware',
@@ -32,7 +33,7 @@ const businessExpected = [
 const checks = [
   ['Primary navigation has exactly 8 requested groups', primaryExpected.every(x => src.includes(`"${x}"`)) && !/href="\/quote"[^>]*>Quote<\/Link>/.test(src)],
   ['Primary navigation labels use regular/medium weight', /bh-primary-nav-item[^"`]*text-\[12px\] font-medium/.test(src)],
-  ['Primary navigation opens by hover, click and keyboard focus', /onMouseEnter=\{\(\)=>setHoverNav\(title\)\}/.test(src) && /onClick=\{\(\)=>setHoverNav\(active\?null:title\)\}/.test(src) && /onFocus=\{\(\)=>setHoverNav\(title\)\}/.test(src)],
+  ['Primary navigation opens with mouse hover, pointer tap and keyboard focus', src.includes('onPointerEnter={e=>{if(e.pointerType==="mouse")') && src.includes('onPointerDown={e=>{navPointerType.current=e.pointerType') && src.includes('onFocus={e=>{if(e.currentTarget.matches(":focus-visible"))setHoverNav(title)}}') && src.includes('navPointerType.current==="mouse"')],
   ['Mega menu is viewport-centered and width-bounded', /\.bh-mega\{position:absolute;left:50%;/.test(css) && /width:min\(/.test(css) && /max-width:calc\(100vw -/.test(css)],
   ['Shop by Brand uses the full mega-menu width', /bh-mega-grid-brands/.test(src) && /\.bh-mega-grid-brands\{grid-template-columns:minmax\(0,1fr\)!important\}/.test(css) && /\.bh-mega-card-grid-brands\{grid-template-columns:minmax\(0,1fr\)!important\}/.test(css)],
   ['Shop by Brand prefers live Shopify collection images', /const brandDirectory=useMemo\(\(\)=>buildBrandDirectory\(collections\),\[collections\]\)/.test(src) && /const src=c\?\.image\?\.url\|\|b\.logoPath/.test(src) && /const src=item\.collection\?\.image\?\.url\|\|item\.logoPath/.test(src)],
@@ -73,6 +74,10 @@ const checks = [
   ['Mobile/tablet navigation is suppressed at touch-safe widths', /@media\s*\(min-width:768px\)\s+and\s+\(max-width:1099px\)[\s\S]*?bh-primary-nav\{display:none!important\}/.test(css) && /@media\(max-width:767px\)[\s\S]*?bh-primary-nav\{display:none!important\}/.test(css)],
   ['No external placeholder image services are used', !/unsplash\.com|placehold\.co/.test(src)],
   ['No local brand-logo dependency remains in active code', !/BRAND_LOGOS|brandLogoFor|getBrandMetaobjects|BrandRecord|BRAND_METAOBJECTS/.test(src)],
+  ['Tracking page embeds the official Track123 live-tracking widget over HTTPS', src.includes('track123-tracking-widget') && src.includes('https://shp.track123.com/tracking-page/build/widget.min.js') && src.includes('buyhoreca.myshopify.com')],
+  ['Tracking page has a clear live-widget failure fallback with support option', src.includes('Live tracking is temporarily unavailable') && src.includes('Contact support')],
+  ['Tracking page bypasses catalogue loading/error fallback', src.includes('let content:ReactNode;if(pathname==="/track-order")content=<TrackOrderPage/>;else if(loading)')],
+  ['Legacy Track123 route preserves nums and redirects to track-order', trackingCompatibility.includes('redirect') && trackingCompatibility.includes('/track-order') && trackingCompatibility.includes('query.toString()') && src.includes('searchParams.get("nums")')],
   ['Unknown routes use Next.js 404 handling', /notFound\(\)/.test(page) && /ROOT_ROUTES/.test(page)],
   ['Business pages match the current business taxonomy', businessExpected.every(x => page.includes(`"${x}"`))],
 ];
