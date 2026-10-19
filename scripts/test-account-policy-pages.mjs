@@ -46,7 +46,7 @@ check('Exactly four supported policy routes are defined', () => Object.keys(poli
 const storefront = fs.readFileSync(path.join(ROOT, 'app/[[...slug]]/Storefront.tsx'), 'utf8');
 const page = fs.readFileSync(path.join(ROOT, 'app/[[...slug]]/page.tsx'), 'utf8');
 const sitemap = fs.readFileSync(path.join(ROOT, 'app/sitemap.ts'), 'utf8');
-check('Account page always exposes a real Shopify-hosted sign-in/create-account link', () => storefront.includes('shopifyCustomerLoginUrl(') && storefront.includes('Sign in or create an account') && storefront.includes('href={accountUrl}') && !storefront.includes('Customer accounts need configuration'));
+check('Account page always exposes a real Shopify-hosted sign-in/create-account link', () => storefront.includes('shopifyCustomerLoginUrl(') && storefront.includes('Open account and orders') && storefront.includes('href={accountUrl}') && !storefront.includes('Customer accounts need configuration'));
 check('Account page no longer treats a missing vanity domain as disabled accounts', () => !storefront.includes('query CustomerAccountSettings{shop{customerAccountUrl}}') && !storefront.includes('status==="unconfigured"'));
 check('Policy route reads Shopify policies and renders plain text rather than raw merchant HTML', () => storefront.includes('SHOP_POLICIES_QUERY') && storefront.includes('policyHtmlToText(policy?.body||"")') && !(/function PolicyPage[\s\S]*?function BrandLogoVisual/.exec(storefront)?.[0] || '').includes('dangerouslySetInnerHTML'));
 check('Policy metadata is noindex until published and published policy routes are canonical', () => page.includes('robots: bodyText ? undefined : NO_INDEX_ROBOTS') && page.includes('url: `${baseUrl}/policies/${handle}`'));
