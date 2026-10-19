@@ -23,7 +23,8 @@
     "test:account-policies": "node scripts/test-account-policy-pages.mjs",
     "test:quote-flow": "node scripts/test-quote-flow.mjs",
     "test:category-rail": "node scripts/test-category-rail-layout.mjs",
-    "test:ai-assistant": "node scripts/test-ai-assistant.mjs"
+    "test:ai-assistant": "node scripts/test-ai-assistant.mjs",
+    "test:catalog-filters": "node scripts/test-catalog-filters.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.14",

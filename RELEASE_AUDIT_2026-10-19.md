@@ -25,8 +25,9 @@ After a clean `npm ci`:
 
 - `npm run build`: PASS (Next.js 16.4.2 production build and TypeScript semantic check).
 - `npm run test:ai-assistant`: 19/19 PASS.
-- `npm run audit:production`: 57/57 requirement checks PASS plus 22 TS/TSX parser checks.
-- `npm run audit:interaction`: 29/29 PASS.
+- `npm run test:catalog-filters`: 10/10 PASS.
+- `npm run audit:production`: 59/59 requirement checks PASS plus 22 TS/TSX parser checks.
+- `npm run audit:interaction`: 30/30 PASS.
 - `npm run audit:responsive-seo`: 53 PASS, 0 FAIL, 0 warnings.
 - `npm run lint`: 22 TS/TSX source files parsed without syntax errors (this repository script is a source parser, not ESLint).
 - Existing regression suites: quote flow 5/5; checkout wiring 10/10; product/blog 14/14; inventory PASS; category rail 12/12; release hardening 21/21; account/policies 19/19; brand directory 18/18; availability filter 5/5; wishlist PASS.
@@ -59,7 +60,7 @@ The recording showed that the visible mega-menu panel is centered and starts to 
 - Moved the visible panel border, background, shadow, max-height, and native scrolling to the centered inner panel, so the wider hit area does not create a full-width visual panel.
 - Retained mouse hover, keyboard focus, touch/pen tap-to-toggle, Escape close, scroll isolation, and the original eight navigation groups.
 
-Follow-up verification: clean production build and TypeScript PASS; production audit 57/57 PASS; interaction audit 29/29 PASS; responsive/SEO audit 53 PASS / 0 FAIL / 0 warnings; `npm audit --audit-level=high` reports zero vulnerabilities. Chromium pointer-path tests: desktop mouse 6/6 PASS (including straight-down travel under the first tab, then horizontal movement into a menu card); touch-enabled 1200px display 4/4 PASS (tap opens, second tap closes). Full existing regression suite also passed.
+Follow-up verification: clean production build and TypeScript PASS; production audit 59/59 PASS; interaction audit 30/30 PASS; responsive/SEO audit 53 PASS / 0 FAIL / 0 warnings; `npm audit --audit-level=high` reports zero vulnerabilities. Chromium pointer-path tests: desktop mouse 6/6 PASS (including straight-down travel under the first tab, then horizontal movement into a menu card); touch-enabled 1200px display 4/4 PASS (tap opens, second tap closes). Full existing regression suite also passed.
 
 
 ## Follow-up fix: Track123 localhost widget and AI customer messages — 19 October 2026
@@ -73,8 +74,8 @@ The user's screenshot showed `[Track123 embed] config HTTP 404` on `/track-order
 Final follow-up verification:
 
 - Clean production build + TypeScript semantic checking: PASS.
-- Production static audit: 57/57 requirements PASS plus 22 TypeScript/TSX parser checks.
-- Interaction audit: 29/29 PASS.
+- Production static audit: 59/59 requirements PASS plus 22 TypeScript/TSX parser checks.
+- Interaction audit: 30/30 PASS.
 - AI/tracking static test: 19/19 PASS.
 - Live Chromium customer-facing test: 7/7 PASS. Both Track123 config and translation endpoints returned HTTP 200 through localhost; the Track123 widget rendered the order lookup/detail UI for the supplied `?nums=BH1130` query with no configuration error; no uncaught browser exceptions. “Hi” received a natural local greeting with no API call, and a product query produced the customer-friendly unavailable response with a WhatsApp CTA and no Cloudflare setup details.
 - Earlier mega-menu browser checks remain: mouse pointer path 6/6 PASS and touch toggle 4/4 PASS. Responsive/SEO audit remains 53 PASS / 0 FAIL / 0 warnings.
@@ -96,7 +97,7 @@ The user's screenshot showed an unnecessary caption reading “Live order and sh
 
 Final browser verification on the clean production build: **7/7 tracking UI checks PASS**; an additional responsive pass at **8 viewport widths (320, 360, 390, 576, 768, 1024, 1440, 1920px) passed 8/8**. Verified the caption is absent; both Track buttons have computed background `rgb(0, 143, 104)`, white text, visible border/padding, and minimum 44px height; heading computes to 30px/700; empty submission activates order-number validation; Track123 config and translation endpoints both return HTTP 200; `?nums=BH1130` renders its tracking details; no uncaught browser exceptions. Local proxy is limited to Track123 anonymous config, translation configuration, and widget assets.
 
-Final static verification after the change: production audit **56/56 PASS**, interaction audit **29/29 PASS**, responsive/SEO audit **53 PASS / 0 FAIL / 0 WARN**, AI-specific test **19/19 PASS**, production build/TypeScript PASS, dependency audit zero vulnerabilities, and `git diff --check` PASS. All existing quote, checkout-wiring, product/blog, inventory, category-rail, release-hardening, account/policy, brand-directory, availability-filter and wishlist regression suites also pass.
+Final static verification after the change: production audit **59/59 PASS**, interaction audit **30/30 PASS**, responsive/SEO audit **53 PASS / 0 FAIL / 0 WARN**, AI-specific test **19/19 PASS**, production build/TypeScript PASS, dependency audit zero vulnerabilities, and `git diff --check` PASS. All existing quote, checkout-wiring, product/blog, inventory, category-rail, release-hardening, account/policy, brand-directory, availability-filter and wishlist regression suites also pass.
 
 No public production deploy or push to GitHub `main` was made. The changes are in the downloadable source archive only.
 
@@ -110,3 +111,19 @@ The LLM is **not a fully enabled generative AI** until the owner configures `CLO
 The ordinary storefront caption “Live order and shipment updates provided by Track123.” is removed and the embedded widget uses scoped BuyHoreca-green styling for the Track actions and heading. The small provider watermark still originates from the Track123 widget. Track123's published plan comparison lists “Remove Track123 branding” as an Advanced-plan feature. The source does not use CSS to circumvent a provider plan limitation. To remove that watermark, use the eligible branding-removal setting in the Track123 app or replace the widget with a different licensed tracking solution. Official plan page: https://intercom.help/track123/en/articles/5920187-track123-pricing-plan.
 
 Additional verification: live AI fallback API 5/5 PASS (tracking action, quote action, categories/browse action, returns/support, unknown product fallback); previous rendered tracking page 7/7 PASS and responsive Track-button matrix 8/8 PASS.
+
+
+## Header and product-filter follow-up — 19 October 2026
+
+- Removed the redundant desktop “Quote” header link beside Wishlist; kept and enlarged the top-strip “Request a Quote” CTA (14px semibold, with added padding).
+- Root cause: `/shop` could stop reloading selected facets when `getCollection("all")` returned `null` or failed. The previous effect returned early without a collection or search term, and the fallback root `getProducts` query ignored selected facets. Added explicit collection-load readiness, a fallback query builder for availability/vendor/product type/tags/price ranges, sort/pagination preservation, and a visible customer-safe error state. Native collection filters still use Shopify `ProductFilter` inputs when the collection is present.
+- Browser regression test with mocked Shopify responses: **7/7 PASS**: header duplicate removal/top CTA size; initial product list; brand selection narrows list; clear restores products; price selection narrows list; in-stock selection excludes unavailable item; zero uncaught client errors.
+- Static catalogue-filter test: **10/10 PASS**. Updated production static audit: **59/59 PASS**; interaction audit **30/30 PASS**; responsive/SEO audit **53 PASS / 0 FAIL / 0 WARN**; AI test **19/19 PASS**; clean Next.js production build + TypeScript PASS. Existing checkout, quote, product/blog, inventory, category rail, account/policy, brand, availability and wishlist test suites also passed; dependency audit reports zero vulnerabilities.
+- Live Shopify credentials/data were not available in the isolated test server, so the browser filter test used representative mocked Shopify responses; the deployed site's actual facet results still require confirming in Preview/Production after setting its normal Shopify environment. These changes have not been pushed to GitHub `main` or deployed to `buyhoreca.com`.
+
+
+## Customer-facing browser test for header and filter changes
+
+On the production Next.js build, using representative mocked Shopify API responses (the sandbox does not contain the production storefront token), Chromium passed **7/7** checks: the header keeps the enlarged top “Request a Quote” CTA and has no duplicate desktop “Quote” item; the initial list shows all fixture items; selecting Brand sends `vendor:"Winco"` and removes other-brand products; Clear all sends an unfiltered product query and restores items; selecting Price sends `variants.price:<=100` and narrows the list; selecting In stock sends `available_for_sale:true` and excludes the unavailable item; no uncaught frontend exceptions occur.
+
+Static tests for the fallback mapping pass **10/10**. This is a functional query-path test using mock product data, not a claim that the live Shopify production credentials or catalog were queried from this isolated test host. The real site must be retested in Vercel Preview/Production with the configured Shopify environment.

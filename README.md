@@ -31,6 +31,7 @@ npm run test:inventory
 npm run test:wishlist
 npm run test:account-policies
 npm run test:ai-assistant
+npm run test:catalog-filters
 npm run test:quote-flow
 npx tsc --noEmit
 npm run lint
@@ -69,3 +70,10 @@ The greeting path answers “hi” and similar greetings locally with a natural 
 ## Track123 branding and watermark
 
 The storefront attribution sentence has been removed and the widget form/heading have BuyHoreca styling. The remaining `Powered by Track123` watermark is injected by Track123 itself, not by the BuyHoreca page source. Track123's published plan comparison lists **Remove Track123 branding** as an Advanced-plan feature; do not attempt to suppress this provider mark in CSS while using a plan that does not permit branding removal. To remove it, upgrade/select the eligible plan in the Track123 Shopify app and enable branding removal in its tracking-page settings. If BuyHoreca cannot use that plan, the alternative is to replace the embedded widget with a different tracking implementation/provider. Official details: https://intercom.help/track123/en/articles/5920187-track123-pricing-plan and https://intercom.help/track123/en/articles/13303463-create-a-track123-tracking-page-in-a-headless-shopify-store.
+
+
+## Header and catalogue filter fix — 19 October 2026
+
+- Kept the top-strip “Request a Quote” link and increased it to 14px semibold with more padding. Removed the duplicate “Quote” link from the desktop action row beside Wishlist.
+- Fixed the all-products page lifecycle so filter changes no longer do nothing when the `all` collection query returns null or fails. Once the initial collection lookup has completed, each filter/sort/search change triggers a reload. If Shopify provides the collection, native `ProductFilter` inputs are used. If not, a fallback `products(query:)` query is constructed for availability, vendor/brand, product type, tags, and price bounds, with sort and pagination retained. A customer-visible message is shown if the product request itself fails.
+- `npm run test:catalog-filters` checks the header change and fallback query wiring. The current test environment ran a browser test with a mocked Shopify response: brand, price and in-stock filters each changed the query and narrowed the visible products; Clear all restored all products. This validates the client/query path, not credentials or live production Shopify results.
