@@ -100,7 +100,7 @@ PASS: 188  FAIL: 0  WARN: 0
 [PASS] Business index cards link to business routes
 [PASS] Business detail supports load more
 [PASS] No oversized standard page h1 at 5xl in active storefront — Home hero uses clamp and is intentionally larger
-[PASS] About h1 is restrained
+[PASS] About heading is restrained
 [PASS] Contact h1 is restrained
 [PASS] FAQ h1 is restrained
 [PASS] Track order fallback has a restrained, accessible heading
@@ -187,7 +187,7 @@ PASS: 188  FAIL: 0  WARN: 0
 [PASS] Current brand collection workflow documentation exists
 [PASS] Original source does not include local brand folder requirement
 [PASS] Obsolete Storefront backup is removed from release tree
-[PASS] Whole-project semantic TypeScript — /__modal/volumes/vo-5TdE9rgPTuy888q4WljU4l/bhclearance/project/node_modules/.bin/tsc --noEmit completed
+[PASS] Whole-project semantic TypeScript — /__modal/volumes/vo-5TdE9rgPTuy888q4WljU4l/bharabic/project/node_modules/.bin/tsc --noEmit completed
 [PASS] TypeScript source lint — /opt/node22/bin/node scripts/lint-source.mjs completed
 [PASS] Next.js production build — npm run build completed
 

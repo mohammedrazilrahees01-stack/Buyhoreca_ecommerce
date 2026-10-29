@@ -17,7 +17,7 @@ check("Brand-card images load lazily and decode asynchronously with intrinsic di
 check("Large brand directory menu disables speculative prefetch across many dynamic routes",brandCard.includes('prefetch={false}'));
 check("Brand logo-only hover/focus treatment respects touch pointers and reduced motion",css.includes('.bh-mega-brand-only-card:focus-visible')&&css.includes('@media(hover:none),(pointer:coarse)')&&css.includes('@media(prefers-reduced-motion:reduce)'));
 check("Large product-card images reserve intrinsic dimensions and load lazily",storefront.includes('width={activeImage?.width||600} height={activeImage?.height||600} loading="lazy" decoding="async"')&&storefront.includes('href={p.href} prefetch={false}'));
-check("Promotional hero card photos are lazy-loaded and decoded asynchronously",storefront.includes('<img src={image} alt="" loading="lazy" decoding="async" className="bh-promo-hero-image"/>'));
+check("Promotional hero card photos are lazy-loaded and decoded asynchronously", /<img src=\{image\} alt="" data-i18n-alt="" loading="lazy" decoding="async" className="bh-promo-hero-image"\/>/.test(storefront));
 const sourceImages=["hero-main","hero-kitchen"];
 const sourceBytes=sourceImages.reduce((n,x)=>n+fs.statSync(path.join(root,"public/images/hero",x+".jpg")).size,0);
 const webpBytes=sourceImages.reduce((n,x)=>n+fs.statSync(path.join(root,"public/images/hero",x+".webp")).size,0);

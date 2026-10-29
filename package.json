@@ -29,7 +29,8 @@
     "test:brand-menu-performance-seo": "node scripts/test-brand-menu-performance-seo.mjs",
     "test:featured-category-grid": "node scripts/test-featured-category-grid.mjs",
     "test:home-clearance": "node scripts/test-home-clearance-section.mjs",
-    "test:clearance-navigation": "node scripts/test-clearance-navigation.mjs"
+    "test:clearance-navigation": "node scripts/test-clearance-navigation.mjs",
+    "test:language-switch": "node scripts/test-language-switch.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.14",

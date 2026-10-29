@@ -89,12 +89,12 @@ check('Quote rows use persisted basket quantity/removal handlers without a legac
 const lastReducedMotionBlock = stylesheet.slice(stylesheet.lastIndexOf('@media (prefers-reduced-motion: reduce)'));
 check('Last reduced-motion override does not re-enable category image zoom',
   lastReducedMotionBlock.includes('.bh-collection-image-fill,') &&
-  /transform:\s*none!important/.test(lastReducedMotionBlock) &&
+  /transform:\s*none\s*!important/.test(lastReducedMotionBlock) &&
   !/\.bh-collection-image-fill\s*\{\s*transform:\s*scale\(/.test(lastReducedMotionBlock));
 check('Final reduced-motion sweep disables the rest of the site’s hover motion',
   stylesheet.includes('.bh-promo-hero-card:hover .bh-promo-hero-image') &&
   stylesheet.includes('.bh-mega-card:hover .bh-mega-category-thumb img') &&
-  /\.bh-cart-drawer[\s\S]*?animation:none!important/.test(lastReducedMotionBlock));
+  /\.bh-cart-drawer[\s\S]*?animation:\s*none\s*!important/.test(lastReducedMotionBlock));
 
 const { collectPages, connectionPageFrom } = loadTypeScriptHelper(paginationSource, ['collectPages', 'connectionPageFrom']);
 const nestedConnection = connectionPageFrom({ blog: { handle: 'news', articles: { nodes: ['article-1'], pageInfo: { hasNextPage: true, endCursor: 'article-cursor' } } } }, 'blog.articles');

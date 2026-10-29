@@ -788,3 +788,95 @@ track123-tracking-widget .track123_form_button:focus-visible{
   .bh-mega-brand-grid .bh-mega-brand-only-card{transition:none!important}
   .bh-mega-brand-grid .bh-mega-brand-only-card .bh-mega-brand-logo img{transition:none!important;transform:none!important}
 }
+
+/* Site-wide Arabic layout support. The language provider sets html[dir="rtl"]
+   while English remains the default LTR layout. Use logical mirroring so the
+   same storefront components keep their structure in both languages. */
+html[dir="rtl"] body {
+  direction: rtl;
+}
+html[dir="rtl"] .text-left:not([dir="ltr"]) { text-align: right !important; }
+html[dir="rtl"] .text-right:not([dir="ltr"]) { text-align: left !important; }
+html[dir="rtl"] input:not([type="tel"]):not([type="email"]):not([type="number"]):not([dir="ltr"]),
+html[dir="rtl"] textarea:not([dir="ltr"]),
+html[dir="rtl"] select:not([dir="ltr"]) {
+  direction: rtl;
+  text-align: right;
+}
+html[dir="rtl"] input[type="tel"],
+html[dir="rtl"] input[type="email"],
+html[dir="rtl"] input[type="number"],
+html[dir="rtl"] [dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+}
+html[dir="rtl"] [class~="left-0"] { left: auto !important; right: 0 !important; }
+html[dir="rtl"] [class~="right-0"] { right: auto !important; left: 0 !important; }
+html[dir="rtl"] [class~="left-2"] { left: auto !important; right: .5rem !important; }
+html[dir="rtl"] [class~="right-2"] { right: auto !important; left: .5rem !important; }
+html[dir="rtl"] [class~="left-3"] { left: auto !important; right: .75rem !important; }
+html[dir="rtl"] [class~="right-3"] { right: auto !important; left: .75rem !important; }
+html[dir="rtl"] [class~="left-4"] { left: auto !important; right: 1rem !important; }
+html[dir="rtl"] [class~="right-4"] { right: auto !important; left: 1rem !important; }
+html[dir="rtl"] [class~="left-1"] { left: auto !important; right: .25rem !important; }
+html[dir="rtl"] [class~="right-1"] { right: auto !important; left: .25rem !important; }
+html[dir="rtl"] [class~="left-5"] { left: auto !important; right: 1.25rem !important; }
+html[dir="rtl"] [class~="right-5"] { right: auto !important; left: 1.25rem !important; }
+html[dir="rtl"] [class~="ml-1"] { margin-left: 0 !important; margin-right: .25rem !important; }
+html[dir="rtl"] [class~="ml-2"] { margin-left: 0 !important; margin-right: .5rem !important; }
+html[dir="rtl"] [class~="ml-3"] { margin-left: 0 !important; margin-right: .75rem !important; }
+html[dir="rtl"] [class~="ml-4"] { margin-left: 0 !important; margin-right: 1rem !important; }
+html[dir="rtl"] [class~="ml-5"] { margin-left: 0 !important; margin-right: 1.25rem !important; }
+html[dir="rtl"] [class~="ml-6"] { margin-left: 0 !important; margin-right: 1.5rem !important; }
+html[dir="rtl"] [class~="ml-8"] { margin-left: 0 !important; margin-right: 2rem !important; }
+html[dir="rtl"] [class~="ml-auto"] { margin-left: 0 !important; margin-right: auto !important; }
+html[dir="rtl"] [class~="mr-1"] { margin-right: 0 !important; margin-left: .25rem !important; }
+html[dir="rtl"] [class~="mr-2"] { margin-right: 0 !important; margin-left: .5rem !important; }
+html[dir="rtl"] [class~="mr-3"] { margin-right: 0 !important; margin-left: .75rem !important; }
+html[dir="rtl"] [class~="mr-4"] { margin-right: 0 !important; margin-left: 1rem !important; }
+html[dir="rtl"] [class~="mr-5"] { margin-right: 0 !important; margin-left: 1.25rem !important; }
+html[dir="rtl"] [class~="mr-6"] { margin-right: 0 !important; margin-left: 1.5rem !important; }
+html[dir="rtl"] [class~="mr-8"] { margin-right: 0 !important; margin-left: 2rem !important; }
+html[dir="rtl"] [class~="mr-auto"] { margin-right: 0 !important; margin-left: auto !important; }
+html[dir="rtl"] [class~="pl-1"] { padding-left: 0 !important; padding-right: .25rem !important; }
+html[dir="rtl"] [class~="pl-2"] { padding-left: 0 !important; padding-right: .5rem !important; }
+html[dir="rtl"] [class~="pl-3"] { padding-left: 0 !important; padding-right: .75rem !important; }
+html[dir="rtl"] [class~="pl-4"] { padding-left: 0 !important; padding-right: 1rem !important; }
+html[dir="rtl"] [class~="pl-5"] { padding-left: 0 !important; padding-right: 1.25rem !important; }
+html[dir="rtl"] [class~="pl-6"] { padding-left: 0 !important; padding-right: 1.5rem !important; }
+html[dir="rtl"] [class~="pr-1"] { padding-right: 0 !important; padding-left: .25rem !important; }
+html[dir="rtl"] [class~="pr-2"] { padding-right: 0 !important; padding-left: .5rem !important; }
+html[dir="rtl"] [class~="pr-3"] { padding-right: 0 !important; padding-left: .75rem !important; }
+html[dir="rtl"] [class~="pr-4"] { padding-right: 0 !important; padding-left: 1rem !important; }
+html[dir="rtl"] [class~="pr-5"] { padding-right: 0 !important; padding-left: 1.25rem !important; }
+html[dir="rtl"] [class~="pr-6"] { padding-right: 0 !important; padding-left: 1.5rem !important; }
+html[dir="rtl"] [class~="border-l"] { border-left: 0 !important; border-right: 1px solid var(--border-color, #e2e8f0) !important; }
+html[dir="rtl"] [class~="border-r"] { border-right: 0 !important; border-left: 1px solid var(--border-color, #e2e8f0) !important; }
+html[dir="rtl"] [class~="rounded-l"] { border-radius: 0 .25rem .25rem 0 !important; }
+html[dir="rtl"] [class~="rounded-r"] { border-radius: .25rem 0 0 .25rem !important; }
+html[dir="rtl"] .bh-whatsapp { right: auto !important; left: 1rem !important; }
+html[dir="rtl"] .bh-ai-panel { right: auto !important; left: 1.25rem !important; }
+html[dir="rtl"] .bh-cart-drawer { right: auto !important; left: 0 !important; }
+html[dir="rtl"] .bh-product-thumbs { left: .5rem !important; right: .5rem !important; }
+html[dir="rtl"] .lucide-arrow-right,
+html[dir="rtl"] .lucide-arrow-left,
+html[dir="rtl"] .lucide-chevron-right,
+html[dir="rtl"] .lucide-chevron-left { scale: -1 1; }
+html[dir="rtl"] .bh-promo-hero-card .text-left { text-align: right !important; }
+html[dir="rtl"] .bh-primary-nav-track { direction: rtl; }
+@media (prefers-reduced-motion: reduce) {
+  .bh-collection-image-fill,
+  .bh-mega-card:hover .bh-mega-category-thumb img,
+  .bh-promo-hero-card:hover .bh-promo-hero-image,
+  .bh-cart-drawer,
+  .bh-mega-brand-grid .bh-mega-brand-only-card,
+  .bh-mega-brand-grid .bh-mega-brand-only-card .bh-mega-brand-logo img {
+    transform: none !important;
+    animation:none!important;
+    transition: none !important;
+  }
+  html[dir="rtl"] .lucide-arrow-right,
+  html[dir="rtl"] .lucide-arrow-left,
+  html[dir="rtl"] .lucide-chevron-right,
+  html[dir="rtl"] .lucide-chevron-left { transition: none !important; }
+}

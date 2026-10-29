@@ -119,10 +119,10 @@ test('Business detail supports load more', /function BusinessPage[\s\S]*loadMore
 
 // UI hardening / responsive checks
 test('No oversized standard page h1 at 5xl in active storefront', !/<h1[^>]*\b(?:text-5xl|md:text-5xl|lg:text-5xl)\b/.test(storefront), 'Home hero uses clamp and is intentionally larger');
-test('About h1 is restrained', /More Than a Supplier\. A Partner in Hospitality\.<\/h1>/.test(storefront) && /text-3xl font-semibold leading-tight md:text-4xl lg:text-\[2\.75rem\]/.test(storefront));
-test('Contact h1 is restrained', /How can we help\?<\/h1>/.test(storefront) && /text-3xl font-semibold md:text-4xl/.test(storefront));
-test('FAQ h1 is restrained', /Frequently Asked Questions<\/h1>/.test(storefront) && /text-3xl font-semibold md:text-4xl/.test(storefront));
-test('Track order fallback has a restrained, accessible heading', /<h1 className="text-lg font-semibold text-slate-900">Live tracking is temporarily unavailable<\/h1>/.test(storefront) && /aria-label="Live order tracking"/.test(storefront));
+test('About heading is restrained', /<h2 className="mt-2 max-w-2xl text-3xl font-bold leading-tight md:text-4xl"><T text=\{"More Than a Supplier. A Partner in Hospitality."\} \/><\/h2>/.test(storefront));
+test('Contact h1 is restrained', /<h1 className="mt-2 text-3xl font-semibold md:text-4xl"><T text=\{"How can we help\?"\} \/><\/h1>/.test(storefront));
+test('FAQ h1 is restrained', /<h1 className="mt-2 text-3xl font-semibold md:text-4xl"><T text=\{"Frequently Asked Questions"\} \/><\/h1>/.test(storefront));
+test('Track order fallback has a restrained, accessible heading', /<h1 className="text-lg font-semibold text-slate-900"><T text=\{"Live tracking is temporarily unavailable"\} \/><\/h1>/.test(storefront) && /aria-label="Live order tracking"/.test(storefront));
 test('Cart drawer action buttons stack on mobile', /className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2"/.test(storefront));
 test('All form submit buttons have explicit type', !/<button\b(?![^>]*\btype\s*=)[^>]*>/.test(storefront));
 test('Mobile floating controls clear bottom navigation', /\.bh-whatsapp\{bottom:calc\(82px \+ env\(safe-area-inset-bottom, 0px\)\)!important;right:12px!important;z-index:100!important/.test(css) && /\.bh-toast\{bottom:78px/.test(css));
@@ -159,9 +159,9 @@ test('Every rendered img tag has alt attribute', imgMissingAlt.length === 0, img
 const dialogTags = (storefront.match(/role="dialog"/g) || []).length;
 test('All dialog surfaces declare aria-modal', dialogTags > 0 && (storefront.match(/role="dialog"[^>]*aria-modal="true"/g) || []).length === dialogTags);
 test('Skip link exists', /bh-skip-link/.test(storefront) && /href="#main-content"/.test(storefront));
-test('Mobile nav has accessible label', /<nav className="bh-mobile-bar md:hidden lg:hidden" aria-label="Quick navigation">/.test(storefront));
+test('Mobile nav has accessible label', /<nav className="bh-mobile-bar md:hidden lg:hidden" aria-label="Quick navigation" data-i18n-aria-label="Quick navigation">/.test(storefront));
 test('Cart close button has accessible label and autofocus', /aria-label="Close cart" autoFocus/.test(storefront));
-test('Quick view close button has accessible label and autofocus', /aria-label="Close quick view" title="Close" autoFocus/.test(storefront));
+test('Quick view close button has accessible label and autofocus', /aria-label="Close quick view" data-i18n-aria-label="Close quick view" title="Close" data-i18n-title="Close" autoFocus/.test(storefront));
 
 // SEO
 for (const item of [

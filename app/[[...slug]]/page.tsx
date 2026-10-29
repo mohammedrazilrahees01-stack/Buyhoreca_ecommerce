@@ -1,3 +1,4 @@
+import { T } from "../../lib/i18n";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
@@ -437,7 +438,7 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
       {structuredData.map((schema, index) => (
         <script key={`schema-${index}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(schema) }} />
       ))}
-      <Suspense fallback={<div className="min-h-screen bg-white" aria-label="Loading BuyHoreca" />}>
+      <Suspense fallback={<div className="min-h-screen bg-white" aria-label="Loading BuyHoreca" data-i18n-aria-label="Loading BuyHoreca" />}>
         <Storefront />
       </Suspense>
     </>

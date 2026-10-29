@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import Script from "next/script";
 import { serializeJsonLd } from "../lib/json-ld";
+import { LocaleProvider } from "../lib/i18n";
 import "./globals.css";
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://buyhoreca.com").replace(/\/$/, "");
@@ -41,8 +42,8 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
   const organizationSchema = {"@context":"https://schema.org","@type":"Organization","name":"BuyHoreca Trading Co. LLC","url":siteUrl,"logo":`${siteUrl}/images/buyhoreca-logo-header.png`,"contactPoint":[{"@type":"ContactPoint","telephone":"+971509936806","contactType":"customer service","areaServed":"AE","availableLanguage":["en"]}]};
   const websiteSchema = {"@context":"https://schema.org","@type":"WebSite","name":"BuyHoreca","url":siteUrl,"potentialAction":{"@type":"SearchAction","target":`${siteUrl}/search?q={search_term_string}`,"query-input":"required name=search_term_string"}};
-  return <html lang="en">
-    <body>{children}<script type="application/ld+json" dangerouslySetInnerHTML={{__html:serializeJsonLd(organizationSchema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:serializeJsonLd(websiteSchema)}}/>
+  return <html lang="en" dir="ltr" suppressHydrationWarning>
+    <body><LocaleProvider>{children}</LocaleProvider><script type="application/ld+json" dangerouslySetInnerHTML={{__html:serializeJsonLd(organizationSchema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:serializeJsonLd(websiteSchema)}}/>
       {gaId && <><Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive"/><Script id="ga4-init" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){window.dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}',{anonymize_ip:true});`}</Script></>}
       {metaPixelId && <Script id="meta-pixel-init" strategy="afterInteractive">{`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${metaPixelId}');fbq('track','PageView');`}</Script>}
     </body>

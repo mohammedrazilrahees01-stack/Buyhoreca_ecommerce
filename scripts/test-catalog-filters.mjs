@@ -4,7 +4,7 @@ const root = process.cwd();
 const source = fs.readFileSync(path.join(root, "app/[[...slug]]/Storefront.tsx"), "utf8");
 const audit = [];
 const check = (name, ok) => { audit.push({ name, ok: Boolean(ok) }); console.log(`${ok ? "[PASS]" : "[FAIL]"} ${name}`); };
-const quoteCta = source.match(/<Link href="\/quote" className="hidden rounded px-3 py-1 text-sm font-semibold[^>]*>Request a Quote →<\/Link>/);
+const quoteCta = source.includes('href="/quote" className="hidden rounded px-3 py-1 text-sm font-semibold') && source.includes('T text={"Request a Quote →"}');
 check("Top Request a Quote CTA remains and is larger/semibold", Boolean(quoteCta));
 check("Duplicate desktop Quote link beside Wishlist is removed", !source.includes('className="hidden px-2 text-xs font-medium text-slate-700 lg:block">Quote{quoteItems.length'));
 check("Catalog waits for initial all-collection lookup to finish before loading filters", source.includes("const [collectionReady,setCollectionReady]=useState(false)") && source.includes("setCollectionReady(true)") && source.includes("if(!collectionReady)return;void load(true)"));
