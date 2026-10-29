@@ -9,10 +9,10 @@ function pass(message) {
   console.log(`PASS ${message}`);
 }
 
-assert.match(store, /const featuredCategories=\[\.\.\.featured,\.\.\.categoryCollections\.filter\(c=>!featured\.some\(f=>f\.id===c\.id\)\)\]\.slice\(0,36\)/);
+assert.match(store, /const featured36=\[\.\.\.featured,\.\.\.categoryCollections\.filter\(c=>!featured\.some\(f=>f\.id===c\.id\)\)\]\.slice\(0,36\)/);
 pass('featured categories can use up to 36 real Shopify collection entries');
 
-assert.match(store, /CategoryRail collections=\{featuredCategories\}/);
+assert.match(store, /CategoryRail collections=\{featured36\}/);
 pass('homepage category rail uses the expanded live collection list');
 
 assert.match(store, /href="\/categories" className="text-sm font-bold text-\[#008f68\]"/);
@@ -30,28 +30,39 @@ const expected = [
   { query: '(min-width:2560px) and (max-width:3839px)', hidden: 34, cols: 11, items: 33 },
 ];
 
-for (const item of expected) {
-  const start = css.lastIndexOf(`@media ${item.query}`);
-  assert.notEqual(start, -1, `missing breakpoint ${item.query}`);
-  const open = css.indexOf('{', start);
-  let depth = 1;
-  let end = open + 1;
-  for (; end < css.length && depth > 0; end++) {
-    if (css[end] === '{') depth++;
-    else if (css[end] === '}') depth--;
+function mediaBlockBodies(query) {
+  const token = `@media ${query}`;
+  const bodies = [];
+  let position = 0;
+  while ((position = css.indexOf(token, position)) !== -1) {
+    const open = css.indexOf("{", position);
+    if (open < 0) break;
+    let depth = 1;
+    let end = open + 1;
+    for (; end < css.length && depth > 0; end++) {
+      if (css[end] === "{") depth++;
+      else if (css[end] === "}") depth--;
+    }
+    bodies.push(css.slice(open + 1, end - 1));
+    position = end;
   }
-  const body = css.slice(open + 1, end - 1);
-  assert.match(body, new RegExp(`nth-child\\(n\\+${item.hidden}\\)`), `wrong cutoff at ${item.query}`);
-  if (item.query.includes('576px')) assert.match(body, /repeat\(4,minmax\(0,1fr\)\)/, '576-767px needs four columns');
+  return bodies;
+}
+
+for (const item of expected) {
+  // The same viewport query can style multiple components. Find the media block
+  // containing the category-rail cutoff, not the last arbitrary block for that query.
+  const body = mediaBlockBodies(item.query).find(value => value.includes(`.bh-category-rail-grid>a:nth-child(n+${item.hidden})`));
+  assert.ok(body, `missing category-rail cutoff ${item.hidden} for ${item.query}`);
+  if (item.query.includes('576px')) assert.ok(body.includes('grid-template-columns:repeat(4,minmax(0,1fr))'), '576-767px needs four columns');
   assert.equal(item.cols * 3, item.items);
   pass(`${item.query} shows up to ${item.items} cards (${item.cols} columns × 3 rows)`);
 }
-
 // The 4K+ layout is explicitly capped at 36 supplied cards and does not hide them.
 assert.match(css, /@media\s*\(min-width:\s*3840px\)[\s\S]*?\.bh-category-rail-grid\{grid-template-columns:repeat\(12,minmax\(0,1fr\)\)!important\}/);
 pass('3840px+ shows up to 36 cards in 12 columns × 3 rows');
 
-assert.equal(packageJson.scripts['test:category-grid'], 'node scripts/test-featured-category-grid.mjs');
-pass('test is exposed as npm run test:category-grid');
+assert.equal(packageJson.scripts['test:featured-category-grid'], 'node scripts/test-featured-category-grid.mjs');
+pass('test is exposed as npm run test:featured-category-grid');
 
 console.log('\nFeatured category grid tests: all passed');

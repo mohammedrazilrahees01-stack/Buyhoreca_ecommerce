@@ -1,0 +1,16 @@
+import fs from "node:fs";
+import path from "node:path";
+import assert from "node:assert/strict";
+const source=fs.readFileSync(path.join(process.cwd(),"app/[[...slug]]/Storefront.tsx"),"utf8");
+const checks=[];const check=(name,fn)=>{try{fn();checks.push(true);console.log("[PASS] "+name)}catch(e){checks.push(false);console.log("[FAIL] "+name+": "+e.message)}};
+const start=source.indexOf("const primary=[");
+const end=source.indexOf("] as const;",start);
+const nav=start>=0&&end>start?source.slice(start,end):"";
+check("Clearance is the ninth primary navigation item after Shop by Business",()=>{assert.ok(nav.indexOf('["Shop by Business"')>=0);assert.ok(nav.indexOf('["Clearance",[]]')>nav.indexOf('["Shop by Business"'));assert.equal((nav.match(/\["(?:Kitchen Utensils|Kitchen Equipment|Tabletop|Buffetware|Hotel specials|Housekeeping|Shop by Brand|Shop by Business|Clearance)"/g)||[]).length,9)});
+check("Desktop Clearance is a direct link, not an empty mega-menu dropdown",()=>{assert.ok(source.includes("isClearance?<Link href="));assert.ok(source.includes('aria-label="Shop Clearance collection"'))});
+check("Clearance resolves the actual Shopify collection handle by handle or title",()=>{assert.ok(source.includes('collections.find(c=>c.handle.trim().toLowerCase()==="clearance"||c.title.trim().toLowerCase()==="clearance")?.handle||"clearance"'))});
+check("Desktop Clearance item does not display a dropdown chevron",()=>{const i=source.indexOf("isClearance?<Link");const j=source.indexOf(":<button type=\"button\" aria-haspopup",i);assert.ok(i>=0&&j>i);assert.doesNotMatch(source.slice(i,j),/<ChevronDown/)});
+check("Clearance is also available in the mobile navigation",()=>{assert.ok(source.includes('["Clearance", '));assert.ok(source.includes("encodeURIComponent(clearanceNavHandle)"))});
+check("Existing eight navigation groups remain intact alongside Clearance",()=>{for(const label of ["Kitchen Utensils","Kitchen Equipment","Tabletop","Buffetware","Hotel specials","Housekeeping","Shop by Brand","Shop by Business"])assert.ok(nav.includes('["'+label+'"'),label)});
+console.log("CLEARANCE NAVIGATION: "+checks.filter(Boolean).length+"/"+checks.length+" PASS / "+checks.filter(x=>!x).length+" FAIL");
+if(checks.some(x=>!x))process.exitCode=1;

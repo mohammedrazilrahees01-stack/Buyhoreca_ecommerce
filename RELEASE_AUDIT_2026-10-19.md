@@ -145,3 +145,35 @@ First-visit poster asset `public/images/promo/welcome-offer.webp` is included in
 - Existing AI, quote, checkout, product/blog, inventory, category rail, release-hardening, account/policies, brand-directory, availability and wishlist regression checks all passed; `npm audit --audit-level=high` reported **zero vulnerabilities**; `git diff --check` passed.
 
 This is a source archive, not a deployed release. No push to GitHub `main` or deploy to `buyhoreca.com` was performed.
+
+
+## Brand-menu, performance and SEO follow-up — 29 October 2026
+
+The Shop by Brand mega-menu now presents the brand logo only, without the adjacent visible name. Brand cards are larger and centered, with responsive sizing (68px logo area desktop / 62px on mobile), keyboard focus indication, and reduced-motion/touch-safe hover styling. Accessible link names (`Shop {brand} products`) and image alternative text remain available to assistive technology. Navigation targets and brand/collection resolution were not changed.
+
+Performance updates include disabling speculative prefetch on the large brand mega-menu and product-card links to avoid bursts of dynamic Shopify page requests; lazy loading/async decoding and intrinsic image dimensions for catalogue thumbnails; deferred loading for promotional hero-card images; and WebP conversion for the three hero assets. The active home hero and kitchen promo images are about 90% smaller combined than their original source files. The home hero remains eager/high-priority. Original JPG-named assets are retained for rollback.
+
+SEO was treated at the correct level: product/collection/brand/article pages continue to use dynamic metadata, canonical/social metadata and structured data; sitemap/robots coverage remains in place. Button copy is not a separate SEO field. For the newly logo-only brand menu, descriptive accessible link names and image alt text retain meaning without reintroducing visible names beside the logos.
+
+The exact updated source was reinstalled and verified with `npm ci`, `npm run build` (Next.js production compilation and semantic TypeScript pass), `npm run lint` (source parser), production/interaction/responsive-SEO audits, brand directory/catalog filter/first-visit popup regression tests, the new `npm run test:brand-menu-performance-seo`, the complete existing regression suite, `npm audit --audit-level=high`, and `git diff --check`. This remains a tested source archive, not proof of a live Shopify checkout or deployed-domain audit.
+
+Run `npm run test:featured-category-grid` for the logo-only brand menu, image performance, and responsive category-grid regression checks.
+
+
+## Homepage Clearance collection section — 29 October 2026
+
+Added a Shopify-driven Clearance rail immediately after the Featured Categories/“Shop by Category” section. The code locates the exact public collection by handle or title (both case-insensitive), fetches products through existing `getCollection` in parallel with the home Best Selling/Newest queries, passes the product list and actual handle into the Home component, and reuses the current `ProductStrip`/`ProductCard` implementation. The section has subtle rose-tinted styling and an accurate “Shop all clearance” link; it is hidden when Shopify returns no products so the layout does not show an empty or broken placeholder. Other homepage strips and data sources are unchanged.
+
+Verification: `npm run test:home-clearance` 8/8 PASS; full Next.js production build and semantic TypeScript check PASS; `git diff --check` PASS.
+
+
+## Clearance as ninth primary navigation item — 29 October 2026
+
+Added Clearance as a ninth entry after Shop by Business in the green top navigation, using a direct accessible link to the actual Shopify collection route. The handle is resolved from the Shopify collection by title or handle (clearance) and safely falls back to clearance. It does not open an empty dropdown. The mobile nav contains the same Clearance destination. Existing eight navigation entries remain unchanged.
+
+Regression: npm run test:clearance-navigation — 6/6 PASS.
+
+
+### Clearance Navigation correction — 29 October 2026: Final verification
+
+The desktop green navigation now contains nine items; Clearance is appended after Shop by Business and is a direct link to the Shopify Clearance collection route. The mobile menu also has a Clearance entry. The production static audit was updated to expect nine top-level items and the current pointer-aware handler. Verification: production build passed; production static audit 62/62; interaction audit 31/31; responsive/SEO audit 53 passed / 0 failed / 0 warnings; Clearance navigation regression 6/6; homepage Clearance section 8/8; brand-menu/performance/SEO 13/13; category-grid test passed; brand directory 18/18; first-visit popup checks passed; catalogue filters 10/10; AI/tracking 19/19; dependency audit reports zero vulnerabilities.

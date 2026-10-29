@@ -25,7 +25,7 @@ check("Input size, history and per-process rate limits are bounded", route.inclu
 check("Model instructions forbid inventing product prices, stock or shipping promises", knowledge.includes("Do not invent product prices") && route.includes("instead of inventing products, prices"));
 check("Assistant directs private order-status questions to Track Shipment", knowledge.includes("https://buyhoreca.com/track-order") && route.includes("cannot read private order history or live shipment scans"));
 check("Chat widget shows live products with storefront links and a sensitive-data warning", widget.includes("/products/${p.handle}") && widget.includes("Please don’t enter passwords, sign-in codes or payment details."));
-check("Header exposes a Track Shipment entry without changing the eight-category menu", storefront.includes("/track-order\" className=\"hidden items-center gap-1") && storefront.includes('Track Shipment</Link><Link href=\"/quote\"') );
+check("Header exposes Track Shipment and preserves the navigation alongside Clearance", storefront.includes("/track-order\" className=\"hidden items-center gap-1") && storefront.includes('Track Shipment</Link><Link href=\"/quote\"') );
 check("Account page presents hosted account access plus a direct tracking shortcut", storefront.includes("Open account and orders") && storefront.includes('href=\"/track-order\" className=\"inline-flex min-h-11 items-center gap-2') && storefront.includes("Shopify’s account portal"));
 console.log([...pass, ...fail].join("\n"));
 console.log(`\nBUYHORECA AI + TRACKING TEST: ${pass.length} PASS / ${fail.length} FAIL`);

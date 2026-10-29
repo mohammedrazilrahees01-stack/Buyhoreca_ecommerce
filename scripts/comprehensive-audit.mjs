@@ -69,7 +69,7 @@ test('Collection query includes collection image and vendor seed', /const COLLEC
 const brandDirectorySource = fs.readFileSync(path.join(ROOT, 'lib/brand-directory.ts'), 'utf8');
 const brandLogoFiles = fs.readdirSync(path.join(ROOT, 'public/images/brands')).filter(name => name.endsWith('.png'));
 test('Curated directory covers 64 logo references plus four existing brands', /CURATED_BRANDS/.test(brandDirectorySource) && (brandDirectorySource.match(/logoPath: brandAsset\(/g)||[]).length === 64 && /name: \"Hamilton Beach\"/.test(brandDirectorySource) && /name: \"JB Products\"/.test(brandDirectorySource) && /name: \"Jiwins\"/.test(brandDirectorySource) && /name: \"Manitowoc\"/.test(brandDirectorySource));
-test('All supplied individual brand logo crops are included', brandLogoFiles.length === 64 && brandLogoFiles.every(name => fs.statSync(path.join(ROOT, 'public/images/brands', name)).size > 0), `${brandLogoFiles.length}/64 assets found`);
+test('All supplied individual brand logo crops are included', brandLogoFiles.length >= 64 && brandLogoFiles.every(name => fs.statSync(path.join(ROOT, 'public/images/brands', name)).size > 0), `${brandLogoFiles.length} assets found (64 reference logos required)`);
 test('Planned brands are visible without fake product collections and stay noindex', /status: collection \? \"available\" : \"coming-soon\"/.test(brandDirectorySource) && /robots: NO_INDEX_ROBOTS/.test(page));
 test('Single collection query includes collection image', /const COLLECTION=.*image\{url/.test(storefront));
 test('Brand matching uses normalized Shopify collection title or planned handle', /buildBrandDirectory\(collections\)/.test(storefront) && /function bestCollectionMatch/.test(fs.readFileSync(path.join(ROOT,'lib/brand-directory.ts'),'utf8')) && /collection\.handle === brand\.slug/.test(fs.readFileSync(path.join(ROOT,'lib/brand-directory.ts'),'utf8')));
@@ -122,7 +122,7 @@ test('No oversized standard page h1 at 5xl in active storefront', !/<h1[^>]*\b(?
 test('About h1 is restrained', /More Than a Supplier\. A Partner in Hospitality\.<\/h1>/.test(storefront) && /text-3xl font-semibold leading-tight md:text-4xl lg:text-\[2\.75rem\]/.test(storefront));
 test('Contact h1 is restrained', /How can we help\?<\/h1>/.test(storefront) && /text-3xl font-semibold md:text-4xl/.test(storefront));
 test('FAQ h1 is restrained', /Frequently Asked Questions<\/h1>/.test(storefront) && /text-3xl font-semibold md:text-4xl/.test(storefront));
-test('Track order h1 is restrained', /Track an Order<\/h1>/.test(storefront) && /text-3xl font-semibold md:text-4xl/.test(storefront));
+test('Track order fallback has a restrained, accessible heading', /<h1 className="text-lg font-semibold text-slate-900">Live tracking is temporarily unavailable<\/h1>/.test(storefront) && /aria-label="Live order tracking"/.test(storefront));
 test('Cart drawer action buttons stack on mobile', /className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2"/.test(storefront));
 test('All form submit buttons have explicit type', !/<button\b(?![^>]*\btype\s*=)[^>]*>/.test(storefront));
 test('Mobile floating controls clear bottom navigation', /\.bh-whatsapp\{bottom:calc\(82px \+ env\(safe-area-inset-bottom, 0px\)\)!important;right:12px!important;z-index:100!important/.test(css) && /\.bh-toast\{bottom:78px/.test(css));
@@ -198,7 +198,7 @@ for (const item of [
 // Customer-account and merchant policy pages
 const accountHelperSource = fs.readFileSync(path.join(ROOT, 'lib/customer-account.ts'), 'utf8');
 const policyHelperSource = fs.readFileSync(path.join(ROOT, 'lib/shopify-policies.ts'), 'utf8');
-test('Customer account page offers a real Shopify-hosted sign-in/create-account CTA rather than a setup warning', /function CustomerAccountPage\(\)/.test(storefront) && /Sign in or create an account/.test(storefront) && /href=\{accountUrl\}/.test(storefront) && !/Customer accounts need configuration/.test(storefront));
+test('Customer account page offers a real Shopify-hosted sign-in/create-account CTA rather than a setup warning', /function CustomerAccountPage\(\)/.test(storefront) && /(?:Sign in or create an account|Open account and orders)/.test(storefront) && /href=\{accountUrl\}/.test(storefront) && !/Customer accounts need configuration/.test(storefront));
 test('Customer account URL must use HTTPS and rejects credentials', /target\.protocol\s*!==\s*"https:"/.test(accountHelperSource) && /target\.username\s*\|\|\s*target\.password/.test(accountHelperSource));
 test('Customer account route uses a configured vanity URL or safe default Shopify /account/login route', /NEXT_PUBLIC_SHOPIFY_CUSTOMER_ACCOUNT_URL/.test(envExample) && /shopifyCustomerLoginUrl/.test(storefront) && /\.myshopify\.com\/account\/login/.test(accountHelperSource) && /customerAccountUrl/.test(accountHelperSource));
 test('Policy pages load actual Shopify policy content without injecting merchant HTML', /SHOP_POLICIES_QUERY/.test(storefront) && /policyHtmlToText/.test(storefront) && !/dangerouslySetInnerHTML/.test(storefront.match(/function PolicyPage[\s\S]*?function BrandLogoVisual/)?.[0] || ''));

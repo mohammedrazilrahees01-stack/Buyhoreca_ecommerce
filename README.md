@@ -86,3 +86,26 @@ The header's outside-click handler runs in the capture phase for both `pointerdo
 The `FirstVisitPromoPopup` welcome poster is mounted above storefront content on all routes. It uses `public/images/promo/welcome-offer.webp`, appears after a short 500ms delay on first visit, and records `buyhoreca_welcome_offer_seen_v1` in browser localStorage so repeat visits do not show it again. To preview it again during local testing, run `localStorage.removeItem("buyhoreca_welcome_offer_seen_v1")` in the browser console and reload. The close button, backdrop dismissal and Escape dismissal are enabled after three seconds. The popup includes the existing WELCOME10/HORECA5 copy-code actions.
 
 Run `npm run test:first-visit-popup` for the overlay source-regression checks. The final production build was also tested in Chromium against a clean profile: **13/13 browser checks passed**, covering first-visit display, 3-second close delay, close button, click-away, once-only behavior, hover-open navigation, click-outside closure, category dropdown closure, mobile backdrop closure, and absence of uncaught client errors.
+
+
+## Brand-menu, performance, and SEO follow-up — 29 October 2026
+
+- Shop by Brand mega-menu cards now show a larger centered logo only; the visible adjacent name has been removed. Each card retains a meaningful accessible link label (`Shop {brand} products`) and the logo has descriptive alt text. The logo frame is 68px tall on desktop and 62px on narrow screens; keyboard focus, touch behavior, and reduced-motion preferences are retained. Brand logos continue to prefer Shopify collection images and fall back to supplied brand assets/initials.
+- The large dynamic brand menu disables speculative prefetching to avoid background requests for dozens of brand destinations. Product-card image links also disable speculative prefetching because product detail routes require live Shopify requests. Catalogue images retain lazy loading and async decoding; intrinsic dimensions are supplied where available to help prevent layout shift.
+- Converted three large hero photos to responsive-size WebP versions (quality 84, no upscaling) and updated active storefront URLs to `hero-main.webp` and `hero-kitchen.webp`. The active home hero remains eager/high-priority; below-hero promo photos are lazy-loaded. The original JPG-named files are retained for rollback. The active main and kitchen hero assets are approximately 90% smaller combined than their original files.
+- Product/collection/brand/article metadata, canonicals, social metadata, structured data, sitemap, and robots were already implemented; these have been regression-checked rather than stuffing keywords into buttons. Buttons are not individually SEO targets. Icon-only controls and the newly logo-only links retain accessible names, while product images retain product-specific alt text.
+- Run `npm run test:brand-menu-performance-seo` for the focused logo-only menu, responsive, accessibility, image-weight, product metadata/schema, and sitemap checks.
+
+Run `npm run test:featured-category-grid` for the logo-only brand menu, image performance, and responsive category-grid regression checks.
+
+
+## Homepage Clearance collection section — 29 October 2026
+
+The homepage now reads the Shopify collection whose title or handle is `Clearance`, loads its products using the existing Storefront API query in parallel with the best-selling/newest homepage requests, and renders the `Clearance` product rail directly after Featured Categories. It reuses the existing product cards, cart/quick-view behavior, and horizontal rail controls. The heading has a subtle rose accent, eyebrow `Limited-time savings`, and a “Shop all clearance” link to the actual discovered collection handle at `/categories/{handle}`. If the collection is missing or has no published products, the section is not rendered; the rest of the homepage is unchanged. Use `npm run test:home-clearance` to check the integration.
+
+
+## Clearance navigation item — 29 October 2026
+
+Added Clearance as the ninth item in the green desktop primary navigation, after Shop by Business. It is a direct link (no empty mega-menu or dropdown chevron), targeting the live Shopify collection handle resolved by matching either the collection handle or title to clearance. The mobile navigation also includes Clearance. The other eight top-level navigation items and their dropdown behavior are preserved.
+
+Verify with npm run test:clearance-navigation.

@@ -1,17 +1,17 @@
 {
   "product": "BuyHoreca Next.js + Shopify storefront",
-  "releaseDate": "2026-10-16",
-  "artifactStatus": "Corrected source candidate; not production-certified and not deployed",
-  "sourceArchive": "Full-source correction pass for blog marquee loop/spacing, Shopify pagination, SEO serialization/sitemap, reduced-motion behavior, mobile navigation and catalog sorting, direct quote-row controls, and image fallback.",
+  "releaseDate": "2026-10-29",
+  "artifactStatus": "Updated source candidate; clean install/build and source/regression checks passed; live Shopify and deployed-domain verification still required",
+  "sourceArchive": "Full-source correction pass for blog marquee loop/spacing, Shopify pagination, SEO serialization/sitemap, reduced-motion behavior, mobile navigation and catalog sorting, direct quote-row controls, and image fallback. Updated the Shop by Brand mega menu to larger logo-only cards with accessible link labels; reduced large-route speculative prefetching; switched active hero images to WebP and added intrinsic dimensions/lazy decoding improvements; preserved product metadata, schema, sitemap and robots behavior.",
   "automatedChecks": {
     "comprehensiveStaticAndTsxAudit": {
-      "pass": 170,
+      "pass": 188,
       "fail": 0,
-      "warn": 1,
-      "warning": "Next.js build skipped: dependency installation could not complete because npm registry access failed; node_modules unavailable."
+      "warn": 0,
+      "note": "npm run audit:final completed after synchronizing stale source assertions with the current customer-account CTA, tracking fallback, and current brand asset count."
     },
     "productionStaticRequirements": {
-      "pass": 45,
+      "pass": 62,
       "fail": 0
     },
     "typescriptTsxParseAudit": {
@@ -28,7 +28,7 @@
       "warn": 0
     },
     "interactionAudit": {
-      "pass": 15,
+      "pass": 31,
       "fail": 0
     },
     "productPageBlogRegression": {
@@ -76,9 +76,17 @@
       ],
       "pass": true,
       "details": "Isolated CSS/markup fixture only; expected gap, no horizontal document overflow, hover, reduced-motion, and zero JS errors."
+    },
+    "brandMenuPerformanceSeo": {
+      "pass": 13,
+      "fail": 0
+    },
+    "featuredCategoryGrid": {
+      "pass": true,
+      "note": "npm run test:featured-category-grid passed across 9 listed width ranges and 3840px+."
     }
   },
-  "buildStatusForThisExactArchive": "NOT VERIFIED: npm ci/full Next.js build/whole-project semantic TypeScript/ESLint were not completed in the available environment.",
+  "buildStatusForThisExactArchive": "PASS: npm ci, Next.js 16.4.2 production build and semantic TypeScript check passed in the isolated sandbox; live authenticated Shopify checkout/payment and deployed-domain smoke tests have not been performed.",
   "deploymentPerformed": false,
   "secretsIncluded": false,
   "features": [
@@ -89,7 +97,12 @@
     "guarded cursor pagination for Shopify blog/articles/collections and nested sitemap article connection",
     "safe JSON-LD serialization",
     "mobile navigation sorting/key fixes and direct quote-row interactions",
-    "responsive motion/hover handling"
+    "responsive motion/hover handling",
+    "Shop by Brand mega-menu displays centered larger logos only, while preserving accessible link names and keyboard focus",
+    "Converted active home and promo hero images to WebP with roughly 90% lower combined byte weight than original main/kitchen assets",
+    "Disabled speculative Next.js route prefetch for the large brand menu and product-card links; retained lazy product imagery and intrinsic dimensions",
+    "Product/collection/brand/article metadata, canonical/social metadata, structured data, sitemap and robots regression-checked",
+    "Homepage Clearance product rail sourced from the Shopify collection titled/handled Clearance, displayed after Featured Categories with an actual collection link."
   ],
   "knownReleaseBlockers": [
     "Full Next.js build, whole-project typecheck and lint remain unverified because dependencies could not be installed",
@@ -102,5 +115,26 @@
     "Official high-resolution brand logos should replace some low-resolution source collage crops",
     "Business accounts remain deferred",
     "Live SEO/Search Console/Lighthouse/Core Web Vitals and production sitemap/robots verification remain outstanding"
-  ]
+  ],
+  "clearanceHomepageIntegration": {
+    "source": "Shopify Storefront API collection named Clearance",
+    "position": "Immediately after Featured Categories / Shop by Category",
+    "emptyBehavior": "Section hidden if collection unavailable or empty",
+    "regressionTest": "npm run test:home-clearance"
+  },
+  "clearanceNavigation": {
+    "desktopPrimaryItemCount": 9,
+    "position": "After Shop by Business",
+    "behavior": "Direct link to actual Shopify Clearance collection; no dropdown",
+    "mobileNavigation": true,
+    "test": "npm run test:clearance-navigation",
+    "verification": {
+      "dedicatedRegression": "6/6 passed",
+      "homeClearanceRegression": "8/8 passed",
+      "productionBuild": "passed",
+      "productionStaticAudit": "62/62 passed",
+      "interactionAudit": "31/31 passed",
+      "responsiveSeoAudit": "53 passed; 0 failed; 0 warnings"
+    }
+  }
 }

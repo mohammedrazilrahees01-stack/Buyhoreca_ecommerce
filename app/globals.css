@@ -761,3 +761,30 @@ track123-tracking-widget .track123_form_button:focus-visible{
   track123-tracking-widget .track123_form_button_style,
   track123-tracking-widget .track123_form_button{min-width:120px!important;min-height:44px!important;padding:11px 18px!important}
 }
+
+
+/* Logo-only Shop by Brand menu: larger art, no visible brand labels, and
+   responsive dimensions kept separate from category/business mega-menu cards. */
+.bh-mega-brand-grid .bh-mega-brand-only-card{
+  display:flex;min-width:0;min-height:88px;width:100%;align-items:center;justify-content:center;
+  padding:8px 12px;text-align:center;transition:border-color .16s ease,background-color .16s ease,box-shadow .16s ease;
+}
+.bh-mega-brand-grid .bh-mega-brand-only-card .bh-mega-brand-logo{
+  display:flex;width:100%;height:68px;min-width:0;align-items:center;justify-content:center;background:transparent!important;
+}
+.bh-mega-brand-grid .bh-mega-brand-only-card .bh-mega-brand-logo img{
+  display:block;width:100%;height:100%;max-width:100%;object-fit:contain!important;object-position:center!important;
+}
+.bh-mega-brand-grid .bh-mega-brand-only-card:hover{
+  border-color:#008f68;background-color:#f7fbf9;box-shadow:0 4px 12px rgba(15,38,48,.06);
+}
+.bh-mega-brand-grid .bh-mega-brand-only-card:focus-visible{outline:2px solid #008f68;outline-offset:2px}
+@media(max-width:767px){
+  .bh-mega-brand-grid .bh-mega-brand-only-card{min-height:80px;padding:6px 8px}
+  .bh-mega-brand-grid .bh-mega-brand-only-card .bh-mega-brand-logo{height:62px}
+}
+@media(hover:none),(pointer:coarse){.bh-mega-brand-grid .bh-mega-brand-only-card:hover{box-shadow:none;background-color:#fff}}
+@media(prefers-reduced-motion:reduce){
+  .bh-mega-brand-grid .bh-mega-brand-only-card{transition:none!important}
+  .bh-mega-brand-grid .bh-mega-brand-only-card .bh-mega-brand-logo img{transition:none!important;transform:none!important}
+}

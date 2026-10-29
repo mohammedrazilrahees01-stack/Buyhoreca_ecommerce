@@ -21,7 +21,7 @@ const trackingCompatibility = fs.readFileSync(path.join(root, 'app/apps/track123
 
 const primaryExpected = [
   'Kitchen Utensils', 'Kitchen Equipment', 'Tabletop', 'Buffetware',
-  'Hotel specials', 'Housekeeping', 'Shop by Brand', 'Shop by Business'
+  'Hotel specials', 'Housekeeping', 'Shop by Brand', 'Shop by Business', 'Clearance'
 ];
 
 const businessExpected = [
@@ -31,9 +31,9 @@ const businessExpected = [
 ];
 
 const checks = [
-  ['Primary navigation has exactly 8 requested groups', primaryExpected.every(x => src.includes(`"${x}"`)) && !/href="\/quote"[^>]*>Quote<\/Link>/.test(src)],
+  ['Primary navigation has exactly 9 requested groups including Clearance', primaryExpected.every(x => src.includes(`"${x}"`)) && !/href="\/quote"[^>]*>Quote<\/Link>/.test(src)],
   ['Primary navigation labels use regular/medium weight', /bh-primary-nav-item[^"`]*text-\[12px\] font-medium/.test(src)],
-  ['Primary navigation opens with mouse hover, pointer tap and keyboard focus', src.includes('onPointerEnter={e=>{if(e.pointerType==="mouse")') && src.includes('onPointerDown={e=>{navPointerType.current=e.pointerType') && src.includes('onFocus={e=>{if(e.currentTarget.matches(":focus-visible"))setHoverNav(title)}}') && src.includes('navPointerType.current==="mouse"')],
+  ['Primary navigation opens with mouse hover, pointer tap and keyboard focus', src.includes('if(e.pointerType==="mouse"){navPointerType.current="mouse";setHoverNav(title)}') && src.includes('onPointerDown={e=>{navPointerType.current=e.pointerType') && src.includes('onFocus={e=>{if(e.currentTarget.matches(":focus-visible"))setHoverNav(title)}}') && src.includes('navPointerType.current==="mouse"')],
   ['Mega menu is viewport-centered and width-bounded', /\.bh-mega\{position:absolute;left:50%;/.test(css) && /width:min\(/.test(css) && /max-width:calc\(100vw -/.test(css)],
   ['Shop by Brand uses the full mega-menu width', /bh-mega-grid-brands/.test(src) && /\.bh-mega-grid-brands\{grid-template-columns:minmax\(0,1fr\)!important\}/.test(css) && /\.bh-mega-card-grid-brands\{grid-template-columns:minmax\(0,1fr\)!important\}/.test(css)],
   ['Shop by Brand prefers live Shopify collection images', /const brandDirectory=useMemo\(\(\)=>buildBrandDirectory\(collections\),\[collections\]\)/.test(src) && /const src=c\?\.image\?\.url\|\|b\.logoPath/.test(src) && /const src=item\.collection\?\.image\?\.url\|\|item\.logoPath/.test(src)],

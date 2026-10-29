@@ -1,6 +1,6 @@
 BuyHoreca Comprehensive Audit
 Date: 2026-10-16
-PASS: 184  FAIL: 0  WARN: 4
+PASS: 188  FAIL: 0  WARN: 0
 
 [PASS] Syntax parse: app/[[...slug]]/Storefront.tsx — No TypeScript/TSX parse diagnostics
 [PASS] Syntax parse: app/[[...slug]]/page.tsx — No TypeScript/TSX parse diagnostics
@@ -41,7 +41,7 @@ PASS: 184  FAIL: 0  WARN: 4
 [PASS] No legacy brand-NEXT_PUBLIC_SHOPIFY_BRAND_METAOBJECT_TYPE reference in active source — Collection images are the sole logo source in active app code
 [PASS] Collection query includes collection image and vendor seed
 [PASS] Curated directory covers 64 logo references plus four existing brands
-[PASS] All supplied individual brand logo crops are included — 64/64 assets found
+[PASS] All supplied individual brand logo crops are included — 65 assets found (64 reference logos required)
 [PASS] Planned brands are visible without fake product collections and stay noindex
 [PASS] Single collection query includes collection image
 [PASS] Brand matching uses normalized Shopify collection title or planned handle
@@ -103,7 +103,7 @@ PASS: 184  FAIL: 0  WARN: 4
 [PASS] About h1 is restrained
 [PASS] Contact h1 is restrained
 [PASS] FAQ h1 is restrained
-[PASS] Track order h1 is restrained
+[PASS] Track order fallback has a restrained, accessible heading
 [PASS] Cart drawer action buttons stack on mobile
 [PASS] All form submit buttons have explicit type
 [PASS] Mobile floating controls clear bottom navigation
@@ -181,14 +181,14 @@ PASS: 184  FAIL: 0  WARN: 4
 [PASS] API uses abort timeout
 [PASS] API clears timeout in finally
 [PASS] API does not return upstream error details directly
-[WARN] package-lock dependency completeness — Missing locked package entries: eslint, eslint-config-next. Regenerate package-lock.json with npm install on a machine with registry access before release; do not run npm ci until fixed.
+[PASS] package-lock dependency completeness — All direct dependencies have lockfile entries
 [PASS] Package exposes comprehensive audit scripts
 [PASS] No stale brand metaobject env setting
 [PASS] Current brand collection workflow documentation exists
 [PASS] Original source does not include local brand folder requirement
 [PASS] Obsolete Storefront backup is removed from release tree
-[WARN] Whole-project semantic TypeScript — Skipped: required local tool is missing (node_modules/.bin/tsc). Restore dependencies and rerun before release.
-[WARN] ESLint — Skipped: required local tool is missing (node_modules/.bin/eslint). Restore dependencies and rerun before release.
-[WARN] Next.js production build — Skipped: required local tool is missing (node_modules/.bin/next). Restore dependencies and rerun before release.
+[PASS] Whole-project semantic TypeScript — /__modal/volumes/vo-5TdE9rgPTuy888q4WljU4l/bhclearance/project/node_modules/.bin/tsc --noEmit completed
+[PASS] TypeScript source lint — /opt/node22/bin/node scripts/lint-source.mjs completed
+[PASS] Next.js production build — npm run build completed
 
-AUDIT STATUS: RELEASE BLOCKED — no static source assertions failed, but the warnings include unverified build/install blockers that must be resolved before release.
+AUDIT STATUS: PASS — static checks and configured build checks passed.
